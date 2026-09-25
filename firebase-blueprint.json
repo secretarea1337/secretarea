@@ -1,0 +1,196 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with authentication details, roles (Admin or User), gaming statistics, hardware, and activity stream.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User Google/email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full display name of the user."
+        },
+        "username": {
+          "type": "string",
+          "description": "Unique username handle."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["Admin", "User", "admin", "user"],
+          "description": "User authorization role (Admin or User)."
+        },
+        "points": {
+          "type": "number",
+          "description": "User community XP/points."
+        },
+        "badge": {
+          "type": "string",
+          "description": "User title or badge."
+        },
+        "bannerURL": {
+          "type": "string",
+          "description": "Profile banner image URL."
+        },
+        "lastActive": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last active timestamp or login date/time."
+        },
+        "lastLogin": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of most recent login."
+        },
+        "blockCount": {
+          "type": "number",
+          "description": "Number of times user has been blocked. Reaching 3 blocks triggers auto-blacklist."
+        },
+        "isBlocked": {
+          "type": "boolean",
+          "description": "Whether user is currently blocked."
+        },
+        "isBlacklisted": {
+          "type": "boolean",
+          "description": "Whether user is permanently blacklisted."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "blocked", "blacklisted"],
+          "description": "Account moderation status."
+        },
+        "blockedUntil": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Expiration time of current block."
+        },
+        "blockedReason": {
+          "type": "string",
+          "description": "Reason for moderation action."
+        },
+        "deviceFingerprint": {
+          "type": "string",
+          "description": "Hardware/browser device fingerprint hash."
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "Last detected IP address."
+        },
+        "liked": {
+          "type": "array",
+          "description": "List of liked games and resources."
+        },
+        "favorites": {
+          "type": "array",
+          "description": "List of favorited games and resources."
+        },
+        "library": {
+          "type": "array",
+          "description": "User game library with status (Playing, Plan to Play, Completed, On Hold, Dropped)."
+        },
+        "gameHistory": {
+          "type": "array",
+          "description": "Recently viewed or played game history records."
+        },
+        "activities": {
+          "type": "array",
+          "description": "Real-time user actions, telemetry, and live movement history."
+        },
+        "pcSpecs": {
+          "type": "object",
+          "description": "User PC hardware configuration specs (GPU, CPU, RAM, OS)."
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "BannedDevice": {
+      "title": "BannedDevice",
+      "description": "Hardware/browser fingerprint ban record.",
+      "type": "object",
+      "properties": {
+        "fingerprint": { "type": "string" },
+        "ip": { "type": "string" },
+        "reason": { "type": "string" },
+        "bannedAt": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "blockCount": { "type": "number" }
+      },
+      "required": ["fingerprint", "bannedAt"]
+    },
+    "GlobalSettings": {
+      "title": "GlobalSettings",
+      "description": "Global application configuration including the universal profile banner URL managed by Admin.",
+      "type": "object",
+      "properties": {
+        "globalBannerURL": {
+          "type": "string",
+          "description": "Global default profile banner URL set by Admin, applies to all users."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of last global settings update."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "Admin email that updated the setting."
+        }
+      },
+      "required": ["globalBannerURL"]
+    },
+    "SystemAdminProfile": {
+      "title": "SystemAdminProfile",
+      "description": "Public system admin profile displayed on detail page badges and admin popup.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "avatarURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "bannerURL": { "type": "string" },
+        "role": { "type": "string" },
+        "rank": { "type": "string" },
+        "points": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "UserRequest": {
+      "title": "UserRequest",
+      "description": "Item request submitted by a user.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "section": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "userId"]
+    }
+  },
+  "firestore": {
+    "/system/{docId}": {
+      "schema": "SystemAdminProfile",
+      "description": "Public system documents such as admin_profile and banner. Publicly readable, admin writable."
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores individual user profile and telemetry. Readable and writable by the user or by Admin."
+    },
+    "/settings/{settingId}": {
+      "schema": "GlobalSettings",
+      "description": "Stores system settings such as global profile banner. Readable publicly, writable by Admin only."
+    },
+    "/requests/{requestId}": {
+      "schema": "UserRequest",
+      "description": "Stores item requests submitted by users."
+    },
+    "/bannedDevices/{deviceId}": {
+      "schema": "BannedDevice",
+      "description": "Stores banned hardware fingerprints and IPs. Non-public; accessible to admin or validated caller checking status, writable by Admin."
+    }
+  }
+}

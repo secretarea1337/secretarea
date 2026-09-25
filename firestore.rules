@@ -1,0 +1,166 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Base authentication check
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Single document fetch helper for user profile
+    function getUser(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    // Root admin email check to bootstrap and guarantee permissions for primary administrator
+    function isRootAdminEmail() {
+      return isSignedIn() &&
+        request.auth.token.email != null &&
+        (request.auth.token.email.lower() == 'secretarea1337@gmail.com' ||
+         request.auth.token.email.lower() == 'marouananouar02@gmail.com');
+    }
+
+    // Role-based admin check: supports root admin emails and users/{uid}.role
+    function isAdmin() {
+      return isRootAdminEmail() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUser(request.auth.uid).role in ['admin', 'Admin']
+      );
+    }
+
+    // Check if target user document has an Admin role
+    function isDocAdmin(data) {
+      return 'role' in data && data.role in ['admin', 'Admin'];
+    }
+
+    // Check if user is permanently blacklisted (manual flag, status, or >= 3 blocks)
+    function isBlacklisted(data) {
+      return data.isBlacklisted == true ||
+             data.status == 'blacklisted' ||
+             (data.blockCount != null && data.blockCount >= 3);
+    }
+
+    // Check if user has active restrictions (blocked or blacklisted)
+    function isRestricted(data) {
+      return data.isBlocked == true ||
+             data.status == 'blocked' ||
+             isBlacklisted(data);
+    }
+
+    // Single-lookup check for non-user collections: verifies user exists and has no restrictions
+    function isCallerActive() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        !isRestricted(getUser(request.auth.uid));
+    }
+
+    // Users collection:
+    // - Blacklisted users (or >= 3 blocks): NO read or write access
+    // - Blocked users: read-only access to own profile (get); cannot update
+    // - Active users: full access to own profile; cannot self-assign admin role or tamper with moderation flags
+    // - Admins: full management; cannot demote existing admins
+    match /users/{userId} {
+      allow get: if isSignedIn() && (
+        request.auth.uid == userId
+          ? !isBlacklisted(resource.data)
+          : isAdmin()
+      );
+
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn() && (
+        isAdmin() || (
+          request.auth.uid == userId &&
+          (!('role' in request.resource.data) || !(request.resource.data.role in ['admin', 'Admin'])) &&
+          (!('isBlacklisted' in request.resource.data) || request.resource.data.isBlacklisted == false) &&
+          (!('isBlocked' in request.resource.data) || request.resource.data.isBlocked == false)
+        )
+      );
+
+      allow update: if isSignedIn() && (
+        isAdmin() ? (
+          !isDocAdmin(resource.data) || request.auth.uid == userId || request.resource.data.role in ['admin', 'Admin']
+        ) : (
+          request.auth.uid == userId &&
+          !isRestricted(resource.data) &&
+          (!('role' in request.resource.data) || !(request.resource.data.role in ['admin', 'Admin'])) &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            'isBlocked', 'isBlacklisted', 'status', 'blockCount', 'blockedUntil', 'blockedAt', 'blacklistedAt'
+          ])
+        )
+      );
+
+      allow delete: if isAdmin() && !isDocAdmin(resource.data);
+
+      // User subcollections: admin or active non-restricted owner
+      match /{allPaths=**} {
+        allow read, write: if isAdmin() || (
+          isSignedIn() &&
+          request.auth.uid == userId &&
+          isCallerActive()
+        );
+      }
+    }
+
+    // System collection (Global Banner, System Config, Admin Profile):
+    // Publicly readable, admin writable
+    match /system/{docId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Banned Identifiers: Admin only
+    match /banned_identifiers/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Requests collection:
+    // Blocked and blacklisted users cannot read, list, or submit requests
+    match /requests/{requestId} {
+      allow create: if isCallerActive() && request.resource.data.userId == request.auth.uid;
+      allow get, update, delete: if isAdmin() || (isCallerActive() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin() || isCallerActive();
+    }
+
+    // Banned Devices collection:
+    // - No public read: access restricted to admin or validated caller checking their status
+    // - Only admin can list, create, update, delete
+    match /bannedDevices/{deviceId} {
+      allow get: if isAdmin() || (
+        isSignedIn() && (resource == null || resource.data.userId == request.auth.uid)
+      );
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    // Global Settings: Publicly readable, admin writable
+    match /settings/{settingId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Removed / Banned User Audit Logs: Admin only access
+    match /removedUsers/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // LiveMovement: Admin only
+    match /liveMovement/{docId} {
+      allow read, write: if isAdmin();
+      match /{allPaths=**} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Diagnostics: Disabled
+    match /diagnostics/{diagnosticId} {
+      allow read, write: if false;
+    }
+
+  }
+}
