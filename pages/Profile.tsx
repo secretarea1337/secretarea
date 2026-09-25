@@ -352,7 +352,17 @@ const Profile: React.FC = () => {
                                              targetKey === 'hypervisor' ? 'H' :
                                              targetKey === 'steamtools' ? 'S' :
                                              targetKey === 'architect' ? 'A' : 'E';
-                            const newItems = rawData[tabKey].map((row: any, idx: number) => {
+                            const newItems = rawData[tabKey]
+                                .filter((row: any) => {
+                                    if (!row || typeof row !== 'object') return false;
+                                    const foundKey = Object.keys(row).find(k => {
+                                        const cleaned = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                                        return cleaned === 'name' || cleaned === 'title';
+                                    });
+                                    const name = foundKey ? String(row[foundKey] || '').trim() : '';
+                                    return Boolean(name && name.toLowerCase() !== 'item');
+                                })
+                                .map((row: any, idx: number) => {
                                 const getVal = (key: string) => {
                                     const normalizedSearchKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
                                     const foundKey = Object.keys(row).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchKey);

@@ -7320,15 +7320,21 @@ const SecretArea: React.FC = () => {
         setIsUpcomingMissing(true);
         setUpcomingGames([]);
     } else if (Array.isArray(data[upcomingKey])) {
-       const mappedUpcoming: UpcomingGame[] = data[upcomingKey].map((item: any, index: number) => ({
-           id: `ug-${index}`,
-           title: item.name || item.title || 'Untitled',
-           image: item.image || item.coverImage || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED',
-           platform: item.platform || 'TBA',
-           price: item.price || 'TBA',
-           icon: getPlatformIcon(item.platform || ''),
-           dateAdded: item.date || item.timestamp || item.dateAdded || item.updated || ''
-       }));
+       const mappedUpcoming: UpcomingGame[] = data[upcomingKey]
+          .filter((item: any) => {
+              if (!item || typeof item !== 'object') return false;
+              const title = (item.name || item.title || '').toString().trim();
+              return Boolean(title && title.toLowerCase() !== 'untitled');
+          })
+          .map((item: any, index: number) => ({
+              id: `ug-${index}`,
+              title: (item.name || item.title || '').toString().trim(),
+              image: item.image || item.coverImage || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED',
+              platform: item.platform || 'TBA',
+              price: item.price || 'TBA',
+              icon: getPlatformIcon(item.platform || ''),
+              dateAdded: item.date || item.timestamp || item.dateAdded || item.updated || ''
+          }));
        setUpcomingGames(mappedUpcoming);
     } else {
        setUpcomingGames([]);
@@ -7345,6 +7351,7 @@ const SecretArea: React.FC = () => {
             savegames: []
         };
         data[upcomingListKey].forEach((row: any) => {
+            if (!row || typeof row !== 'object') return;
             const rowKeys = Object.keys(row);
             Object.keys(newLists).forEach(category => {
                 const matchingKey = rowKeys.find(k => k.toLowerCase().replace(/\s+/g, '') === category);
@@ -7370,7 +7377,13 @@ const SecretArea: React.FC = () => {
     // Handle Steam Accounts with robust header normalization
     const steamKey = Object.keys(data).find(k => k.toLowerCase() === 'steamaccounts');
     if (steamKey && Array.isArray(data[steamKey])) {
-        setSteamAccounts(data[steamKey].map((raw: any) => {
+        setSteamAccounts(data[steamKey]
+          .filter((raw: any) => {
+              if (!raw || typeof raw !== 'object') return false;
+              const key = Object.keys(raw).find(k => k.toLowerCase().trim().startsWith('username'));
+              return Boolean(key && raw[key] && String(raw[key]).trim());
+          })
+          .map((raw: any) => {
             const findByPrefix = (prefix: string) => {
                 const key = Object.keys(raw).find(k => k.toLowerCase().trim().startsWith(prefix.toLowerCase()));
                 return key ? raw[key] : undefined;
@@ -7390,7 +7403,13 @@ const SecretArea: React.FC = () => {
     // Handle Master Gift Accounts
     const masterGiftKey = Object.keys(data).find(k => k.toLowerCase().replace(/\s+/g, '') === 'mastergift');
     if (masterGiftKey && Array.isArray(data[masterGiftKey])) {
-        setMasterGifts(data[masterGiftKey].map((raw: any) => {
+        setMasterGifts(data[masterGiftKey]
+          .filter((raw: any) => {
+              if (!raw || typeof raw !== 'object') return false;
+              const key = Object.keys(raw).find(k => k.toLowerCase().trim().startsWith('name'));
+              return Boolean(key && raw[key] && String(raw[key]).trim());
+          })
+          .map((raw: any) => {
             const findByPrefix = (prefix: string) => {
                 const key = Object.keys(raw).find(k => k.toLowerCase().trim().startsWith(prefix.toLowerCase()));
                 return key ? raw[key] : undefined;
@@ -7414,7 +7433,18 @@ const SecretArea: React.FC = () => {
         return lowerK === 'profil' || lowerK === 'profile' || lowerK === 'profiles' || lowerK === 'company';
     });
     if (profilKey && Array.isArray(data[profilKey])) {
-        const profiles: CompanyProfile[] = data[profilKey].map((row: any, idx: number) => {
+        const profiles: CompanyProfile[] = data[profilKey]
+          .filter((row: any) => {
+              if (!row || typeof row !== 'object') return false;
+              const normalizedSearchKey = 'name';
+              const foundKey = Object.keys(row).find(k => {
+                  const cleaned = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  return cleaned === 'name' || cleaned === 'company' || cleaned === 'studio' || cleaned === 'developer';
+              });
+              const val = foundKey ? String(row[foundKey] || '').trim() : '';
+              return Boolean(val);
+          })
+          .map((row: any, idx: number) => {
            const getVal = (key: string) => {
               const normalizedSearchKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
               const foundKey = Object.keys(row).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchKey);
@@ -7441,6 +7471,7 @@ const SecretArea: React.FC = () => {
     if (popularKey && Array.isArray(data[popularKey])) {
         const ids: string[] = [];
         data[popularKey].forEach((row: any) => {
+           if (!row || typeof row !== 'object') return;
            Object.values(row).forEach((val: any) => {
               if (val && typeof val === 'string' && val.trim() !== '') {
                   val.split(',').forEach((v: string) => ids.push(v.trim()));
@@ -7457,7 +7488,17 @@ const SecretArea: React.FC = () => {
     // Handle Top Games
     const topGamesKey = Object.keys(data).find(k => k.toLowerCase().replace(/\s+/g, '') === 'topgames');
     if (topGamesKey && Array.isArray(data[topGamesKey])) {
-        const topGamesList: TopGame[] = data[topGamesKey].map((row: any, idx: number) => {
+        const topGamesList: TopGame[] = data[topGamesKey]
+          .filter((row: any) => {
+              if (!row || typeof row !== 'object') return false;
+              const foundKey = Object.keys(row).find(k => {
+                  const cleaned = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  return cleaned === 'name' || cleaned === 'gamename' || cleaned === 'title';
+              });
+              const val = foundKey ? String(row[foundKey] || '').trim() : '';
+              return Boolean(val);
+          })
+          .map((row: any, idx: number) => {
            const getVal = (keyStr: string) => {
               const normalizedSearchKey = keyStr.toLowerCase().replace(/[^a-z0-9]/g, '');
               const foundKey = Object.keys(row).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchKey);
@@ -7480,7 +7521,17 @@ const SecretArea: React.FC = () => {
     // Handle Best Game Series
     const bestGameSeriesKey = Object.keys(data).find(k => k.toLowerCase().replace(/\s+/g, '') === 'bestgameseries');
     if (bestGameSeriesKey && Array.isArray(data[bestGameSeriesKey])) {
-        const seriesList: BestGameSeries[] = data[bestGameSeriesKey].map((row: any, idx: number) => {
+        const seriesList: BestGameSeries[] = data[bestGameSeriesKey]
+          .filter((row: any) => {
+              if (!row || typeof row !== 'object') return false;
+              const foundKey = Object.keys(row).find(k => {
+                  const cleaned = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  return cleaned === 'title' || cleaned === 'name';
+              });
+              const val = foundKey ? String(row[foundKey] || '').trim() : '';
+              return Boolean(val);
+          })
+          .map((row: any, idx: number) => {
            const getVal = (keyStr: string) => {
               const normalizedSearchKey = keyStr.toLowerCase().replace(/[^a-z0-9]/g, '');
               const foundKey = Object.keys(row).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchKey);
@@ -7540,7 +7591,17 @@ const SecretArea: React.FC = () => {
       else if (normalizedKey.includes('extra') || normalizedKey.includes('savegame')) { targetKey = 'extra'; idPrefix = 'E'; }
 
       if (targetKey && transformed.hasOwnProperty(targetKey)) {
-        const newItems = data[tabKey].map((row: any, idx: number) => {
+        const newItems = (data[tabKey] || [])
+          .filter((row: any) => {
+            if (!row || typeof row !== 'object') return false;
+            const foundKey = Object.keys(row).find(k => {
+              const cleaned = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+              return cleaned === 'name' || cleaned === 'title' || cleaned === 'toolname';
+            });
+            const name = foundKey ? String(row[foundKey] || '').trim() : '';
+            return Boolean(name && name.toLowerCase() !== 'secure fragment' && name.toLowerCase() !== 'untitled');
+          })
+          .map((row: any, idx: number) => {
           const getVal = (key: string) => {
               const normalizedSearchKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
               const foundKey = Object.keys(row).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchKey);
@@ -7696,7 +7757,7 @@ const SecretArea: React.FC = () => {
     }
   };
 
-  const fetchData = async (silent = false) => {
+  const fetchData = async (silent = false, isManualReload = false) => {
     if (!silent) setLoading(true);
     if (!silent && showHackerLoader) {
         setImagesLoading(true);
@@ -7707,21 +7768,36 @@ const SecretArea: React.FC = () => {
     setScriptError(false);
     let dataToPreload = null;
 
+    if (isManualReload) {
+      try {
+        localStorage.removeItem('cached_secret_resources');
+        localStorage.removeItem('cached_transformed_resources');
+        localStorage.removeItem('cached_intel_items');
+      } catch (e) {
+        console.warn("Clearing cache failed:", e);
+      }
+    }
+
     try {
-      const response = await fetch(API_ENDPOINT, {
+      const cacheBuster = `_t=${Date.now()}&_r=${Math.random().toString(36).substring(7)}`;
+      const requestUrl = API_ENDPOINT.includes('?') 
+        ? `${API_ENDPOINT}&${cacheBuster}` 
+        : `${API_ENDPOINT}?${cacheBuster}`;
+
+      const response = await fetch(requestUrl, {
           method: 'GET',
           cache: 'no-store',
           redirect: 'follow'
       });
       if (!response.ok) {
-          throw new Error(`Server returned ${response.status} ${response.statusText}`);
+          throw new Error(`Server returned status ${response.status} ${response.statusText}`);
       }
       let data;
       try {
           data = await response.json();
       } catch (parseError) {
           setScriptError(true);
-          throw new Error("Google Script is down or returned invalid data. Please check code.gs deployment.");
+          throw new Error("Google Script returned invalid JSON or an error page. Please check code.gs deployment.");
       }
       
       processRawData(data);
@@ -7732,17 +7808,34 @@ const SecretArea: React.FC = () => {
       } catch (cacheErr) {
         console.warn("Writing to cache failed:", cacheErr);
       }
-    } catch (err: any) {
-      const isAbortOrTeardown = err?.name === 'AbortError' || err?.message === 'Failed to fetch';
-      if (!silent && !isAbortOrTeardown) {
-        console.warn("Fetch failed, using local offline backup and cache data:", err);
+
+      if (isManualReload) {
+        const notifId = Date.now();
+        setNotifications(prev => [...prev, {
+            id: notifId,
+            title: 'Data Reloaded Successfully',
+            text: 'Catalog updated with the latest live data from Google Sheets.',
+            time: 'Just now'
+        }]);
+        setTimeout(() => {
+            setNotifications(prev => prev.filter(n => n.id !== notifId));
+        }, 5000);
       }
+    } catch (err: any) {
+      const errMsg = String(err?.message || err || 'Network Error');
+      const isAbort = err?.name === 'AbortError';
+      const isAccessOrCors = errMsg.includes('403') || errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || err?.name === 'TypeError';
+
+      if (!silent && !isAbort) {
+        console.warn("Fetch from Google Sheet failed, falling back to cached/offline data:", err);
+      }
+
       let loadedData = null;
       try {
         const cached = localStorage.getItem('cached_secret_resources');
         if (cached) {
           loadedData = JSON.parse(cached);
-          if (!silent) console.log("Successfully loaded resources from localStorage cache.");
+          if (!silent) console.log("Loaded resources from localStorage cache.");
         }
       } catch (e) {
         if (!silent) console.warn("LocalStorage cache read failed:", e);
@@ -7750,25 +7843,30 @@ const SecretArea: React.FC = () => {
 
       if (!loadedData) {
         loadedData = backupData;
-        if (!silent) console.log("Successfully fell back to local JSON backup.");
+        if (!silent) console.log("Fell back to local JSON backup.");
       }
 
       if (loadedData) {
         processRawData(loadedData);
         dataToPreload = loadedData;
         
-        // Show subtle notification about offline mode only when active and not aborting
-        if (!silent && !isAbortOrTeardown) {
+        // Show clear notification about why fresh Google Sheet data was not loaded
+        if (!silent && !isAbort) {
           const notifId = Date.now();
+          const noticeTitle = isManualReload ? 'Google Sheet Sync Incomplete' : 'Offline Backup Active';
+          const noticeText = isAccessOrCors
+            ? 'Unable to connect to Google Apps Script. If you just created this deployment, please ensure in Google Apps Script that "Who has access" is set to "Anyone" (Deploy > Manage deployments > Edit > Who has access: Anyone).'
+            : `Could not reach Google Sheet (${errMsg}). Showing previous cached/offline catalog.`;
+
           setNotifications(prev => [...prev, {
               id: notifId,
-              title: 'Offline Backup Active',
-              text: 'Connection to cloud database is unavailable. Displaying local offline database.',
+              title: noticeTitle,
+              text: noticeText,
               time: 'Just now'
           }]);
           setTimeout(() => {
               setNotifications(prev => prev.filter(n => n.id !== notifId));
-          }, 6000);
+          }, 9000);
         }
       } else {
         if (!silent) {
@@ -9354,7 +9452,7 @@ const paginatedData = useMemo(() => {
 
                       <div className="flex items-center gap-2 shrink-0">
                           <button 
-                            onClick={() => fetchData()}
+                            onClick={() => fetchData(false, true)}
                             className="flex items-center justify-center p-2.5 sm:p-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-200 rounded-xl transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                             title={t('Reload Data') || 'Reload Data'}
                             aria-label={t('Reload Data') || 'Reload Data'}

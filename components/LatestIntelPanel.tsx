@@ -242,7 +242,12 @@ const extractIntelFromRawResources = (resources: Record<string, any[]>): IntelIt
     });
 
     // Capture up to 8 recent products per category
-    const recent = sorted.slice(0, 8);
+    const validItems = sorted.filter(item => {
+      if (!item) return false;
+      const title = String(item.name || item.title || '').trim();
+      return Boolean(title && title.toLowerCase() !== 'secure fragment' && title.toLowerCase() !== 'unknown');
+    });
+    const recent = validItems.slice(0, 8);
     recent.forEach((item) => {
       const v = String(item.version || '').toLowerCase();
       const title = String(item.name || item.title || '').toLowerCase();
