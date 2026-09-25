@@ -73,14 +73,14 @@ const ITEMS_PER_PAGE = 12; // Show 12 items per page for laptop grid (4x3)
 // --- ADVERTISEMENT CONFIGURATION ---
 const AD_CONFIG = {
   banner1: {
-    desktop: "https://blogger.googleusercontent.com/img/a/AVvXsEgCPA6tVcBH3S5v1Z8kuza6RZkU4xgxr8xmDfFTWXVe20XthTejclAyfpzC2XueH50MwmRFDlVIF5ZIRjBZeNqjgokoSxt9yv7DXICKl25yK2xiE5WaAPt5Qe-n80SlQjtByruEyvGpeo4txkhtEEIcjKnjV4iAFygZilgqiEfPxJqnjbGo88quaNiOjku7",
-    mobile: "https://blogger.googleusercontent.com/img/a/AVvXsEg0cECd44EYPreCyyRdRXdrtpVgQ4zhKzzTRdtiusek9QZ6nOVADqxzHsfsdEmEc2uWMAzaWMRsNXcpsI3cAOarcDnfXSrFyDXvfPQbMfsFsdWRVsv0S6ZcNPDc2GsNLQhv2x9K9ftA9bthdBDkYEkCt5styw5GuPQ1R6ig_ao0lDy_8F69e5bhdQ3Px3zo",
-    link: "https://nexa1337.github.io/nexa1337"
+    desktop: "/images/ads/laptop/1_ads_laptop.png",
+    mobile: "/images/ads/mobile/1_ads_mobile.png",
+    link: "https://atlas1337agency.vercel.app/"
   },
   banner2: {
-    desktop: "https://blogger.googleusercontent.com/img/a/AVvXsEieujME3eiERRYSKVuqNK5RmR9HNp8dIkYA9RpGwRpFITR4AF-xgaSrGplCnCjdMfq2qERyhFQ3w55UQZKo_2NKJMqwLz9BVbQCBiSF5xq2LIuEP2hZZh6YCWDn7iYCcNvbsAAY7cOPfLbyUI27WR4CrgT84BBjJUvydxicw8aTVMfLV1TDl_ybMlB9w_2-",
-    mobile: "https://blogger.googleusercontent.com/img/a/AVvXsEinwCMKTZTTEwIRwgWImWswN0ZyY_WR59hda2eTjfCsaqCRE081vj5F9NG7Ko4fpWigTmJv1DW7CdzeIC-XVAd-zIrSHCsM9mlCUQhVcJulQIT5A27L2XVG1ddbmPALFBgfPXxLLl6bTq3eBxn_pc1U_fyxJQ5eiwxckBoMXJNDBMi9iJEQ8MJ8gPLqIOBN",
-    link: "https://school-lime-psi.vercel.app/"
+    desktop: "/images/ads/laptop/2_ads_laptop.png",
+    mobile: "/images/ads/mobile/2_ads_mobile.png",
+    link: "https://skilliq1337school.vercel.app/"
   },
   banner3: {
     desktop: "https://blogger.googleusercontent.com/img/a/AVvXsEiSEyx6A5aXHKHgULr34BNBrXr1T1zwDDY6AzfDmoju_y5RofIrU3hD8656Wx_p2CWs-lye2-ZADxwF1OQdiP-iFeHacWd7d0zqi0mcXb6v6GkzSJ8wCnFt0OtmoHW9GigDZK9p5fu5QQw5tyQFoBNOS1dfcDt5e7HHMJD8FeNvGYcfRCoHHBtWdRxbyD_D",
