@@ -807,7 +807,7 @@ const PersonalFinance: React.FC = () => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("N E X A 1337 | Financial Roadmap", 20, 20);
+    doc.text("SecretArea | Financial Roadmap", 20, 20);
     
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
@@ -897,7 +897,7 @@ const PersonalFinance: React.FC = () => {
     doc.setTextColor(150, 150, 150);
     doc.text("Keep pushing. The roadmap is clear.", pageWidth / 2, 280, { align: 'center' });
 
-    doc.save(`NEXA_Roadmap_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`SecretArea_Roadmap_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   // --- MAIN DASHBOARD ---

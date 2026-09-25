@@ -3241,7 +3241,7 @@ const TorrentWarningModal: React.FC<{ link: string; onClose: () => void; }> = ({
             </div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4">{t('Everything is fine! 🎉')}</h3>
             <p className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-8 text-sm">
-              {t('Now you can have it thanks for respect N E X A 1337 Guidelines and instructions, all this for you. 🥳')}
+              {t('Now you can have it thanks for respect SecretArea Guidelines and instructions, all this for you. 🥳')}
             </p>
             <a href={link} onClick={onClose} className="block w-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold py-3 px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(14,165,233,0.3)] text-sm">
               {t('Get Files ⚡')}
@@ -4520,14 +4520,14 @@ export const ResourceDetailModal: React.FC<{
               </div>
           </div>
 
-          {/* N E X A 1337 message note if available */}
+          {/* SecretArea message note if available */}
           {item.links?.fullNote && (
               <div className="w-full bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-xl p-4 flex gap-4">
                  <div className="text-blue-500 shrink-0">
                      <Icon name="Info" size={24} />
                  </div>
                  <div>
-                     <h4 className="text-sm font-bold text-blue-900 dark:text-blue-400 uppercase tracking-widest mb-1">{t('N E X A 1337 Says')}</h4>
+                     <h4 className="text-sm font-bold text-blue-900 dark:text-blue-400 uppercase tracking-widest mb-1">{t('SecretArea Says')}</h4>
                      <p className="text-sm text-blue-800 dark:text-blue-300">{item.links?.fullNote}</p>
                  </div>
               </div>
@@ -4663,14 +4663,14 @@ export const ResourceDetailModal: React.FC<{
 
                   </>
                   )}
-                  {/* N E X A 1337 Alert */}
+                  {/* SecretArea Alert */}
                   <div className="py-6 border-b border-slate-200 dark:border-slate-800">
                       <div className="w-full bg-[#fdf8f6] dark:bg-slate-900 border-l-4 border-amber-500 rounded-r-xl p-4 flex gap-4">
                          <div className="text-amber-500 shrink-0 mt-1">
                              <Icon name="AlertTriangle" size={24} />
                          </div>
                          <div>
-                             <h4 className="font-bold text-amber-500 mb-2">{t('N E X A 1337 Says :')}</h4>
+                             <h4 className="font-bold text-amber-500 mb-2">{t('SecretArea Says :')}</h4>
                              <p className="text-amber-600 dark:text-amber-500/80 text-sm mb-1">
                                  {t('Support the original developers and creators by purchasing legitimate copies of their products.')}
                              </p>
@@ -6690,7 +6690,7 @@ const SecretArea: React.FC = () => {
   
   // Terminal State
   const [terminalHistory, setTerminalHistory] = useState<{type: string, text: React.ReactNode}[]>([
-    { type: 'system', text: 'N E X A 1337 OS v9.0.1 - SECURE TERMINAL' },
+    { type: 'system', text: 'SecretArea OS v9.0.1 - SECURE TERMINAL' },
     { type: 'system', text: 'Unauthorized CLI access is restricted.' },
     { type: 'system', text: 'Type "help" for available protocols.' },
     { type: 'success', text: '💡 TIP: To enter the area, use the Google, Discord, GitHub, or Guest mode buttons below.' }
@@ -6780,7 +6780,7 @@ const SecretArea: React.FC = () => {
             <div>[-] <a href="https://www.instagram.com/nexa1337" target="_blank" rel="noreferrer" className="text-pink-400 hover:text-pink-300 underline underline-offset-2">Instagram</a></div>
             <div>[-] <a href="mailto:support@nexa1337.com" className="text-purple-400 hover:text-purple-300 underline underline-offset-2">Email (support@nexa1337.com)</a></div>
             <div>[-] <a href="mailto:nexa1337agency@gmail.com" className="text-red-400 hover:text-red-300 underline underline-offset-2">Gmail (nexa1337agency@gmail.com)</a></div>
-            <div>[-] <a href="https://linktr.ee/nexa1337" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-300 underline underline-offset-2">N E X A 1337</a></div>
+            <div>[-] <a href="https://linktr.ee/nexa1337" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-300 underline underline-offset-2">SecretArea</a></div>
           </div>
         ) 
       });
@@ -8529,7 +8529,7 @@ const paginatedData = useMemo(() => {
                         {!terminalCleared && (
                           <div className="mb-3 sm:mb-4">
                              <span className="text-[#89B4FA] font-bold">┌──(</span><span className="text-[#E5E9F0] font-bold">guest㉿SecretArea1337</span><span className="text-[#89B4FA] font-bold">)-[</span><span className="text-[#E5E9F0] font-bold">~</span><span className="text-[#89B4FA] font-bold">]</span><br/>
-                             <span className="text-[#89B4FA] font-bold">└─$</span> <span className="text-[#A6E3A1]">N E X A OS - System Online</span>
+                             <span className="text-[#89B4FA] font-bold">└─$</span> <span className="text-[#A6E3A1]">SecretArea OS - System Online</span>
                           </div>
                         )}
                         {terminalHistory.map((line, i) => (

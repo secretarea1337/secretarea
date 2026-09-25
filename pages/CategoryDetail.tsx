@@ -452,7 +452,7 @@ const CategoryDetail: React.FC = () => {
                   >
                     Solutions
                   </motion.div>
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">N E X A 1337 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500 dark:from-emerald-400 dark:to-cyan-400">Collection</span></h2>
+                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">SecretArea <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500 dark:from-emerald-400 dark:to-cyan-400">Collection</span></h2>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
@@ -575,7 +575,7 @@ const CategoryDetail: React.FC = () => {
                 <div className="absolute top-0 end-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -me-20 -mt-20"></div>
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                    <div>
-                      <h2 className="text-2xl font-bold mb-2">N E X A 1337 Business</h2>
+                      <h2 className="text-2xl font-bold mb-2">SecretArea Business</h2>
                       <p className="text-emerald-200">Digital products, Print On demand & More</p>
                    </div>
                    <div className="flex gap-4">

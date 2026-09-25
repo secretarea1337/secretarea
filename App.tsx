@@ -109,17 +109,17 @@ const App: React.FC = () => {
         
         <Helmet>
           <title>Secret Area</title>
-          <meta name="description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by N E X A 1337." />
+          <meta name="description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea." />
           <meta name="keywords" content="games Repack, Secret Area, Premium Tools, Hypervisor, Gaming Resources" />
           <meta property="og:title" content="Secret Area" />
-          <meta property="og:description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by N E X A 1337." />
+          <meta property="og:description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea." />
           <meta property="og:type" content="website" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content="Secret Area" />
-          <meta name="twitter:description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by N E X A 1337." />
+          <meta name="twitter:description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea." />
           <link rel="canonical" href="https://nexa1337.com/" />
           <script type="application/ld+json">
-            {`{"@context":"https://schema.org","@type":"WebSite","name":"Secret Area","url":"https://nexa1337.com/","description":"Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by N E X A 1337."}`}
+            {`{"@context":"https://schema.org","@type":"WebSite","name":"Secret Area","url":"https://nexa1337.com/","description":"Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea."}`}
           </script>
         </Helmet>
         <Header />

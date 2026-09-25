@@ -521,12 +521,12 @@ export const CATEGORIES: CategoryData[] = [
   },
   {
     id: 'business',
-    title: 'N E X A 1337',
+    title: 'SecretArea',
     shortDescription: 'Modern technology, creative design, and performance-driven strategies.',
     iconName: 'Briefcase',
     color: 'emerald',
     role: 'Founder',
-    bio: 'At N E X A 1337, we help brands unlock their full potential through modern technology, creative design, and performance-driven strategies. Our team turns complex challenges into simple, scalable digital solutions, helping you grow smarter and faster.',
+    bio: 'At SecretArea, we help brands unlock their full potential through modern technology, creative design, and performance-driven strategies. Our team turns complex challenges into simple, scalable digital solutions, helping you grow smarter and faster.',
     categorySocials: [
       { platform: 'Instagram', url: 'https://instagram.com/nexa1337', icon: 'Instagram' },
       { platform: 'TikTok', url: 'https://tiktok.com/@nexa.1337', icon: 'Tiktok' },
@@ -556,16 +556,16 @@ export const CATEGORIES: CategoryData[] = [
     certificatesDisclaimer: "These are my online certificates. If you have any doubts, feel free to message me and I will gladly send them to you. All of them were obtained through online learning platforms.",
     projects: [
       {
-        title: 'N E X A 1337 Agency',
+        title: 'SecretArea',
         description: 'Digital agency providing 3D and Web solutions.',
         tags: ['Business', 'Startup'],
         images: ['https://picsum.photos/seed/biz1/600/400']
       }
     ],
     resources: [],
-    goals: ['Scale N E X A 1337 to 10 employees', 'Launch a SaaS product'],
+    goals: ['Scale SecretArea to 10 employees', 'Launch a SaaS product'],
     roadmap: [
-      { title: 'Phase 1: The Genesis', status: 'completed', description: 'Starting from zero. Building the core philosophy, defining the brand identity of N E X A 1337, and securing the first loyal clients through pure value delivery.', icon: 'Rocket' },
+      { title: 'Phase 1: The Genesis', status: 'completed', description: 'Starting from zero. Building the core philosophy, defining the brand identity of SecretArea, and securing the first loyal clients through pure value delivery.', icon: 'Rocket' },
       { title: 'Phase 2: Digital Foundation', status: 'completed', description: 'Establishing a robust digital presence. Mastering WordPress, Shopify, and Branding to empower small businesses to stand out online.', icon: 'Building' },
       { title: 'Phase 3: The AI Revolution', status: 'in-progress', description: 'Integrating N8N, Automation, and AI Agents to scale operations. Transforming from a service provider to a tech-driven efficiency partner.', icon: 'Bot' },
       { title: 'Phase 4: Global Ecosystem', status: 'planned', description: 'Expanding to a global scale. Reaching 1M+ clients worldwide by creating a self-sustaining ecosystem of digital products, SaaS solutions, and automated growth engines.', icon: 'Globe' }

@@ -72,7 +72,7 @@ const Roadmap: React.FC = () => {
           {/* Vertical connection line */}
           <div className="absolute start-[29px] md:start-[39px] top-12 bottom-12 w-px bg-gradient-to-b from-transparent via-slate-200 dark:via-slate-800 to-transparent -z-10 hidden sm:block" />
 
-          {CATEGORIES.map((category, index) => {
+          {CATEGORIES.filter(category => category.id !== 'business' && category.title !== 'N E X A 1337' && category.title !== 'SecretArea').map((category, index) => {
             const isHovered = hoveredIndex === index;
             const itemsCount = category.projects.length + (category.nexaProjects?.length || 0);
 

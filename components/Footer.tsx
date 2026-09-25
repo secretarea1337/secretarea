@@ -105,7 +105,7 @@ const Footer: React.FC = () => {
             © 2026 <span className="font-black text-slate-900 dark:text-white tracking-widest">{t('SecretArea')}</span>. {t('All rights reserved.')}
           </p>
           <p className="flex items-center gap-1.5 text-slate-900 dark:text-white font-semibold">
-            {t('Built by :')} <a href="https://nexa1337vcard.vercel.app" target="_blank" rel="noreferrer" className="font-black text-slate-900 dark:text-white hover:text-primary-500 transition-colors">N E X A 1337</a>
+            {t('Built by :')} <a href="https://atlasvcard.vercel.app/" target="_blank" rel="noreferrer" className="font-black text-slate-900 dark:text-white hover:text-primary-500 transition-colors">ATLAS</a>
           </p>
         </div>
 
