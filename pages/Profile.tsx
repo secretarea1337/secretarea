@@ -327,7 +327,7 @@ const Profile: React.FC = () => {
                     try { rawData = JSON.parse(cachedRaw); } catch (e) {}
                 }
                 if (!rawData) {
-                    const res = await fetch('https://script.google.com/macros/s/AKfycbx7nzBZc_tIhbAUK5OvOzgifGVzaVorzjn5OXNe8ENC0p7Pjia7O-u4WggxjRZipt4v/exec', {
+                    const res = await fetch('https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec', {
                         method: 'GET',
                         cache: 'no-store'
                     });

@@ -18,30 +18,22 @@ export default function RequestSection() {
         setErrorMsg('');
 
         try {
-            // Replace this with your actual Google Apps Script web app URL or API endpoint
-            const GOOGLE_SHEETS_ENDPOINT = 'YOUR_GOOGLE_SHEETS_ENDPOINT_HERE';
+            const GOOGLE_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec';
             
-            // To connect to a Google Sheet without OAuth from the client, 
-            // the standard way is to use a Google Apps Script Web App that appends to the sheet.
-            // Or a backend proxy endpoint.
-            
-            const response = await fetch('/api/submit-request', {
+            await fetch(GOOGLE_SHEETS_ENDPOINT, {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'text/plain',
                 },
                 body: JSON.stringify({
                     title,
-                    section,
-                    imageUrl,
+                    category: section,
+                    image: imageUrl,
                     message,
                     timestamp: new Date().toISOString()
                 }),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to submit request');
-            }
 
             setSuccessMsg('Request submitted successfully!');
             setTitle('');

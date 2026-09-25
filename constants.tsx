@@ -1,6 +1,14 @@
 
 import { CategoryData, NavItem } from './types';
 
+export const GOOGLE_SHEET_CONFIG = {
+  webAppUrl: "https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec",
+  libraryUrl: "https://script.google.com/macros/library/d/1Xb0fBVi-y3YQP1diN60Ms_1r4cPl4iJOKKSzqVPImPYpxrN4Evf_9yAN/2",
+  deploymentId: "AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw"
+};
+
+export const GOOGLE_SHEET_API_ENDPOINT = GOOGLE_SHEET_CONFIG.webAppUrl;
+
 export const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/in/nexa1337",
   github: "https://github.com",
