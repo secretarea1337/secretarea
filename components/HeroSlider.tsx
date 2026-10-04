@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from './Icon';
-import { TbPlayerPause, TbPlayerPlay } from 'react-icons/tb';
 
 interface ResourceItem {
   id: string;
@@ -282,7 +281,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
       onTouchEnd={handleTouchEnd}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative w-full min-h-[90svh] sm:min-h-[85vh] lg:min-h-[92svh] overflow-hidden bg-slate-100 dark:bg-[#030712] flex flex-col pt-16 sm:pt-20 md:pt-24 transition-colors duration-300 select-none"
+      className="relative w-full min-h-[620px] sm:min-h-[640px] lg:min-h-[700px] h-[90svh] sm:h-[86vh] lg:h-[90svh] max-h-[920px] overflow-hidden bg-slate-100 dark:bg-[#030712] flex flex-col pt-16 sm:pt-20 md:pt-24 transition-colors duration-300 select-none"
     >
       {/* Dynamic Animated Ambient Wallpaper Background */}
       <AnimatePresence initial={false}>
@@ -349,11 +348,6 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                   <span className="text-slate-400 dark:text-slate-600 select-none">·</span>
                   <span>{gameGenre}</span>
 
-                  <span className="text-slate-400 dark:text-slate-600 select-none">·</span>
-                  <span className="font-bold text-slate-900 dark:text-white">
-                    {t('PC Edition')} {currentItem.version ? `(v${currentItem.version.replace(/^v/i, '')})` : ''}
-                  </span>
-
                   {currentItem.repackSize && (
                     <>
                       <span className="text-slate-400 dark:text-slate-600 select-none">·</span>
@@ -375,40 +369,30 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                   )}
                 </div>
 
-                {/* Main Cinematic Game Title */}
-                <h1
-                  className={`text-3xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-slate-900 dark:text-white leading-[1.08] uppercase tracking-tight drop-shadow-md break-words line-clamp-2 ${
+                {/* Main Cinematic Game Title - stable reserved height keeps hero section exactly the same size */}
+                <div
+                  className={`w-full text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] uppercase tracking-tight min-h-[2.25em] h-[2.25em] flex items-center ${
                     isRTL ? 'font-arabic' : ''
                   }`}
                   style={{
                     fontFamily: isRTL ? "'Noto Sans Arabic', 'Cairo', system-ui, sans-serif" : undefined,
                   }}
                 >
-                  {currentItem.name}
-                </h1>
-
-                {/* Smart Multilingual Language Support Indicator */}
-                <div className="flex items-center gap-2 pt-0.5 text-xs text-slate-600 dark:text-slate-400 font-medium">
-                  <Icon name="Globe" size={14} className="text-sky-600 dark:text-sky-400 shrink-0" />
-                  <span className="font-bold text-slate-800 dark:text-slate-200">
-                    {t('Audio & Subtitles')}:
-                  </span>
-                  <div className="flex items-center gap-1 text-[11px] font-mono font-semibold">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">EN</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">FR</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">ES</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">AR</span>
-                  </div>
+                  <h1 className="text-slate-900 dark:text-white drop-shadow-md break-words line-clamp-2 leading-[1.1] w-full">
+                    {currentItem.name}
+                  </h1>
                 </div>
 
                 {/* Localized Synopsis (EN, FR, ES, AR) */}
-                <p
-                  className={`text-slate-700 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl line-clamp-3 sm:line-clamp-4 font-normal leading-relaxed ${
-                    isRTL ? 'font-arabic leading-relaxed' : ''
-                  }`}
-                >
-                  {gameSynopsis}
-                </p>
+                <div className="min-h-[4rem] sm:min-h-[4.5rem] md:min-h-[5rem] flex items-start">
+                  <p
+                    className={`text-slate-700 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl line-clamp-3 font-normal leading-relaxed ${
+                      isRTL ? 'font-arabic leading-relaxed' : ''
+                    }`}
+                  >
+                    {gameSynopsis}
+                  </p>
+                </div>
 
                 {/* Zero-Pill Quick Specs Bar */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -459,16 +443,6 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                       size={18}
                       className="shrink-0 rtl:rotate-180"
                     />
-                  </button>
-
-                  {/* Slideshow Play/Pause Toggle Button */}
-                  <button
-                    onClick={() => setIsPaused((prev) => !prev)}
-                    className="p-3 sm:p-3.5 rounded-xl bg-slate-200/60 hover:bg-slate-300/70 dark:bg-slate-800/60 dark:hover:bg-slate-700/70 border border-slate-300/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 transition-colors active:scale-95 cursor-pointer"
-                    title={isPaused ? t('Play Slideshow') : t('Pause Slideshow')}
-                    aria-label={isPaused ? t('Play Slideshow') : t('Pause Slideshow')}
-                  >
-                    {isPaused ? <TbPlayerPlay size={18} /> : <TbPlayerPause size={18} />}
                   </button>
                 </div>
               </motion.div>
