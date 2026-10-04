@@ -4,6 +4,8 @@ import { useLanguage } from '../src/contexts/LanguageContext';
 import Icon from './Icon';
 import { auth } from '../src/firebase';
 import { AnimatePresence, motion } from 'framer-motion';
+import { isUserAdmin } from '../src/services/userService';
+import { subscribeReports, getCachedReports, getDeletedReportIds } from '../src/services/reportService';
 
 const BottomNav: React.FC = () => {
   const { t, dir } = useLanguage();
@@ -12,6 +14,7 @@ const BottomNav: React.FC = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   const checkGuest = () =>
     localStorage.getItem('nexa_guest_mode') === 'true' ||
@@ -19,6 +22,9 @@ const BottomNav: React.FC = () => {
 
   const [isGuest, setIsGuest] = useState(checkGuest);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
+
+  const isAdmin = isUserAdmin(currentUser?.email);
 
   useEffect(() => {
     const handleAuth = () => {
@@ -43,15 +49,57 @@ const BottomNav: React.FC = () => {
     };
   }, []);
 
-  // Close menu on outside click or navigation
+  // Track pending reports for admin
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+    if (!isAdmin) return;
+
+    const calculatePending = (reportsList: any[]) => {
+      const deletedIds = getDeletedReportIds();
+      const pending = reportsList.filter((r) => !deletedIds.has(r.id) && r.status === 'pending').length;
+      setPendingReportsCount(pending);
+    };
+
+    calculatePending(getCachedReports());
+    const unsub = subscribeReports((reports) => {
+      calculatePending(reports);
+    });
+
+    const handleReportUpdate = () => {
+      calculatePending(getCachedReports());
+    };
+
+    window.addEventListener('secretarea_reports_changed', handleReportUpdate);
+    window.addEventListener('secretarea_report_deleted', handleReportUpdate);
+    window.addEventListener('secretarea_report_updated', handleReportUpdate);
+    window.addEventListener('secretarea_item_fixed', handleReportUpdate);
+
+    return () => {
+      unsub();
+      window.removeEventListener('secretarea_reports_changed', handleReportUpdate);
+      window.removeEventListener('secretarea_report_deleted', handleReportUpdate);
+      window.removeEventListener('secretarea_report_updated', handleReportUpdate);
+      window.removeEventListener('secretarea_item_fixed', handleReportUpdate);
+    };
+  }, [isAdmin]);
+
+  // Robust outside click/touch listener that ignores clicks on the trigger button
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        !menuTriggerRef.current?.contains(target)
+      ) {
         setIsMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -120,7 +168,7 @@ const BottomNav: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.96 }}
             transition={{ duration: 0.18 }}
-            className="absolute bottom-full end-3 mb-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 z-50 overflow-hidden"
+            className="absolute bottom-full end-2 mb-2 w-72 max-w-[calc(100vw-1rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 z-50 overflow-hidden"
           >
             {/* Header / Guest Mode Info */}
             <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-100 dark:border-slate-800">
@@ -136,6 +184,27 @@ const BottomNav: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
+              {/* Admin Reports & Fixes link if user is admin */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/profile', { state: { defaultTab: 'reports' } });
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold text-xs transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon name="AlertTriangle" size={15} />
+                    <span>{t('Reports & Fixes')}</span>
+                  </span>
+                  {pendingReportsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black">
+                      {pendingReportsCount}
+                    </span>
+                  )}
+                </button>
+              )}
+
               {/* Login Button (if not logged in with real account) */}
               {!currentUser ? (
                 <button
@@ -201,28 +270,24 @@ const BottomNav: React.FC = () => {
                 </div>
               </button>
 
-              {/* Quick links to Profile & Settings (Only for logged-in users) */}
-              {currentUser && (
-                <>
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    <Icon name="User" size={15} />
-                    <span>{t('My profile')}</span>
-                  </Link>
+              {/* Profile & Settings Links */}
+              <Link
+                to="/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+              >
+                <Icon name="User" size={15} />
+                <span>{t('My profile')}</span>
+              </Link>
 
-                  <Link
-                    to="/settings"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-                  >
-                    <Icon name="Settings" size={15} />
-                    <span>{t('Settings')}</span>
-                  </Link>
-                </>
-              )}
+              <Link
+                to="/settings"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+              >
+                <Icon name="Settings" size={15} />
+                <span>{t('Settings')}</span>
+              </Link>
             </div>
           </motion.div>
         )}
@@ -282,8 +347,9 @@ const BottomNav: React.FC = () => {
           <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">{t('Roadmap')}</span>
         </Link>
 
-        {/* Menu Dropdown Trigger (with guest indicator if in guest mode) */}
+        {/* Menu Dropdown Trigger - Fixed with ref, proper outside click, and ALWAYS display Menu label */}
         <button
+          ref={menuTriggerRef}
           onClick={() => setIsMenuOpen((prev) => !prev)}
           className={`relative flex flex-col items-center justify-center w-full h-full transition-colors group active:scale-95 ${
             isMenuOpen
@@ -298,9 +364,12 @@ const BottomNav: React.FC = () => {
             {isGuest && !currentUser && (
               <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white dark:border-slate-900 animate-pulse" />
             )}
+            {isAdmin && pendingReportsCount > 0 && (
+              <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900 animate-ping" />
+            )}
           </div>
           <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">
-            {isGuest && !currentUser ? t('Guest mode') : t('Menu')}
+            {t('Menu')}
           </span>
         </button>
       </div>

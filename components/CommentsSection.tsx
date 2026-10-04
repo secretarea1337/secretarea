@@ -462,7 +462,7 @@ export const CommentsSection: React.FC<{ itemId: string, itemTitle?: string, ite
         mode: 'no-cors'
       });
     } catch (error) {
-      console.warn("Failed to save to Google Sheet, saved locally.");
+      console.warn("Failed to synchronize comment remotely, saved locally.");
     }
 
     setNewComment('');

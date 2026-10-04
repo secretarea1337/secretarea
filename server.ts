@@ -1,40 +1,158 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 async function startServer() {
   const app = express();
-  app.set("trust proxy", true);
+  app.set("trust proxy", 1);
   const PORT = 3000;
 
-  // CORS headers to support custom domains including secretarea.vercel.app
+  // 1. Security HTTP Headers with Helmet
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Managed granularly to avoid blocking external widgets (Ko-Fi, Discord, Firebase, Google Fonts)
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      frameguard: { action: "sameorigin" },
+      hidePoweredBy: true,
+      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+      noSniff: true,
+      xssFilter: true,
+    })
+  );
+
+  // 2. Anti-Exploit / Malicious Scanner Blocker
+  // Blocks automated bot probes (e.g. .env, .git, wp-login, phpmyadmin, cgi-bin) immediately
+  app.use((req, res, next) => {
+    const maliciousPatterns = [
+      /\/\.env/i,
+      /\/\.git/i,
+      /\/\.aws/i,
+      /\/wp-login/i,
+      /\/xmlrpc/i,
+      /\/phpmyadmin/i,
+      /\/cgi-bin/i,
+      /\/shell/i,
+      /\/actuator/i,
+      /\/autodiscover/i,
+    ];
+
+    if (maliciousPatterns.some((pattern) => pattern.test(req.path))) {
+      return res.status(403).send("Forbidden - Threat intelligence blocked");
+    }
+    next();
+  });
+
+  // 3. Anti-DDoS Rate Limiters
+  // Global Limiter: 400 requests per 10 minutes per IP
+  const globalLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 400,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      error: "Too many requests from this IP. Anti-DDoS protection active. Please wait a few minutes.",
+    },
+  });
+  app.use(globalLimiter);
+
+  // Sensitive Auth Limiter: Max 30 requests per 15 minutes to prevent OAuth abuse or brute-forcing
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Authentication rate limit reached. Please try again later." },
+  });
+
+  // Upload Limiter (Speed Test protection against bandwidth exhaustion)
+  const uploadLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Upload rate limit reached. Please wait a moment." },
+  });
+
+  // Admin Actions Limiter
+  const adminLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Rate limit reached for administrative actions." },
+  });
+
+  // 4. Strict CORS headers with origin validation
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     const allowedOrigins = [
       "https://secretarea.vercel.app",
+      "https://nexa1337.com",
       "http://localhost:3000",
-      "http://localhost:5173"
+      "http://localhost:5173",
     ];
-    if (origin && (allowedOrigins.includes(origin) || origin.endsWith(".run.app") || origin.endsWith(".vercel.app"))) {
+
+    const isAllowed =
+      origin &&
+      (allowedOrigins.includes(origin) ||
+        origin.endsWith(".run.app") ||
+        origin.endsWith(".vercel.app"));
+
+    if (isAllowed) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
       res.setHeader("Access-Control-Allow-Credentials", "true");
     }
+
     if (req.method === "OPTIONS") {
       return res.sendStatus(204);
     }
     next();
   });
 
-  // speed test upload endpoint
-  app.post("/upload", (req, res) => {
-    req.on("data", () => {});
-    req.on("end", () => res.send("ok"));
+  // 5. JSON Body size limit to prevent memory-exhaustion JSON bomb attacks
+  app.use(express.json({ limit: "250kb" }));
+
+  // Admin Reports Delete Endpoint with Admin Limiter
+  app.post("/api/admin/reports/delete", adminLimiter, (req, res) => {
+    try {
+      const { reportIds } = req.body || {};
+      const ids = Array.isArray(reportIds) ? reportIds : reportIds ? [reportIds] : [];
+      res.json({ success: true, count: ids.length, deleted: ids });
+    } catch (e: any) {
+      res.status(500).json({ success: false, error: e.message });
+    }
   });
 
-  // Discord OAuth URL endpoint
-  app.get("/api/auth/discord/url", (req, res) => {
+  // Speed test upload endpoint with upload limiter and 15MB maximum safety threshold
+  app.post("/upload", uploadLimiter, (req, res) => {
+    let receivedBytes = 0;
+    const MAX_ALLOWED_BYTES = 15 * 1024 * 1024; // 15MB cap
+
+    req.on("data", (chunk) => {
+      receivedBytes += chunk.length;
+      if (receivedBytes > MAX_ALLOWED_BYTES) {
+        req.destroy(); // Abort slowloris / giant flood connection immediately
+      }
+    });
+
+    req.on("end", () => {
+      if (receivedBytes <= MAX_ALLOWED_BYTES) {
+        res.send("ok");
+      }
+    });
+
+    req.on("error", () => {
+      res.status(400).send("Upload terminated");
+    });
+  });
+
+  // Discord OAuth URL endpoint with Auth rate limiter
+  app.get("/api/auth/discord/url", authLimiter, (req, res) => {
     const clientId = process.env.DISCORD_CLIENT_ID;
     if (!clientId) {
       return res.status(400).json({ error: "DISCORD_CLIENT_ID not configured in environment variables" });
@@ -66,8 +184,8 @@ async function startServer() {
     res.json({ url, redirectUri });
   });
 
-  // Discord OAuth Callback endpoint (Handles popup postMessage and closes)
-  app.get(["/auth/discord/callback", "/auth/discord/callback/"], async (req, res) => {
+  // Discord OAuth Callback endpoint (Handles popup postMessage and closes) with Auth rate limiter
+  app.get(["/auth/discord/callback", "/auth/discord/callback/"], authLimiter, async (req, res) => {
     const { code, error, error_description, state } = req.query as Record<string, string>;
 
     if (error) {

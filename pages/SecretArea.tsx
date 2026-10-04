@@ -55,9 +55,25 @@ import {
   TbX, 
   TbCheck, 
   TbDeviceFloppy, 
-  TbLink 
+  TbLink,
+  TbCircleCheck,
+  TbAlertTriangle,
+  TbAlertCircle,
+  TbRefresh,
+  TbSparkles,
+  TbLinkOff
 } from 'react-icons/tb';
 import backupData from '../data/backup_resources.json';
+import ReportModal from '../components/ReportModal';
+import { 
+  subscribeItemFixes, 
+  subscribeReports,
+  getCachedFixes, 
+  mergeItemWithFix, 
+  ItemFix, 
+  getItemActiveReport, 
+  ItemReport 
+} from '../src/services/reportService';
 
 // --- CONFIGURATION ---
 const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec';
@@ -743,7 +759,12 @@ export interface ResourceItem {
         torrent?: string;
     };
     utorrent?: string;
-  };}
+    googleDrive?: string;
+    mega?: string;
+  };
+  isFixedByAdmin?: boolean;
+  adminFixNotes?: string;
+}
 
 interface CompanyProfile {
   id: string;
@@ -3542,6 +3563,124 @@ const LikeButton = ({ item, t }: { item: ResourceItem, t: any }) => {
     );
 };
 
+// 4-Language Dictionary for Notification Banners (EN, FR, ES/ESP, AR) with full RTL support
+export const NOTIF_BANNER_I18N = {
+  fixedPill: {
+    en: 'Download Links Updated & Verified',
+    fr: 'Liens de téléchargement mis à jour & vérifiés',
+    es: 'Enlaces de descarga actualizados y verificados',
+    ar: 'تم تحديث روابط التحميل والتحقق منها بنجاح',
+  },
+  inProgressPill: {
+    en: 'Report Status: In Progress',
+    fr: 'Statut du signalement : En cours',
+    es: 'Estado del reporte: En progreso',
+    ar: 'حالة البلاغ: قيد المتابعة والإصلاح',
+  },
+  pendingPill: {
+    en: 'Report Status: Issue Under Review',
+    fr: "Statut du signalement : En attente d'examen",
+    es: 'Estado del reporte: En revisión',
+    ar: 'حالة البلاغ: قيد مراجعة وتدقيق الإدارة',
+  },
+  liveSync: {
+    en: 'Live Sync: Guest & User Notification',
+    fr: 'Synchronisation en direct : Invités & Membres',
+    es: 'Sincronización en vivo: Invitados y Miembros',
+    ar: 'تحديث فوري مباشر: للزوار والأعضاء',
+  },
+  fixedTitle: {
+    en: 'Download Links Have Been Repaired & Updated!',
+    fr: 'Les liens de téléchargement ont été réparés et mis à jour !',
+    es: '¡Los enlaces de descarga han sido reparados y actualizados!',
+    ar: 'تم إصلاح وتحديث روابط التحميل بنجاح!',
+  },
+  inProgressTitle: {
+    en: 'Admin Team Is Actively Working On Links',
+    fr: "L'équipe d'administration répare actuellement les liens",
+    es: 'El equipo de administración está trabajando en los enlaces',
+    ar: 'فريق الإدارة يعمل حالياً على فحص واستبدال الروابط',
+  },
+  pendingTitle: {
+    en: 'Broken Link Report Received',
+    fr: 'Signalement de lien brisé reçu',
+    es: 'Reporte de enlace caído recibido',
+    ar: 'تم استلام بلاغ بوجود خلل في روابط التحميل',
+  },
+  fixedDesc: {
+    en: 'The reported issues for this item have been reviewed and repaired by the admin team. All download mirrors below are updated and verified for safe, high-speed download.',
+    fr: "Les problèmes signalés pour cet élément ont été examinés et corrigés par l'équipe d'administration. Tous les miroirs de téléchargement ci-dessous sont à jour et vérifiés.",
+    es: 'Los problemas reportados para este elemento han sido revisados y reparados por el equipo de administración. Todos los servidores de descarga a continuación están actualizados y verificados.',
+    ar: 'تمت مراجعة الخلل المبلغ عنه وإصلاحه بالكامل من قبل فريق الإدارة. جميع سيرفرات التحميل وروابط الماغنت بالأسفل محدثة ومفحوصة وجاهزة للتحميل الآمن والسريع.',
+  },
+  inProgressDesc: {
+    en: 'Our admin team has acknowledged the issue with download links ({type}) and is currently re-uploading replacement mirrors. Check back shortly or try backup mirrors below.',
+    fr: 'Notre équipe d\'administration a pris en compte le problème avec les liens ({type}) et téléverse actuellement des miroirs de remplacement. Revenez bientôt ou essayez les miroirs de secours ci-dessous.',
+    es: 'Nuestro equipo de administración ha recibido el reporte del enlace ({type}) y está subiendo servidores de reemplazo. Vuelve pronto o prueba los servidores de respaldo a continuación.',
+    ar: 'تلقى فريق الإدارة البلاغ بخصوص روابط التحميل ({type}) وجارٍ العمل الآن على فحص ورفع سيرفرات وروابط بديلة. يرجى إعادة التجربة لاحقاً أو استخدام الروابط الاحتياطية بالأسفل.',
+  },
+  pendingDesc: {
+    en: 'A link issue was reported for this item regarding "{reason}". Admins have been notified to inspect and replace links. If one mirror fails, try alternative mirrors below.',
+    fr: 'Un problème de lien a été signalé pour "{reason}". Les administrateurs ont été prévenus pour inspecter et remplacer les liens. En attendant, essayez les autres miroirs ci-dessous.',
+    es: 'Se ha reportado un problema con los enlaces por "{reason}". Se ha notificado a los administradores para inspeccionar y reemplazar los enlaces. Prueba los servidores alternativos a continuación.',
+    ar: 'تم تسجيل بلاغ بوجود رابط معطل لهذا العنصر بخصوص "{reason}". تم إشعار المشرفين للتدقيق واستبدال الروابط. يمكنك تجربة الروابط الاحتياطية المتوفرة بالأسفل حالياً.',
+  },
+  repairedOn: {
+    en: 'Repaired on',
+    fr: 'Réparé le',
+    es: 'Reparado el',
+    ar: 'تاريخ الإصلاح',
+  },
+  verifiedBy: {
+    en: 'Verified by',
+    fr: 'Vérifié par',
+    es: 'Verificado por',
+    ar: 'تم التحقق بواسطة',
+  },
+  adminName: {
+    en: 'Admin',
+    fr: 'Administrateur',
+    es: 'Administrador',
+    ar: 'المشرف',
+  },
+  goToMirrors: {
+    en: 'Go to Download Mirrors ↓',
+    fr: 'Aller aux miroirs de téléchargement ↓',
+    es: 'Ir a los enlaces de descarga ↓',
+    ar: 'الانتقال لروابط وسيرفرات التحميل ↓',
+  },
+  dismissNotice: {
+    en: 'Dismiss notice',
+    fr: 'Masquer la notification',
+    es: 'Descartar aviso',
+    ar: 'إغلاق التنبيه',
+  },
+  liveToastTitle: {
+    en: 'Live Link Status Update',
+    fr: 'Mise à jour du statut en direct',
+    es: 'Actualización de enlace en vivo',
+    ar: 'تنبيه فوري: تحديث حالة الروابط',
+  },
+  realtimePill: {
+    en: 'Realtime',
+    fr: 'Temps réel',
+    es: 'Tiempo real',
+    ar: 'مباشر',
+  },
+  statusUpdatedTo: {
+    en: 'Status updated to',
+    fr: 'Statut mis à jour à',
+    es: 'Estado actualizado a',
+    ar: 'تم تحديث الحالة إلى',
+  },
+  linksRepairedToast: {
+    en: 'Download links have been repaired and updated by admin!',
+    fr: "Les liens de téléchargement ont été réparés et mis à jour par l'admin !",
+    es: '¡Los enlaces de descarga han sido reparados y actualizados por el admin!',
+    ar: 'تم إصلاح وتحديث روابط التحميل بنجاح من قبل المشرف!',
+  },
+};
+
 export const ResourceDetailModal: React.FC<{ 
   item: ResourceItem; 
   onClose: () => void; 
@@ -3561,14 +3700,115 @@ export const ResourceDetailModal: React.FC<{
   currentGenreContext?: string | null;
   onCategoryClick?: (category: string) => void;
 }> = ({ item: rawItem, onClose, isHypervisor, stash = [], toggleStash = () => {}, onCompanyClick, onGenreClick, resolvedDev, isGuestMode, showGuestNotification, globalSpecs, initialScrollTarget, onDonateClick, allResources, onItemSelect, currentGenreContext, onCategoryClick }) => {
-  const { dir, t } = useLanguage();
+  const { dir, t, language } = useLanguage();
+  const normalizedLang: 'en' | 'fr' | 'es' | 'ar' =
+    language === 'ar' ? 'ar' : language === 'fr' ? 'fr' : (language === 'es' || (language as any) === 'esp') ? 'es' : 'en';
+  const isRtl = dir === 'rtl';
+
+  const bTr = (key: keyof typeof NOTIF_BANNER_I18N): string => {
+    return NOTIF_BANNER_I18N[key]?.[normalizedLang] || NOTIF_BANNER_I18N[key]?.en || t(key as string);
+  };
+
   const [showUploaderPopup, setShowUploaderPopup] = useState(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [itemFixes, setItemFixes] = useState<Record<string, ItemFix>>(() => getCachedFixes());
+  const [activeReport, setActiveReport] = useState<ItemReport | undefined>(() => getItemActiveReport(rawItem?.id));
+  const [isStatusBannerDismissed, setIsStatusBannerDismissed] = useState<boolean>(false);
+  const [liveStatusToast, setLiveStatusToast] = useState<{ message: string; status: ItemReport['status'] | 'fixed' } | null>(null);
+
+  useEffect(() => {
+    const unsub = subscribeItemFixes((fixes) => setItemFixes(fixes));
+    return () => unsub();
+  }, []);
+
+  // Real-time Firestore reports subscription for guests and logged-in users
+  useEffect(() => {
+    const unsubReports = subscribeReports((reportsList) => {
+      const match = reportsList.filter((r) => r.itemId === rawItem?.id);
+      if (match.length > 0) {
+        const inProg = match.find((r) => r.status === 'in_progress');
+        const pend = match.find((r) => r.status === 'pending');
+        const fix = match.find((r) => r.status === 'fixed');
+        const best = inProg || pend || fix || match[0];
+        setActiveReport((prev) => {
+          if (prev && prev.status !== best.status) {
+            const toastMsg = best.status === 'fixed'
+              ? bTr('linksRepairedToast')
+              : `${bTr('statusUpdatedTo')}: ${bTr(best.status === 'in_progress' ? 'inProgressPill' : 'pendingPill')}`;
+            setLiveStatusToast({
+              message: toastMsg,
+              status: best.status
+            });
+            setIsStatusBannerDismissed(false);
+          }
+          return best;
+        });
+      } else {
+        setActiveReport(undefined);
+      }
+    });
+    return () => unsubReports();
+  }, [rawItem?.id, t, normalizedLang]);
+
+  useEffect(() => {
+    setActiveReport(getItemActiveReport(rawItem?.id));
+    const handleReportChange = (e: any) => {
+      const updated = getItemActiveReport(rawItem?.id);
+      setActiveReport(updated);
+      setIsStatusBannerDismissed(false);
+      if (!e?.detail?.itemId || e?.detail?.itemId === rawItem?.id) {
+        const newStatus = e?.detail?.status || updated?.status;
+        if (newStatus) {
+          const toastMsg = newStatus === 'fixed'
+            ? bTr('linksRepairedToast')
+            : `${bTr('statusUpdatedTo')}: ${bTr(newStatus === 'in_progress' ? 'inProgressPill' : 'pendingPill')}`;
+          setLiveStatusToast({
+            message: toastMsg,
+            status: newStatus
+          });
+        }
+      }
+    };
+    const handleReportDeleted = (e: any) => {
+      if (!e?.detail?.itemId || e?.detail?.itemId === rawItem?.id) {
+        setActiveReport(getItemActiveReport(rawItem?.id));
+      }
+    };
+    const handleItemFixed = (e: any) => {
+      if (e?.detail?.itemId === rawItem?.id) {
+        setLiveStatusToast({
+          message: bTr('linksRepairedToast'),
+          status: 'fixed'
+        });
+        setIsStatusBannerDismissed(false);
+      }
+    };
+
+    window.addEventListener('secretarea_report_updated', handleReportChange);
+    window.addEventListener('secretarea_report_submitted', handleReportChange);
+    window.addEventListener('secretarea_report_deleted', handleReportDeleted);
+    window.addEventListener('secretarea_item_fixed', handleItemFixed);
+    return () => {
+      window.removeEventListener('secretarea_report_updated', handleReportChange);
+      window.removeEventListener('secretarea_report_submitted', handleReportChange);
+      window.removeEventListener('secretarea_report_deleted', handleReportDeleted);
+      window.removeEventListener('secretarea_item_fixed', handleItemFixed);
+    };
+  }, [rawItem?.id, t, normalizedLang]);
+
+  useEffect(() => {
+    if (liveStatusToast) {
+      const timer = setTimeout(() => setLiveStatusToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [liveStatusToast]);
+
   const currentUser = auth.currentUser;
   const [adminAvatar, setAdminAvatar] = useState<string>(() => getCachedAdminAvatar());
   const [adminDisplayName, setAdminDisplayName] = useState<string>(() => getCachedAdminName());
 
   // Resolve item if item.name is an ID or missing full details
-  const item: ResourceItem = useMemo(() => {
+  const baseItem: ResourceItem = useMemo(() => {
     let current = rawItem;
     if (!current) {
       return {
@@ -3719,6 +3959,11 @@ export const ResourceDetailModal: React.FC<{
 
     return current;
   }, [rawItem, allResources]);
+
+  const item: ResourceItem = useMemo(() => {
+    const fix = baseItem?.id ? itemFixes[baseItem.id] : null;
+    return mergeItemWithFix(baseItem, fix);
+  }, [baseItem, itemFixes]);
 
   const getBreadcrumbCategoryLabel = (cat?: string, itemId?: string) => {
     const c = (cat || '').toLowerCase();
@@ -4016,10 +4261,7 @@ export const ResourceDetailModal: React.FC<{
   };
 
   const handleReportBrokenLink = () => {
-    const whatsappMessage = `*{t('Report Broken Link')} in Secret Area*\n\n*Item Name:* ${item.name}\n*Item ID:* ${item.id}\n*Category:* ${item.category}\n\nPlease check this link, it seems to be down. Thanks!`;
-    const phoneNumber = '212723242286';
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-    window.open(url, '_blank');
+    setShowReportModal(true);
   };
 
   const isSteamTool = item.category === 'steamtools';
@@ -4279,7 +4521,168 @@ export const ResourceDetailModal: React.FC<{
                      </div>
                  </div>
 
-                 {/* Action Buttons Row */}
+                 {/* REAL-TIME SLIDE-IN TOAST NOTIFICATION FOR LINK STATUS UPDATES */}
+                  <AnimatePresence>
+                    {liveStatusToast && (
+                      <motion.div
+                        dir={dir}
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className={`fixed top-20 start-1/2 -translate-x-1/2 z-[99999] px-4 py-3 rounded-2xl shadow-2xl border text-xs sm:text-sm font-bold flex items-center gap-3 backdrop-blur-md max-w-md w-[92%] ${
+                          isRtl ? 'text-right' : 'text-left'
+                        } ${
+                          liveStatusToast.status === 'fixed'
+                            ? 'bg-emerald-600/95 text-white border-emerald-400 shadow-emerald-500/30'
+                            : liveStatusToast.status === 'in_progress'
+                            ? 'bg-sky-600/95 text-white border-sky-400 shadow-sky-500/30'
+                            : 'bg-amber-600/95 text-white border-amber-400 shadow-amber-500/30'
+                        }`}
+                      >
+                        {liveStatusToast.status === 'fixed' ? (
+                          <TbCircleCheck size={22} className="shrink-0 text-emerald-200" />
+                        ) : liveStatusToast.status === 'in_progress' ? (
+                          <TbRefresh size={22} className="shrink-0 animate-spin text-sky-200" />
+                        ) : (
+                          <TbAlertCircle size={22} className="shrink-0 text-amber-200" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <span className="block font-black text-[10px] uppercase tracking-wider opacity-85">
+                            {bTr('liveToastTitle')} • {bTr('realtimePill')}
+                          </span>
+                          <span className="truncate block font-semibold">{liveStatusToast.message}</span>
+                        </div>
+                        <button
+                          onClick={() => setLiveStatusToast(null)}
+                          className="p-1 rounded-lg hover:bg-white/20 text-white transition-colors shrink-0"
+                          title={bTr('dismissNotice')}
+                          aria-label={bTr('dismissNotice')}
+                        >
+                          <TbX size={16} />
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* PROMINENT STATUS REPORT & LINKS UPDATED NOTIFICATION BANNER (LOGGED-IN & GUEST MODE) */}
+                  {!isStatusBannerDismissed && (item.isFixedByAdmin || activeReport) && (
+                    <motion.div
+                      dir={dir}
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`mb-6 p-4 sm:p-5 rounded-2xl border shadow-md relative overflow-hidden backdrop-blur-xs transition-all ${
+                        isRtl ? 'text-right' : 'text-left'
+                      } ${
+                        (item.isFixedByAdmin || activeReport?.status === 'fixed')
+                          ? isRtl
+                            ? 'bg-gradient-to-l from-emerald-500/15 via-emerald-500/10 to-transparent border-emerald-500/35 dark:border-emerald-500/30'
+                            : 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/10 to-transparent border-emerald-500/35 dark:border-emerald-500/30'
+                          : activeReport?.status === 'in_progress'
+                          ? isRtl
+                            ? 'bg-gradient-to-l from-sky-500/15 via-sky-500/10 to-transparent border-sky-500/35 dark:border-sky-500/30'
+                            : 'bg-gradient-to-r from-sky-500/15 via-sky-500/10 to-transparent border-sky-500/35 dark:border-sky-500/30'
+                          : isRtl
+                          ? 'bg-gradient-to-l from-amber-500/15 via-amber-500/10 to-transparent border-amber-500/35 dark:border-amber-500/30'
+                          : 'bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border-amber-500/35 dark:border-amber-500/30'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                          <div className={`p-2.5 rounded-xl text-white shrink-0 shadow-md ${
+                            (item.isFixedByAdmin || activeReport?.status === 'fixed')
+                              ? 'bg-emerald-500 shadow-emerald-500/30'
+                              : activeReport?.status === 'in_progress'
+                              ? 'bg-sky-500 shadow-sky-500/30'
+                              : 'bg-amber-500 shadow-amber-500/30'
+                          }`}>
+                            {(item.isFixedByAdmin || activeReport?.status === 'fixed') ? (
+                              <TbCircleCheck size={22} />
+                            ) : activeReport?.status === 'in_progress' ? (
+                              <TbRefresh size={22} className="animate-spin" />
+                            ) : (
+                              <TbAlertTriangle size={22} />
+                            )}
+                          </div>
+
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {(item.isFixedByAdmin || activeReport?.status === 'fixed') ? (
+                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                                  <span>{bTr('fixedPill')}</span>
+                                </span>
+                              ) : activeReport?.status === 'in_progress' ? (
+                                <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 font-extrabold text-[10px] uppercase tracking-wider border border-sky-500/30 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                                  <span>{bTr('inProgressPill')}</span>
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] uppercase tracking-wider border border-amber-500/30 flex items-center gap-1.5">
+                                  <span>{bTr('pendingPill')}</span>
+                                </span>
+                              )}
+
+                              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                                • {bTr('liveSync')}
+                              </span>
+                            </div>
+
+                            <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                              {(item.isFixedByAdmin || activeReport?.status === 'fixed')
+                                ? bTr('fixedTitle')
+                                : activeReport?.status === 'in_progress'
+                                ? bTr('inProgressTitle')
+                                : bTr('pendingTitle')}
+                            </h4>
+
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                              {(item.isFixedByAdmin || activeReport?.status === 'fixed')
+                                ? (item.adminFixNotes || activeReport?.fixedNotes || bTr('fixedDesc'))
+                                : activeReport?.status === 'in_progress'
+                                ? bTr('inProgressDesc').replace('{type}', activeReport?.brokenLinkType || 'general')
+                                : bTr('pendingDesc').replace('{reason}', activeReport?.reason || (t('Broken Link') || 'Broken Link'))}
+                            </p>
+
+                            <div className="pt-2 flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                              {activeReport?.fixedAt && (
+                                <span className="flex items-center gap-1">
+                                  <span>{bTr('repairedOn')} :</span>
+                                  <strong className="text-slate-700 dark:text-slate-200">
+                                    {new Date(activeReport.fixedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : language === 'fr' ? 'fr-FR' : (language === 'es' || (language as any) === 'esp') ? 'es-ES' : 'en-US')}
+                                  </strong>
+                                </span>
+                              )}
+                              {(item.isFixedByAdmin || activeReport?.fixedBy || activeReport?.status === 'fixed') && (
+                                <span className="flex items-center gap-1">
+                                  <span>{bTr('verifiedBy')} :</span>
+                                  <strong className="text-slate-700 dark:text-slate-200">{bTr('adminName')}</strong>
+                                </span>
+                              )}
+
+                              <a
+                                href="#download"
+                                className="inline-flex items-center gap-1 font-bold text-primary-600 dark:text-primary-400 hover:underline ms-auto text-xs"
+                              >
+                                <span>{bTr('goToMirrors')}</span>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsStatusBannerDismissed(true)}
+                          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors shrink-0"
+                          title={bTr('dismissNotice')}
+                          aria-label={bTr('dismissNotice')}
+                        >
+                          <TbX size={16} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Action Buttons Row */}
                  <div className="flex flex-wrap items-center gap-3 mb-8">
                      {item.category !== 'steamtools' && (
                          <div className="px-3 py-2 bg-emerald-500 text-white text-sm font-bold rounded-lg border border-emerald-600">
@@ -4289,6 +4692,12 @@ export const ResourceDetailModal: React.FC<{
                      <div className="px-3 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-700 dark:text-emerald-400 text-sm font-bold rounded-lg border border-emerald-500/20 flex items-center gap-2">
                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Latest
                      </div>
+                     {item.isFixedByAdmin && (
+                         <div className="px-3 py-2 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-sm font-bold rounded-lg border border-emerald-500/30 flex items-center gap-1.5 shadow-sm" title={item.adminFixNotes || t('Links verified and fixed by Admin')}>
+                             <Icon name="CheckCircle" size={16} className="text-emerald-500" />
+                             <span>{t('Link Fixed by Admin')}</span>
+                         </div>
+                     )}
                      
                       <div className="relative" ref={favoriteDropdownRef}>
                           <button 
@@ -4742,16 +5151,42 @@ export const ResourceDetailModal: React.FC<{
                   {/* Download Channels */}
                   {((item.links?.full) || (item.links?.utorrent) || (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) || (item.links?.ankerParts && item.links.ankerParts.length > 0) || (item.links?.preInstalled && (item.links.preInstalled.download || item.links.preInstalled.cloudDrop || item.links.preInstalled.torrent))) && (
                   <div className="py-6 sm:py-12" id="download">
-                      <div className="flex items-center gap-4 mb-6">
-                          <div className="w-10 h-10 bg-primary-500/10 text-primary-500 rounded-xl flex items-center justify-center">
-                              <Icon name="Download" size={20} />
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                          <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-primary-500/10 text-primary-500 rounded-xl flex items-center justify-center">
+                                  <Icon name="Download" size={20} />
+                              </div>
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('Download Channels')}</h3>
                           </div>
-                          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('Download Channels')}</h3>
+
+                          {(item.isFixedByAdmin || activeReport?.status === 'fixed') ? (
+                              <span className="px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 shadow-xs">
+                                  <TbCircleCheck size={16} className="text-emerald-500" />
+                                  <span>{t('All Mirrors Live & Verified by Admin') || 'All Mirrors Live & Verified by Admin'}</span>
+                              </span>
+                          ) : activeReport?.status === 'in_progress' ? (
+                              <span className="px-3 py-1.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 shadow-xs">
+                                  <TbRefresh size={15} className="animate-spin text-sky-500" />
+                                  <span>{t('Links Under Maintenance') || 'Links Under Maintenance'}</span>
+                              </span>
+                          ) : activeReport?.status === 'pending' ? (
+                              <span className="px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 shadow-xs">
+                                  <TbAlertTriangle size={15} className="text-amber-500" />
+                                  <span>{t('Link Reported - Use Backup Mirrors') || 'Link Reported - Use Backup Mirrors'}</span>
+                              </span>
+                          ) : null}
                       </div>
                       
                       {item.links?.full && (
                           <div className="mb-6">
-                              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">{t('Direct Full Download')}</h4>
+                              <div className="flex items-center gap-2 mb-3">
+                                  <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t('Direct Full Download')}</h4>
+                                  {(item.isFixedByAdmin || activeReport?.status === 'fixed') && (
+                                      <span className="px-2 py-0.2 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] border border-emerald-500/30">
+                                          ✓ {t('Updated Link') || 'Updated Link'}
+                                      </span>
+                                  )}
+                              </div>
                               <div className="relative">
                                   <div className="absolute -top-3 end-4 z-10 bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)] text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md">
                                       {t('Recommendation')}
@@ -5420,6 +5855,12 @@ export const ResourceDetailModal: React.FC<{
     document.body
   )}
   <UploaderProfilePopup isOpen={showUploaderPopup} onClose={() => setShowUploaderPopup(false)} gameItem={item} />
+  <ReportModal 
+    isOpen={showReportModal} 
+    onClose={() => setShowReportModal(false)} 
+    item={item} 
+    currentUserProfile={getLocalProfile(auth.currentUser?.uid || 'guest')} 
+  />
 </motion.div>
   );
 };
@@ -5962,19 +6403,13 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
 
     return (
         <div className="mt-12 w-screen relative start-[50%] end-[50%] -ms-[50vw] -me-[50vw] overflow-hidden bg-slate-50 dark:bg-[#0a0a0a] border-y border-slate-200 dark:border-white/10 transition-colors duration-300">
-            {noData && (
+            {noData && typeof window !== 'undefined' && window.location.search.includes('debug=true') && (
                 <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 m-4 md:m-8 rounded-xl relative z-20 mx-auto max-w-5xl">
                     <h4 className="text-yellow-400 font-bold mb-2 flex items-center gap-2">
-                        <Icon name="AlertTriangle" size={20} /> Action Required: Google Apps Script Update
+                        <Icon name="AlertTriangle" size={20} /> Preview Mode Active
                     </h4>
                     <p className="text-sm text-yellow-200/80 mb-2">
-                        Your Google Apps Script is not returning the "topgames" sheet data. You are currently seeing a preview with dummy data.
-                    </p>
-                    <p className="text-xs text-yellow-200/60 font-mono bg-black/30 p-3 rounded-lg overflow-x-auto">
-                        1. Open your Google Sheet <br/>
-                        2. Go to Extensions &gt; Apps Script <br/>
-                        3. Make sure it fetches the new sheet. If you have hardcoded sheet names, add "topgames" (or exactly how you named it) to the loop.<br/>
-                        4. VERY IMPORTANT: Click Deploy &gt; New deployment &gt; Web app. Overwriting an old version without "New deployment" will NOT work!
+                        Displaying preview data for top games collection.
                     </p>
                 </div>
             )}
@@ -6215,7 +6650,7 @@ const BestStudiosCarousel: React.FC<{
 // --- MAIN PAGE COMPONENT ---
 
 const SecretArea: React.FC = () => {
-  const { dir, t } = useLanguage();
+  const { dir, t, language } = useLanguage();
   const [currentUser, setCurrentUser] = useState<any>(null); const [authChecked, setAuthChecked] = useState(false); const [isUnlocked, setIsUnlocked] = useState(() => localStorage.getItem('secret_area_unlocked') === 'true' || localStorage.getItem('nexa_guest_mode') === 'true');
   const [isGuestMode, setIsGuestMode] = useState(() => localStorage.getItem('nexa_guest_mode') === 'true');
 
@@ -6446,11 +6881,34 @@ const SecretArea: React.FC = () => {
 
   const showGuestNotification = () => {
     const notifId = Date.now();
+    const isAr = language === 'ar';
+    const isFr = language === 'fr';
+    const isEs = language === 'es' || (language as any) === 'esp';
+
+    let title = '🔑 Access Denied - Guest Mode';
+    let text = 'Please login with Secret Key To get Full Access. If you don\'t have a Secret Key, contact Admin from TikTok, Instagram, or Email.';
+    let time = 'Just now';
+
+    if (isAr) {
+      title = '🔑 تم رفض الوصول - وضع الزائر';
+      text = 'يرجى تسجيل الدخول بالمفتاح السري للحصول على الصلاحيات الكاملة. إذا لم يكن لديك مفتاح، تواصل مع المشرف عبر تيك توك، إنستغرام أو البريد.';
+      time = 'الآن';
+    } else if (isFr) {
+      title = '🔑 Accès Refusé - Mode Invité';
+      text = 'Veuillez vous connecter avec la Clé Secrète pour un accès complet. Si vous n\'en avez pas, contactez l\'Admin sur TikTok ou Instagram.';
+      time = 'À l\'instant';
+    } else if (isEs) {
+      title = '🔑 Acceso Denegado - Modo Invitado';
+      text = 'Inicia sesión con la Clave Secreta para obtener acceso completo. Si no tienes una clave, contacta al Admin por TikTok o Instagram.';
+      time = 'Ahora mismo';
+    }
+
     setNotifications(prev => [...prev, {
         id: notifId,
-        title: '🔑 Access Denied - Guest Mode',
-        text: 'Please login with Secret Key To get Full Access. If you don\'t have a Secret Key, contact Admin from TikTok, Instagram, or Email.',
-        time: 'Just now'
+        title,
+        text,
+        time,
+        isAr
     }]);
     setTimeout(() => {
         setNotifications(prev => prev.filter(n => n.id !== notifId));
@@ -6653,7 +7111,7 @@ const SecretArea: React.FC = () => {
   const [isUpcomingMissing, setIsUpcomingMissing] = useState(false);
   const [scriptError, setScriptError] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [maintenanceConfig, setMaintenanceConfig] = useState<{active: boolean, endTime: string | null, message: string} | null | undefined>(() => {
+  const [maintenanceConfig, setMaintenanceConfig] = useState<{active: boolean, endTime: string | null, message: string} | null>(() => {
     try {
         const cached = localStorage.getItem('cached_secret_resources');
         if (cached) {
@@ -6670,10 +7128,9 @@ const SecretArea: React.FC = () => {
                     };
                 }
             }
-            return null;
         }
     } catch (e) {}
-    return undefined;
+    return null;
   });
 
   useEffect(() => {
@@ -7768,15 +8225,9 @@ const SecretArea: React.FC = () => {
     setScriptError(false);
     let dataToPreload = null;
 
-    if (isManualReload) {
-      try {
-        localStorage.removeItem('cached_secret_resources');
-        localStorage.removeItem('cached_transformed_resources');
-        localStorage.removeItem('cached_intel_items');
-      } catch (e) {
-        console.warn("Clearing cache failed:", e);
-      }
-    }
+    // Timeout of 35 seconds to allow full 2.4MB payload to transfer from Google Apps Script
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 35000);
 
     try {
       const cacheBuster = `_t=${Date.now()}&_r=${Math.random().toString(36).substring(7)}`;
@@ -7787,8 +8238,10 @@ const SecretArea: React.FC = () => {
       const response = await fetch(requestUrl, {
           method: 'GET',
           cache: 'no-store',
-          redirect: 'follow'
+          redirect: 'follow',
+          signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (!response.ok) {
           throw new Error(`Server returned status ${response.status} ${response.statusText}`);
       }
@@ -7797,25 +8250,31 @@ const SecretArea: React.FC = () => {
           data = await response.json();
       } catch (parseError) {
           setScriptError(true);
-          throw new Error("Google Script returned invalid JSON or an error page. Please check code.gs deployment.");
+          throw new Error("Invalid server response format.");
       }
       
       processRawData(data);
       dataToPreload = data;
-      // Cache the loaded data in localStorage
+
+      // Update cache with new valid data
       try {
         localStorage.setItem('cached_secret_resources', JSON.stringify(data));
+        localStorage.removeItem('cached_transformed_resources');
       } catch (cacheErr) {
         console.warn("Writing to cache failed:", cacheErr);
       }
 
       if (isManualReload) {
         const notifId = Date.now();
+        const isAr = language === 'ar';
+        const isFr = language === 'fr';
+        const isEs = language === 'es' || (language as any) === 'esp';
         setNotifications(prev => [...prev, {
             id: notifId,
-            title: 'Data Reloaded Successfully',
-            text: 'Catalog updated with the latest live data from Google Sheets.',
-            time: 'Just now'
+            title: isAr ? 'تم تحديث البيانات بنجاح' : isFr ? 'Données rechargées avec succès' : isEs ? 'Datos recargados con éxito' : 'Data Reloaded Successfully',
+            text: isAr ? 'تم تحديث الدليل بأحدث البيانات المباشرة.' : isFr ? 'Catalogue mis à jour avec les dernières données en direct.' : isEs ? 'Catálogo actualizado con los datos en vivo más recientes.' : 'Catalog updated with the latest live data.',
+            time: isAr ? 'الآن' : isFr ? 'À l\'instant' : isEs ? 'Ahora mismo' : 'Just now',
+            isAr
         }]);
         setTimeout(() => {
             setNotifications(prev => prev.filter(n => n.id !== notifId));
@@ -7824,10 +8283,9 @@ const SecretArea: React.FC = () => {
     } catch (err: any) {
       const errMsg = String(err?.message || err || 'Network Error');
       const isAbort = err?.name === 'AbortError';
-      const isAccessOrCors = errMsg.includes('403') || errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || err?.name === 'TypeError';
 
       if (!silent && !isAbort) {
-        console.warn("Fetch from Google Sheet failed, falling back to cached/offline data:", err);
+        console.warn("Catalog sync fallback active:", errMsg);
       }
 
       let loadedData = null;
@@ -7835,46 +8293,52 @@ const SecretArea: React.FC = () => {
         const cached = localStorage.getItem('cached_secret_resources');
         if (cached) {
           loadedData = JSON.parse(cached);
-          if (!silent) console.log("Loaded resources from localStorage cache.");
+          if (!silent) console.log("Loaded resources from local cache.");
         }
       } catch (e) {
-        if (!silent) console.warn("LocalStorage cache read failed:", e);
+        if (!silent) console.warn("Local cache read failed:", e);
       }
 
       if (!loadedData) {
         loadedData = backupData;
-        if (!silent) console.log("Fell back to local JSON backup.");
+        if (!silent) console.log("Loaded resources from bundled catalog.");
       }
 
       if (loadedData) {
         processRawData(loadedData);
         dataToPreload = loadedData;
         
-        // Show clear notification about why fresh Google Sheet data was not loaded
         if (!silent && !isAbort) {
           const notifId = Date.now();
-          const noticeTitle = isManualReload ? 'Google Sheet Sync Incomplete' : 'Offline Backup Active';
-          const noticeText = isAccessOrCors
-            ? 'Unable to connect to Google Apps Script. If you just created this deployment, please ensure in Google Apps Script that "Who has access" is set to "Anyone" (Deploy > Manage deployments > Edit > Who has access: Anyone).'
-            : `Could not reach Google Sheet (${errMsg}). Showing previous cached/offline catalog.`;
+          const isAr = language === 'ar';
+          const isFr = language === 'fr';
+          const isEs = language === 'es' || (language as any) === 'esp';
+          const noticeTitle = isManualReload 
+            ? (isAr ? 'تم تحميل الدليل' : isFr ? 'Catalogue chargé' : isEs ? 'Catálogo cargado' : 'Catalog Loaded')
+            : (isAr ? 'وضع عدم الاتصال نشط' : isFr ? 'Mode hors ligne actif' : isEs ? 'Modo sin conexión activo' : 'Offline Mode Active');
+          const noticeText = isManualReload
+            ? (isAr ? 'يتم عرض أحدث موارد الدليل المحفوظة محلياً.' : isFr ? 'Affichage des dernières ressources en cache.' : isEs ? 'Mostrando los recursos en caché más recientes.' : 'Serving latest cached catalog resources.')
+            : (isAr ? 'يتم عرض موارد الدليل المحفوظة بلا اتصال.' : isFr ? 'Affichage des ressources du catalogue hors ligne.' : isEs ? 'Mostrando recursos del catálogo sin conexión.' : 'Serving offline catalog resources.');
 
           setNotifications(prev => [...prev, {
               id: notifId,
               title: noticeTitle,
               text: noticeText,
-              time: 'Just now'
+              time: isAr ? 'الآن' : isFr ? 'À l\'instant' : isEs ? 'Ahora mismo' : 'Just now',
+              isAr
           }]);
           setTimeout(() => {
               setNotifications(prev => prev.filter(n => n.id !== notifId));
-          }, 9000);
+          }, 6000);
         }
       } else {
         if (!silent) {
-          setError("CRITICAL ERROR: Google Apps Script Connection Failed and no local backup could be found.");
+          setError("Catalog is currently unavailable. Please verify your connection and try again.");
           setMaintenanceConfig(null);
         }
       }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
       
       if (!silent && showHackerLoader && dataToPreload) {
@@ -8350,14 +8814,6 @@ const paginatedData = useMemo(() => {
       }
     }
   };
-
-  if (maintenanceConfig === undefined) {
-      return (
-          <div className="w-full h-screen fixed inset-0 z-[200] bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-              <div className="animate-spin text-slate-900 dark:text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></div>
-          </div>
-      );
-  }
 
   if (maintenanceConfig?.active) {
     // Admin bypass: append ?bypass=nexa to the URL
@@ -9014,11 +9470,11 @@ const paginatedData = useMemo(() => {
             {notifications.map(n => (
                 <motion.div
                     key={n.id}
-                    initial={{ x: 100, opacity: 0 }}
+                    initial={{ x: (dir === 'rtl' || n.isAr) ? -100 : 100, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: 100, opacity: 0 }}
-                    className={`bg-white/80 dark:bg-slate-900/80 md:backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 rounded-2xl w-[300px] pointer-events-auto flex gap-3 items-start ${n.isAr ? 'rtl' : 'ltr'}`}
-                    dir={n.isAr ? 'rtl' : 'ltr'}
+                    exit={{ x: (dir === 'rtl' || n.isAr) ? -100 : 100, opacity: 0 }}
+                    className={`bg-white/80 dark:bg-slate-900/80 md:backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 rounded-2xl w-[300px] pointer-events-auto flex gap-3 items-start ${(dir === 'rtl' || n.isAr) ? 'rtl text-right' : 'ltr text-left'}`}
+                    dir={(dir === 'rtl' || n.isAr) ? 'rtl' : 'ltr'}
                 >
                     <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-xl border border-slate-200 dark:border-slate-700">
                         🐺
@@ -9487,8 +9943,15 @@ const paginatedData = useMemo(() => {
         <div className="min-h-[50vh]">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-[50vh] text-slate-900 dark:text-slate-300">
-               <div className="w-16 h-16 border-4 border-slate-200 dark:border-slate-800 border-t-primary-500 rounded-full animate-spin mb-6"></div>
-               <p className="font-mono text-xs uppercase tracking-[0.2em] animate-pulse">{t('Decrypting Data Stream...')}</p>
+               <div className="relative flex items-center justify-center w-16 h-16 mb-6">
+                 {/* Background track circle */}
+                 <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-800"></div>
+                 {/* High-visibility vibrant spinning arc in both light and dark mode */}
+                 <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-sky-500 border-r-sky-500 dark:border-t-sky-400 dark:border-r-sky-400 animate-spin"></div>
+                 {/* Subtle glowing center pulse */}
+                 <div className="absolute w-3 h-3 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse"></div>
+               </div>
+               <p className="font-mono text-xs uppercase tracking-[0.25em] text-slate-600 dark:text-sky-300 font-semibold animate-pulse">{t('Decrypting Data Stream...')}</p>
             </div>
           ) : filteredData.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[50vh] text-slate-900 dark:text-slate-300">

@@ -19,6 +19,29 @@ export const translations: Translations = {
 
 
     'Community': { en: 'Community', fr: 'Communauté', es: 'Comunidad', ar: 'مجتمعنا' },
+    'Reports & Fixes': { en: 'Reports & Fixes', fr: 'Signalements & Correctifs', es: 'Reportes y Correcciones', ar: 'البلاغات والإصلاحات' },
+    'Broken Links & User Reports': { en: 'Broken Links & User Reports', fr: 'Liens brisés & Signalements', es: 'Enlaces caídos y Reportes', ar: 'الروابط المعطلة وبلاغات الأعضاء' },
+    'Report an Issue': { en: 'Report an Issue', fr: 'Signaler un problème', es: 'Reportar un problema', ar: 'الإبلاغ عن مشكلة في المحتوى' },
+    'Send to Admin Page': { en: 'Send to Admin Page', fr: 'Envoyer à l\'administration', es: 'Enviar a la página de admin', ar: 'إرسال لصفحة الإدارة' },
+    'Report Sent to Admin!': { en: 'Report Sent to Admin!', fr: 'Signalement envoyé à l\'admin !', es: '¡Reporte enviado al admin!', ar: 'تم إرسال البلاغ للإدارة بنجاح!' },
+    'Link Fixed by Admin': { en: 'Link Fixed by Admin', fr: 'Lien vérifié et corrigé', es: 'Enlace verificado y corregido', ar: 'تم فحص وإصلاح الرابط من الإدارة' },
+    'Fix It Now': { en: 'Fix It Now', fr: 'Corriger maintenant', es: 'Corregir ahora', ar: 'إصلاح الرابط الآن' },
+    'Edit Fix Links': { en: 'Edit Fix Links', fr: 'Modifier les liens', es: 'Editar enlaces', ar: 'تعديل روابط الإصلاح' },
+    'Needs Fix': { en: 'Needs Fix', fr: 'À corriger', es: 'Requiere corrección', ar: 'يحتاج إصلاحاً' },
+    'Fix Download Links & Metadata': { en: 'Fix Download Links & Metadata', fr: 'Corriger les liens & métadonnées', es: 'Corregir enlaces y metadatos', ar: 'إصلاح روابط التحميل والبيانات' },
+    'Updates the live links in details pages and marks the report as Fixed': { en: 'Updates the live links in details pages and marks the report as Fixed', fr: 'Met à jour les liens dans les détails et marque comme Corrigé', es: 'Actualiza los enlaces en detalles y marca como Arreglado', ar: 'يحدث الروابط المباشرة في صفحات التفاصيل ويحدد البلاغ كـ تم الإصلاح' },
+    'Direct Download / Master Magnet Link': { en: 'Direct Download / Master Magnet Link', fr: 'Téléchargement Direct / Lien Magnet Principal', es: 'Descarga Directa / Enlace Magnet Principal', ar: 'التحميل المباشر / ملف الماغنت الرئيسي' },
+    'Torrent / Magnet Link': { en: 'Torrent / Magnet Link', fr: 'Lien Torrent / Magnet', es: 'Enlace Torrent / Magnet', ar: 'رابط التورنت / الماغنت' },
+    'Mega.nz Mirror Link': { en: 'Mega.nz Mirror Link', fr: 'Lien Miroir Mega.nz', es: 'Enlace Espejo Mega.nz', ar: 'رابط سيرفر Mega.nz البديل' },
+    'Google Drive Link': { en: 'Google Drive Link', fr: 'Lien Google Drive', es: 'Enlace Google Drive', ar: 'رابط جوجل درايف' },
+    'Apply Fix & Mark as Resolved': { en: 'Apply Fix & Mark as Resolved', fr: 'Appliquer le correctif & Marquer comme résolu', es: 'Aplicar corrección y marcar como resuelto', ar: 'تطبيق الإصلاح وتحديد البلاغ كمحلول' },
+    'Saving Fix & Updating Item...': { en: 'Saving Fix & Updating Item...', fr: 'Enregistrement du correctif...', es: 'Guardando corrección...', ar: 'جارٍ حفظ الروابط وتحديث العنصر...' },
+    'All Reports': { en: 'All Reports', fr: 'Tous les signalements', es: 'Todos los reportes', ar: 'كافة البلاغات' },
+    'Pending': { en: 'Pending', fr: 'En attente', es: 'Pendiente', ar: 'قيد الانتظار' },
+    'In Progress': { en: 'In Progress', fr: 'En cours', es: 'En progreso', ar: 'قيد المتابعة' },
+    'Fixed': { en: 'Fixed', fr: 'Corrigé', es: 'Arreglado', ar: 'تم الإصلاح' },
+    'Dismissed': { en: 'Dismissed', fr: 'Ignoré', es: 'Descartado', ar: 'مستبعد' },
+    'Reported Issue': { en: 'Reported Issue', fr: 'Problème signalé', es: 'Problema reportado', ar: 'المشكلة المبلغ عنها' },
 
     'Upcoming Games Trailers': { en: 'Upcoming Games Trailers', fr: 'Bandes-annonces des Jeux à Venir', es: 'Tráilers de Próximos Juegos', ar: 'عروض الألعاب القادمة' },
     'Upcoming Games': { en: 'Upcoming Games', fr: 'Jeux à Venir', es: 'Próximos Juegos', ar: 'الألعاب القادمة' },
@@ -41,8 +64,8 @@ export const translations: Translations = {
     'Copy Trailer Link': { en: 'Copy Trailer Link', fr: 'Copier le lien du tráiler', es: 'Copiar enlace del tráiler', ar: 'نسخ رابط العرض' },
     'Trailer Link Copied': { en: 'Trailer Link Copied', fr: 'Lien du tráiler copié', es: 'Enlace del tráiler copiado', ar: 'تم نسخ رابط العرض بنجاح' },
     'Open on YouTube': { en: 'Open on YouTube', fr: 'Ouvrir sur YouTube', es: 'Abrir en YouTube', ar: 'فتح على يوتيوب' },
-    'How to add trailers in Google Sheet?': { en: 'How to add trailers in Google Sheet?', fr: 'Comment ajouter des bandes-annonces dans Google Sheet ?', es: '¿Cómo agregar tráilers en Google Sheet?', ar: 'كيف تضيف العروض في Google Sheet؟' },
-    'Google Sheet Integration Guide': { en: 'Google Sheet Integration Guide', fr: 'Guide d\'intégration Google Sheet', es: 'Guía de integración de Google Sheet', ar: 'دليل ربط Google Sheet' },
+    'How to add trailers in Google Sheet?': { en: 'How to manage trailers?', fr: 'Comment gérer les bandes-annonces ?', es: '¿Cómo gestionar tráilers?', ar: 'كيف تدير العروض؟' },
+    'Google Sheet Integration Guide': { en: 'Catalog Guide', fr: 'Guide du catalogue', es: 'Guía del catálogo', ar: 'دليل الكتالوج' },
     'Featured Premiere': { en: 'Featured Premiere', fr: 'Première en vedette', es: 'Estreno destacado', ar: 'العرض الحصري المميز' },
     'Expected Release': { en: 'Expected Release', fr: 'Sortie prévue', es: 'Lanzamiento esperado', ar: 'تاريخ الإطلاق المتوقع' },
     'Target Platforms': { en: 'Target Platforms', fr: 'Plateformes cibles', es: 'Plataformas', ar: 'المنصات المدعومة' },
@@ -827,6 +850,332 @@ export const translations: Translations = {
       es: 'Estas cuentas pertenecen a la comunidad. ¡Por favor no cambies las contraseñas!',
       ar: 'هذه الحسابات ملك للمجتمع، يرجى عدم تغيير كلمات المرور!'
     },
+
+    // Report & Links Status Notification Banners (Multi-language EN, FR, ESP, AR)
+    'Download Links Updated & Verified': {
+        en: 'Download Links Updated & Verified',
+        fr: 'Liens de téléchargement mis à jour & vérifiés',
+        es: 'Enlaces de descarga actualizados y verificados',
+        ar: 'تم تحديث روابط التحميل والتحقق منها'
+    },
+    'Report Status: In Progress': {
+        en: 'Report Status: In Progress',
+        fr: 'Statut du signalement : En cours',
+        es: 'Estado del reporte: En progreso',
+        ar: 'حالة البلاغ: قيد المتابعة والإصلاح'
+    },
+    'Report Status: Issue Under Review': {
+        en: 'Report Status: Issue Under Review',
+        fr: "Statut du signalement : En attente d'examen",
+        es: 'Estado del reporte: En revisión',
+        ar: 'حالة البلاغ: قيد مراجعة الإدارة'
+    },
+    'Download Links Have Been Repaired & Updated!': {
+        en: 'Download Links Have Been Repaired & Updated!',
+        fr: 'Les liens de téléchargement ont été réparés et mis à jour !',
+        es: '¡Los enlaces de descarga han sido reparados y actualizados!',
+        ar: 'تم إصلاح وتحديث روابط التحميل بنجاح!'
+    },
+    'Admin Team Is Actively Working On Links': {
+        en: 'Admin Team Is Actively Working On Links',
+        fr: "L'équipe d'administration répare actuellement les liens",
+        es: 'El equipo de administración está trabajando en los enlaces',
+        ar: 'فريق الإدارة يعمل حالياً على فحص واستبدال الروابط'
+    },
+    'Broken Link Report Received': {
+        en: 'Broken Link Report Received',
+        fr: 'Signalement de lien brisé reçu',
+        es: 'Reporte de enlace caído recibido',
+        ar: 'تم استلام بلاغ بوجود خلل في روابط التحميل'
+    },
+    'Live Sync: Guest & User Notification': {
+        en: 'Live Sync: Guest & User Notification',
+        fr: 'Synchronisation en direct : Invités & Membres',
+        es: 'Sincronización en vivo: Invitados y Miembros',
+        ar: 'تحديث فوري مباشر: للزوار والأعضاء'
+    },
+    'The reported issues for this item have been reviewed and repaired by the admin team. All download mirrors below are updated and verified for safe download.': {
+        en: 'The reported issues for this item have been reviewed and repaired by the admin team. All download mirrors below are updated and verified for safe download.',
+        fr: "Les problèmes signalés pour cet élément ont été examinés et corrigés par l'équipe d'administration. Tous les miroirs de téléchargement ci-dessous sont à jour et vérifiés.",
+        es: 'Los problemas reportados para este elemento han sido revisados y reparados por el equipo de administración. Todos los servidores de descarga a continuación están actualizados y verificados.',
+        ar: 'تمت مراجعة الخلل المبلغ عنه وإصلاحه بالكامل من قبل فريق الإدارة. جميع سيرفرات التحميل بالأسفل محدثة ومفحوصة بالكامل وجاهزة للتحميل الآمن السريع.'
+    },
+    'Repaired on': {
+        en: 'Repaired on',
+        fr: 'Réparé le',
+        es: 'Reparado el',
+        ar: 'تاريخ الإصلاح'
+    },
+    'Verified by': {
+        en: 'Verified by',
+        fr: 'Vérifié par',
+        es: 'Verificado por',
+        ar: 'تم الفحص بواسطة'
+    },
+    'Admin': {
+        en: 'Admin',
+        fr: 'Administrateur',
+        es: 'Administrador',
+        ar: 'المشرف'
+    },
+    'Go to Download Mirrors ↓': {
+        en: 'Go to Download Mirrors ↓',
+        fr: 'Aller aux miroirs de téléchargement ↓',
+        es: 'Ir a los enlaces de descarga ↓',
+        ar: 'الانتقال لروابط وسيرفرات التحميل ↓'
+    },
+    'Dismiss notice': {
+        en: 'Dismiss notice',
+        fr: 'Masquer la notification',
+        es: 'Descartar aviso',
+        ar: 'إغلاق التنبيه'
+    },
+    'Live Link Status Update': {
+        en: 'Live Link Status Update',
+        fr: 'Mise à jour du statut en direct',
+        es: 'Actualización de enlace en vivo',
+        ar: 'تنبيه فوري: تحديث حالة الروابط'
+    },
+    'Realtime': {
+        en: 'Realtime',
+        fr: 'Temps réel',
+        es: 'Tiempo real',
+        ar: 'مباشر'
+    },
+    'Status updated to': {
+        en: 'Status updated to',
+        fr: 'Statut mis à jour à',
+        es: 'Estado actualizado a',
+        ar: 'تم تحديث الحالة إلى'
+    },
+    'Download links have been repaired and updated by admin!': {
+        en: 'Download links have been repaired and updated by admin!',
+        fr: "Les liens de téléchargement ont été réparés et mis à jour par l'admin !",
+        es: '¡Los enlaces de descarga han sido reparados y actualizados por el admin!',
+        ar: 'تم إصلاح وتحديث روابط التحميل بنجاح من قبل المشرف!'
+    },
+    'All Mirrors Live & Verified by Admin': {
+        en: 'All Mirrors Live & Verified by Admin',
+        fr: "Tous les miroirs sont actifs & vérifiés par l'admin",
+        es: 'Todos los servidores activos y verificados por el admin',
+        ar: 'جميع السيرفرات تعمل وتم فحصها وتحديثها'
+    },
+    'Links Under Maintenance': {
+        en: 'Links Under Maintenance',
+        fr: 'Liens en cours de maintenance',
+        es: 'Enlaces en mantenimiento',
+        ar: 'الروابط قيد الصيانة والتحديث'
+    },
+    'Link Reported - Use Backup Mirrors': {
+        en: 'Link Reported - Use Backup Mirrors',
+        fr: 'Lien signalé - Utilisez les miroirs de secours',
+        es: 'Enlace reportado - Usa los servidores de respaldo',
+        ar: 'تم الإبلاغ عن خلل - استخدم السيرفرات البديلة'
+    },
+    'Updated Link': {
+        en: 'Updated Link',
+        fr: 'Lien mis à jour',
+        es: 'Enlace actualizado',
+        ar: 'رابط محدث'
+    },
+    'Updated Mirror': {
+        en: 'Updated Mirror',
+        fr: 'Miroir mis à jour',
+        es: 'Servidor actualizado',
+        ar: 'سيرفر محدث'
+    },
+    'Notification Banners': {
+        en: 'Notification Banners',
+        fr: 'Bannières de notification',
+        es: 'Banners de notificación',
+        ar: 'لافتات الإشعارات والتنبيهات'
+    },
+    'Verified by : Admin': {
+        en: 'Verified by : Admin',
+        fr: 'Vérifié par : Administrateur',
+        es: 'Verificado por : Administrador',
+        ar: 'تم التحقق بواسطة : المشرف'
+    },
+    'Access Denied - Guest Mode': {
+        en: 'Access Denied - Guest Mode',
+        fr: 'Accès Refusé - Mode Invité',
+        es: 'Acceso Denegado - Modo Invitado',
+        ar: 'تم رفض الوصول - وضع الزائر'
+    },
+    'Data Reloaded Successfully': {
+        en: 'Data Reloaded Successfully',
+        fr: 'Données rechargées avec succès',
+        es: 'Datos recargados con éxito',
+        ar: 'تم تحديث البيانات بنجاح'
+    },
+    'Catalog updated with the latest live data.': {
+        en: 'Catalog updated with the latest live data.',
+        fr: 'Catalogue mis à jour avec les dernières données en direct.',
+        es: 'Catálogo actualizado con los datos en vivo más recientes.',
+        ar: 'تم تحديث الدليل بأحدث البيانات المباشرة.'
+    },
+    'Offline Mode Active': {
+        en: 'Offline Mode Active',
+        fr: 'Mode hors ligne actif',
+        es: 'Modo sin conexión activo',
+        ar: 'وضع عدم الاتصال نشط'
+    },
+    'Serving offline catalog resources.': {
+        en: 'Serving offline catalog resources.',
+        fr: 'Affichage des ressources du catalogue hors ligne.',
+        es: 'Mostrando recursos del catálogo sin conexión.',
+        ar: 'يتم عرض موارد الدليل المحفوظة بلا اتصال.'
+    },
+    'Delete Report': {
+        en: 'Delete Report',
+        fr: 'Supprimer le signalement',
+        es: 'Eliminar reporte',
+        ar: 'حذف البلاغ'
+    },
+    'Delete All Reports': {
+        en: 'Delete All Reports',
+        fr: 'Supprimer tous les signalements',
+        es: 'Eliminar todos los reportes',
+        ar: 'حذف جميع البلاغات'
+    },
+    'Delete Selected Reports': {
+        en: 'Delete Selected Reports',
+        fr: 'Supprimer les signalements sélectionnés',
+        es: 'Eliminar reportes seleccionados',
+        ar: 'حذف البلاغات المحددة'
+    },
+    'Clear Dismissed Reports': {
+        en: 'Clear Dismissed Reports',
+        fr: 'Effacer les signalements ignorés',
+        es: 'Limpiar reportes descartados',
+        ar: 'مسح البلاغات المستبعدة'
+    },
+    'Clear Fixed Reports': {
+        en: 'Clear Fixed Reports',
+        fr: 'Effacer les signalements corrigés',
+        es: 'Limpiar reportes corregidos',
+        ar: 'مسح البلاغات التي تم إصلاحها'
+    },
+    'This report will be permanently removed.': {
+        en: 'This report will be permanently removed.',
+        fr: 'Ce signalement sera supprimé définitivement.',
+        es: 'Este reporte será eliminado permanentemente.',
+        ar: 'سيتم حذف هذا البلاغ بشكل نهائي.'
+    },
+    'This action cannot be undone.': {
+        en: 'This action cannot be undone.',
+        fr: 'Cette action ne peut pas être annulée.',
+        es: 'Esta acción no se puede deshacer.',
+        ar: 'لا يمكن التراجع عن هذا الإجراء.'
+    },
+    'Solidarity': {
+        en: 'Solidarity',
+        fr: 'Solidarité',
+        es: 'Solidaridad',
+        ar: 'تضامن'
+    },
+    'Featured Game': {
+        en: 'Featured Game',
+        fr: 'Jeu en Vedette',
+        es: 'Juego Destacado',
+        ar: 'اللعبة المميزة'
+    },
+    'PC Edition': {
+        en: 'PC Edition',
+        fr: 'Édition PC',
+        es: 'Edición PC',
+        ar: 'نسخة الكمبيوتر'
+    },
+    'Verified Repack': {
+        en: 'Verified Repack',
+        fr: 'Repack Vérifié',
+        es: 'Repack Verificado',
+        ar: 'ريباك مفحوص وموثوق'
+    },
+    'Direct & Fast Download': {
+        en: 'Direct & Fast Download',
+        fr: 'Téléchargement Direct & Rapide',
+        es: 'Descarga Directa y Rápida',
+        ar: 'تحميل مباشر وسريع'
+    },
+    'Audio & Subtitles': {
+        en: 'Audio & Subtitles',
+        fr: 'Audio & Sous-titres',
+        es: 'Audio y Subtítulos',
+        ar: 'الصوت والترجمة'
+    },
+    'Multi-Language': {
+        en: 'Multi-Language',
+        fr: 'Multilingue',
+        es: 'Multilenguaje',
+        ar: 'متعدد اللغات'
+    },
+    'Full Game + All DLCs': {
+        en: 'Full Game + All DLCs',
+        fr: 'Jeu Complet + Tous les DLC',
+        es: 'Juego Completo + Todos los DLCs',
+        ar: 'اللعبة كاملة + كافة الإضافات'
+    },
+    'Virus Free & Tested': {
+        en: 'Virus Free & Tested',
+        fr: 'Sans Virus & Testé',
+        es: 'Sin Virus y Probado',
+        ar: 'خالٍ من الفيروسات ومجرّب'
+    },
+    'Jump to Library': {
+        en: 'Jump to Library',
+        fr: 'Accéder à la bibliothèque',
+        es: 'Ir a la biblioteca',
+        ar: 'انتقل إلى المكتبة'
+    },
+    'Trending Now': {
+        en: 'Trending Now',
+        fr: 'Tendance actuelle',
+        es: 'Tendencia ahora',
+        ar: 'الأكثر طلباً الآن'
+    },
+    'Game Overview': {
+        en: 'Game Overview',
+        fr: 'Aperçu du jeu',
+        es: 'Resumen del juego',
+        ar: 'نظرة عامة على اللعبة'
+    },
+    'Pause Slideshow': {
+        en: 'Pause Slideshow',
+        fr: 'Mettre en pause',
+        es: 'Pausar presentación',
+        ar: 'إيقاف التبديل التلقائي'
+    },
+    'Play Slideshow': {
+        en: 'Play Slideshow',
+        fr: 'Reprendre la lecture',
+        es: 'Reanudar presentación',
+        ar: 'تشغيل التبديل التلقائي'
+    },
+    'Repack by': {
+        en: 'Repack by',
+        fr: 'Repack par',
+        es: 'Repack por',
+        ar: 'إعداد ريباك'
+    },
+    'Direct Cloud Links': {
+        en: 'Direct Cloud Links',
+        fr: 'Liens Cloud Directs',
+        es: 'Enlaces Directos en la Nube',
+        ar: 'سيرفرات سحابية مباشرة'
+    },
+    'Safe & Ad-free': {
+        en: 'Safe & Ad-free',
+        fr: 'Sûr & Sans Pub',
+        es: 'Seguro y Sin Anuncios',
+        ar: 'آمن وبدون إعلانات'
+    },
+    'Quick Intel': {
+        en: 'Quick Intel',
+        fr: 'Infos Rapides',
+        es: 'Info Rápida',
+        ar: 'معلومات سريعة'
+    }
 };
 
 interface LanguageContextType {

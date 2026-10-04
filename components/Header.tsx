@@ -3,49 +3,48 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
-import { NAV_ITEMS } from '../constants';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import Icon from './Icon';
 import { TbMoon, TbSun } from 'react-icons/tb';
 import { auth, signInWithGoogle, signInWithDiscord, signInWithGithub } from '../src/firebase';
-import { subscribeUserProfile, getLocalProfile, ensureUserProfile, UserProfileData } from '../src/services/userService';
+import { subscribeUserProfile, getLocalProfile, ensureUserProfile, isUserAdmin, UserProfileData } from '../src/services/userService';
+import { subscribeReports, getDeletedReportIds, getCachedReports } from '../src/services/reportService';
 
 const Flags = () => {
   const { t } = useLanguage();
   return (
-  <div className="flex items-center gap-1 sm:gap-2">
-    <div 
-      className="relative w-5 h-3 sm:w-6 sm:h-4 md:w-8 md:h-5 rounded shadow-sm cursor-default overflow-hidden group flex items-center justify-center shrink-0"
-      title={t("Made in Morocco")}
-    >
-      <img 
-        src="https://media3.giphy.com/media/v1.Y2lkPTZjMDliOTUyejV3bDZmYmVhczl6eWdtajNvb2Nocmk4NzVqYmE5aHBzd3Z6cndiOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Q6xuxUhCgCNpsbfhaP/source.gif" 
-        alt="Morocco Flag" 
-        className="w-full h-full object-cover"
-        referrerPolicy="no-referrer"
-      />
+    <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 shrink-0">
+      <div 
+        className="relative w-5 h-3.5 sm:w-6 sm:h-4 rounded shadow-2xs cursor-default overflow-hidden group flex items-center justify-center shrink-0 border border-slate-200/40 dark:border-slate-700/40"
+        title={t("Made in Morocco")}
+      >
+        <img 
+          src="https://media3.giphy.com/media/v1.Y2lkPTZjMDliOTUyejV3bDZmYmVhczl6eWdtajNvb2Nocmk4NzVqYmE5aHBzd3Z6cndiOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Q6xuxUhCgCNpsbfhaP/source.gif" 
+          alt="Morocco Flag" 
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+      <div 
+        className="relative w-5 h-3.5 sm:w-6 sm:h-4 rounded shadow-2xs cursor-default overflow-hidden group flex items-center justify-center shrink-0 border border-slate-200/40 dark:border-slate-700/40"
+        title={t("Solidarity with Palestine")}
+      >
+        <img 
+          src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Flag_of_Palestine.gif" 
+          alt="Palestine Flag" 
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </div>
     </div>
-    <div 
-      className="relative w-5 h-3 sm:w-6 sm:h-4 md:w-8 md:h-5 rounded shadow-sm cursor-default overflow-hidden group flex items-center justify-center shrink-0"
-      title={t("Solidarity with Palestine")}
-    >
-      <img 
-        src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Flag_of_Palestine.gif" 
-        alt="Palestine Flag" 
-        className="w-full h-full object-cover"
-        referrerPolicy="no-referrer"
-      />
-    </div>
-  </div>
   );
 };
-
 
 const DiscoverGameButton = () => {
   const { t } = useLanguage();
   return (
     <div 
-      className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 group shadow-lg cursor-pointer mx-1 transition-transform hover:scale-110 active:scale-95" 
+      className="relative w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 group shadow-md cursor-pointer transition-transform hover:scale-110 active:scale-95" 
       title={t("Discover a random game")}
       onClick={() => window.dispatchEvent(new CustomEvent('randomPopularGame'))}
     >
@@ -88,12 +87,82 @@ const ScrollToLibraryButton = () => {
   return (
     <button
       onClick={handleScrollToLibrary}
-      className="hidden md:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 font-bold text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+      className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 font-bold text-xs uppercase tracking-wider transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
       title={t('SecretArea Library')}
       aria-label={t('SecretArea Library')}
     >
-      <Icon name="Gamepad2" size={15} className="text-primary-500 shrink-0" />
+      <Icon name="Gamepad2" size={14} className="text-primary-500 shrink-0" />
       <span className="whitespace-nowrap text-[11px] font-black">{t('Library')}</span>
+    </button>
+  );
+};
+
+const AdminReportsHeaderButton = ({ profileData, user }: { profileData: UserProfileData | null; user: any }) => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [pendingCount, setPendingCount] = useState(0);
+  const isAdmin = isUserAdmin(user?.email || profileData?.email, profileData?.role);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const calculatePending = (reportsList: any[]) => {
+      const deletedIds = getDeletedReportIds();
+      const pending = reportsList.filter((r) => !deletedIds.has(r.id) && r.status === 'pending').length;
+      setPendingCount(pending);
+    };
+
+    // Initialize from local cache
+    calculatePending(getCachedReports());
+
+    // Subscribe to real-time updates and actions
+    const unsub = subscribeReports((reports) => {
+      calculatePending(reports);
+    });
+
+    const handleCustomEvent = (e: any) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        calculatePending(e.detail);
+      } else {
+        calculatePending(getCachedReports());
+      }
+    };
+
+    const handleDirectUpdate = () => {
+      calculatePending(getCachedReports());
+    };
+
+    window.addEventListener('secretarea_reports_changed', handleCustomEvent);
+    window.addEventListener('secretarea_report_deleted', handleDirectUpdate);
+    window.addEventListener('secretarea_report_updated', handleCustomEvent);
+    window.addEventListener('secretarea_item_fixed', handleCustomEvent);
+    window.addEventListener('storage', handleDirectUpdate);
+
+    return () => {
+      unsub();
+      window.removeEventListener('secretarea_reports_changed', handleCustomEvent);
+      window.removeEventListener('secretarea_report_deleted', handleDirectUpdate);
+      window.removeEventListener('secretarea_report_updated', handleCustomEvent);
+      window.removeEventListener('secretarea_item_fixed', handleCustomEvent);
+      window.removeEventListener('storage', handleDirectUpdate);
+    };
+  }, [isAdmin]);
+
+  // If not admin OR if there are no pending reports, automatically remove the badge from the Navbar!
+  if (!isAdmin || pendingCount <= 0) return null;
+
+  return (
+    <button
+      onClick={() => navigate('/admin')}
+      className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold text-xs uppercase tracking-wider transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 animate-in fade-in duration-200"
+      title={`${t('Admin Reports & Fixes')} (${pendingCount} ${t('pending') || 'pending'})`}
+      aria-label={`${t('Admin Reports & Fixes')} (${pendingCount})`}
+    >
+      <Icon name="AlertTriangle" size={14} className="text-rose-500 shrink-0" />
+      <span className="hidden lg:inline whitespace-nowrap text-[11px] font-black">{t('Reports')}</span>
+      <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-mono flex items-center justify-center font-bold animate-pulse">
+        {pendingCount}
+      </span>
     </button>
   );
 };
@@ -725,7 +794,7 @@ const UserDropdown = ({
     <div className="relative" ref={dropdownRef} dir={dir}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center font-bold text-sm sm:text-base overflow-hidden border-2 border-slate-200 dark:border-slate-700/80 hover:border-[#29aaea] dark:hover:border-[#29aaea] transition-all ml-1 sm:ml-2 shadow-sm relative group bg-gradient-to-tr from-blue-600 to-cyan-500 shrink-0"
+        className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full text-white flex items-center justify-center font-bold text-xs sm:text-sm overflow-hidden border-2 border-slate-200 dark:border-slate-700/80 hover:border-[#29aaea] dark:hover:border-[#29aaea] transition-all shadow-xs relative group bg-gradient-to-tr from-blue-600 to-cyan-500 shrink-0 cursor-pointer active:scale-95"
         title={displayName}
       >
         {avatarSrc ? (
@@ -825,7 +894,7 @@ const GuestDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-500/30 dark:border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold text-xs transition-all shadow-xs active:scale-95 shrink-0 select-none cursor-pointer"
+        className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-500/30 dark:border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold text-xs transition-all shadow-xs active:scale-95 shrink-0 select-none cursor-pointer"
         title={t('Guest mode')}
         aria-label={t('Guest mode')}
         aria-expanded={isOpen}
@@ -834,13 +903,13 @@ const GuestDropdown = ({
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
         </span>
-        <Icon name="Ghost" size={14} className="sm:hidden text-amber-500 shrink-0" />
-        <span className="hidden sm:inline font-bold whitespace-nowrap">
+        <Icon name="Ghost" size={13} className="text-amber-500 shrink-0" />
+        <span className="hidden sm:inline font-bold whitespace-nowrap text-[11px] md:text-xs">
           {t('Guest mode')}
         </span>
         <Icon 
           name="ChevronDown" 
-          size={12} 
+          size={11} 
           className={`text-slate-400 dark:text-slate-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} 
         />
       </button>
@@ -1032,25 +1101,25 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header dir={dir} className="fixed top-0 w-full z-50 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header dir={dir} className="fixed top-0 w-full z-50 bg-white/75 dark:bg-slate-950/75 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 gap-1 sm:gap-2">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0">
-            <div className="relative text-slate-900 dark:text-white shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14">
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0 min-w-0">
+            <div className="relative text-slate-900 dark:text-white shrink-0 w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11">
               <div className="relative z-10 flex items-center justify-center w-full h-full">
                  <Icon name="Wolf" className="w-full h-full" />
               </div>
             </div>
             <div className="flex flex-col items-start justify-center min-w-0 overflow-hidden">
-              <div className="flex items-center justify-start mb-0.5 sm:mb-1 gap-1">
-                  <span className="font-mono font-black text-xs sm:text-sm md:text-lg tracking-tight sm:tracking-widest text-slate-900 dark:text-white leading-none truncate">
+              <div className="flex items-center justify-start gap-1">
+                <span className="font-mono font-black text-xs sm:text-sm md:text-base lg:text-lg tracking-tight sm:tracking-normal text-slate-900 dark:text-white leading-none truncate">
                   {t('SecretArea')}
-                 </span>
-                 <Icon name="CheckCircle" size={14} className="text-blue-500 shrink-0" />
+                </span>
+                <Icon name="CheckCircle" size={13} className="text-blue-500 shrink-0" />
               </div>
-              <span className="text-[6px] sm:text-[10px] font-bold text-primary-500 uppercase tracking-tight sm:tracking-[0.3em] leading-none animate-pulse whitespace-nowrap">
+              <span className="hidden sm:block text-[8px] md:text-[9px] font-bold text-primary-500 uppercase tracking-wider leading-none animate-pulse whitespace-nowrap mt-0.5">
                 {t('Internet For Everyone')}
               </span>
             </div>
@@ -1058,6 +1127,7 @@ const Header: React.FC = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
+            <AdminReportsHeaderButton profileData={profileData} user={currentUser} />
             <ScrollToLibraryButton />
             <Flags />
             <DiscoverGameButton />
@@ -1084,7 +1154,7 @@ const Header: React.FC = () => {
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all whitespace-nowrap active:scale-95 shrink-0 cursor-pointer"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all whitespace-nowrap active:scale-95 shrink-0 cursor-pointer"
                 title={t('Login')}
                 aria-label={t('Login')}
               >

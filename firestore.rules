@@ -162,5 +162,23 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Reports collection:
+    // - Users and guests can report broken links or issues
+    // - Admins can read, update status, and fix reports
+    match /reports/{reportId} {
+      allow create: if request.resource.data.keys().hasAll(['itemId', 'itemName', 'reason', 'status']) &&
+                       request.resource.data.status in ['pending', 'in_progress', 'fixed', 'dismissed'];
+      allow get, list: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Item Fixes collection:
+    // - Publicly readable so all users and guests receive fixed links
+    // - Writable by Admin only
+    match /item_fixes/{itemId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
   }
 }

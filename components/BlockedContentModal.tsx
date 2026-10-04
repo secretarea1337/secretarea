@@ -148,7 +148,7 @@ export const BlockedContentModal: React.FC<BlockedContentModalProps> = ({
         {/* Footer Support Info */}
         <p className="text-[11px] text-slate-400 mb-5">
           {t("For appeals or urgent inquiries, please contact")}{' '}
-          <span className="text-slate-200 font-mono">secretarea1337@gmail.com</span>
+          <span className="text-slate-200 font-semibold">{t("Administrator Support")}</span>
         </p>
 
         {/* Action Button */}

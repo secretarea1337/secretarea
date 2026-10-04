@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../src/contexts/LanguageContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Icon from '../components/Icon';
+import AdminReportsManager from '../components/AdminReportsManager';
+import { subscribeReports } from '../src/services/reportService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TbTrash, 
@@ -103,10 +105,18 @@ function formatTimeAgo(dateString?: string): string {
   return `${diffDays}d ago`;
 }
 
-const Profile: React.FC = () => {
+const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
     const { t, dir } = useLanguage();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('Overview');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(() => {
+        if (defaultTab) return defaultTab;
+        if (typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.search.includes('reports'))) {
+            return 'Reports & Fixes';
+        }
+        return 'Overview';
+    });
+    const [pendingReportsCount, setPendingReportsCount] = useState<number>(0);
     const [libraryTab, setLibraryTab] = useState('All');
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [profileData, setProfileData] = useState<UserProfileData>(DEFAULT_PROFILE);
@@ -500,9 +510,26 @@ const Profile: React.FC = () => {
             const unsubUsers = subscribeAllUsers((list) => {
                 setAllUsers(list);
             });
-            return () => unsubUsers();
+            const unsubReports = subscribeReports((reportsList) => {
+                const pending = reportsList.filter(r => r.status === 'pending').length;
+                setPendingReportsCount(pending);
+            });
+            return () => {
+                unsubUsers();
+                unsubReports();
+            };
         }
     }, [isAdmin]);
+
+    // Handle deep-link to tab
+    useEffect(() => {
+        const search = new URLSearchParams(location.search);
+        if (defaultTab) {
+            setActiveTab(defaultTab);
+        } else if (location.pathname === '/admin' || search.get('tab') === 'reports' || search.get('tab') === 'admin') {
+            setActiveTab('Reports & Fixes');
+        }
+    }, [defaultTab, location.pathname, location.search]);
 
     // Auto-sanitize mock 9,999 in profile data to real-time history count
     useEffect(() => {
@@ -579,7 +606,7 @@ const Profile: React.FC = () => {
         'Game history', 
         'Favorites', 
         'Live Movement',
-        ...(isAdmin ? ['Users Directory'] : [])
+        ...(isAdmin ? ['Reports & Fixes', 'Users Directory'] : [])
     ];
 
     // Filtered users & pagination for admin
@@ -1069,7 +1096,7 @@ const Profile: React.FC = () => {
                                     {profileData.isBlacklisted ? t("Account Blacklisted") : t("Account Suspended / Blocked")}
                                 </h4>
                                 <p className="text-xs mt-0.5 text-slate-600 dark:text-slate-300">
-                                    {profileData.blockedReason || t("Your account has been restricted by the administrator. Contact secretarea1337@gmail.com for inquiries.")}
+                                    {profileData.blockedReason || t("Your account has been restricted by the administrator. Contact administrator support for inquiries.")}
                                 </p>
                             </div>
                         </div>
@@ -1154,6 +1181,9 @@ const Profile: React.FC = () => {
                         if (tab === 'Favorites') count = favorites.length;
                         if (tab === 'Live Movement') count = activities.length;
                         if (tab === 'Users Directory') count = allUsers.length;
+                        if (tab === 'Reports & Fixes') count = pendingReportsCount;
+
+                        const isPendingReportsTab = tab === 'Reports & Fixes' && pendingReportsCount > 0;
 
                         return (
                             <button 
@@ -1166,10 +1196,15 @@ const Profile: React.FC = () => {
                                 }`}
                             >
                                 {tab === 'Users Directory' && <TbUsers size={16} className="text-amber-400" />}
+                                {tab === 'Reports & Fixes' && (
+                                    <TbAlertTriangle size={16} className={pendingReportsCount > 0 ? "text-amber-500 animate-pulse" : "text-slate-400"} />
+                                )}
                                 <span>{t(tab)}</span>
                                 {count !== null && count > 0 && (
                                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                        activeTab === tab 
+                                        isPendingReportsTab
+                                            ? 'bg-amber-500/25 text-amber-500 font-bold border border-amber-500/30'
+                                            : activeTab === tab 
                                             ? 'bg-[#29aaea]/20 text-[#29aaea]' 
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
                                     }`}>
@@ -1777,6 +1812,51 @@ const Profile: React.FC = () => {
                                     ) : (
                                         <EmptyState message="No movements recorded yet. Start browsing roadmaps or games to see realtime results here!" />
                                     )}
+                                </div>
+                            )}
+
+                            {/* ADMIN REPORTS & FIXES TAB */}
+                            {activeTab === 'Reports & Fixes' && isAdmin && (
+                                <div className="space-y-6">
+                                    {/* Admin Action Bar */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-[#111623] border border-slate-200 dark:border-slate-800 shadow-sm">
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <span className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20 shrink-0">
+                                                    <TbAlertTriangle size={18} />
+                                                </span>
+                                                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate">
+                                                    {t("Broken Links & User Reports")}
+                                                </h2>
+                                                {pendingReportsCount > 0 && (
+                                                    <span className="text-[11px] sm:text-xs font-bold font-mono bg-amber-500/20 text-amber-500 px-2.5 py-0.5 rounded-full border border-amber-500/30 animate-pulse shrink-0">
+                                                        {pendingReportsCount} {t("Needs Fix")}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                {t("Review issues submitted by logged-in users and guests. Fix broken download links directly from this admin panel.")}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2.5 flex-wrap">
+                                            <button 
+                                                onClick={() => navigate('/')}
+                                                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-[#29aaea]/10 text-slate-700 dark:text-slate-200 hover:text-[#29aaea] border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all shadow-sm"
+                                            >
+                                                <TbLayoutDashboard size={15} className="text-[#29aaea]" />
+                                                <span>{t("Back to Dashboard")}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Reports Manager Component */}
+                                    <AdminReportsManager
+                                        adminEmail={currentUser?.email || profileData.email}
+                                        onOpenItem={(itemId) => {
+                                            navigate(`/?item=${itemId}`);
+                                        }}
+                                    />
                                 </div>
                             )}
 

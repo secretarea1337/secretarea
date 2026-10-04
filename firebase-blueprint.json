@@ -169,6 +169,56 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "userId"]
+    },
+    "ItemReport": {
+      "title": "ItemReport",
+      "description": "Report of broken links, crashes, or missing files submitted by users or guests.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "itemCategory": { "type": "string" },
+        "itemCoverImage": { "type": "string" },
+        "itemVersion": { "type": "string" },
+        "downloadLinks": { "type": "object" },
+        "brokenLinkType": { "type": "string" },
+        "reason": { "type": "string" },
+        "details": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "fixed", "dismissed"]
+        },
+        "reporterType": {
+          "type": "string",
+          "enum": ["user", "guest"]
+        },
+        "reportedBy": {
+          "type": "object"
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "fixedAt": { "type": "string", "format": "date-time" },
+        "fixedBy": { "type": "string" },
+        "fixedNotes": { "type": "string" },
+        "fixedLinks": { "type": "object" }
+      },
+      "required": ["itemId", "itemName", "reason", "status"]
+    },
+    "ItemFix": {
+      "title": "ItemFix",
+      "description": "Admin corrected links and metadata for items reported broken.",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "category": { "type": "string" },
+        "fixedLinks": { "type": "object" },
+        "fixedVersion": { "type": "string" },
+        "fixedNotes": { "type": "string" },
+        "fixedAt": { "type": "string", "format": "date-time" },
+        "fixedBy": { "type": "string" }
+      },
+      "required": ["itemId", "fixedLinks"]
     }
   },
   "firestore": {
@@ -191,6 +241,14 @@
     "/bannedDevices/{deviceId}": {
       "schema": "BannedDevice",
       "description": "Stores banned hardware fingerprints and IPs. Non-public; accessible to admin or validated caller checking status, writable by Admin."
+    },
+    "/reports/{reportId}": {
+      "schema": "ItemReport",
+      "description": "User and guest submitted reports of broken links and bugs. Accessible to admin for triage and fixing."
+    },
+    "/item_fixes/{itemId}": {
+      "schema": "ItemFix",
+      "description": "Live fixes applied by admin for broken download links. Publicly readable, admin writable."
     }
   }
 }

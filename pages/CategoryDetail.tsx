@@ -1,8 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, db } from '../src/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { recordGameInteraction } from '../src/services/userService';
+import { recordGameInteraction, getLocalProfile } from '../src/services/userService';
+import { useLanguage } from '../src/contexts/LanguageContext';
+import { getItemActiveReport, subscribeReports, ItemReport } from '../src/services/reportService';
+import { TbCircleCheck, TbAlertTriangle, TbRefresh } from 'react-icons/tb';
 
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
@@ -12,6 +15,7 @@ import ITRoadmapComponent from '../components/ITRoadmapComponent';
 import GamingRoadmapComponent from '../components/GamingRoadmapComponent';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Project, MindMapSection, MindMapNode, NexaProject } from '../types';
+import ReportModal from '../components/ReportModal';
 
 const MindMapRenderer: React.FC<{ data: MindMapSection }> = ({ data }) => {
   // Group nodes by category
@@ -72,8 +76,26 @@ const MindMapRenderer: React.FC<{ data: MindMapSection }> = ({ data }) => {
 
 // Nexa Project Detail Modal Component
 const NexaProjectModal: React.FC<{ project: NexaProject; onClose: () => void; onTrack: (p: any, t: any) => void }> = ({ project, onClose, onTrack }) => {
+    const { t, dir } = useLanguage();
     const [activeImage, setActiveImage] = useState(project.gallery[0]);
     const [includedOpen, setIncludedOpen] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [activeReport, setActiveReport] = useState<ItemReport | undefined>(() => getItemActiveReport(project.title));
+
+    useEffect(() => {
+        const unsub = subscribeReports((reportsList) => {
+            const match = reportsList.filter((r) => r.itemId === project.title || r.itemName === project.title);
+            if (match.length > 0) {
+                const inProg = match.find((r) => r.status === 'in_progress');
+                const pend = match.find((r) => r.status === 'pending');
+                const fix = match.find((r) => r.status === 'fixed');
+                setActiveReport(inProg || pend || fix || match[0]);
+            } else {
+                setActiveReport(undefined);
+            }
+        });
+        return () => unsub();
+    }, [project.title]);
 
     return (
         <motion.div 
@@ -119,6 +141,49 @@ const NexaProjectModal: React.FC<{ project: NexaProject; onClose: () => void; on
                         <h2 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">{project.title}</h2>
                         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{project.fullDescription}</p>
                     </div>
+
+                    {/* LIVE STATUS REPORT NOTIFICATION (USERS & GUEST MODE) */}
+                    {activeReport && (
+                        <div 
+                          dir={dir}
+                          className={`mb-6 p-4 rounded-2xl border text-xs shadow-sm flex items-start gap-3 ${
+                            dir === 'rtl' ? 'text-right' : 'text-left'
+                          } ${
+                            activeReport.status === 'fixed'
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                                : activeReport.status === 'in_progress'
+                                ? 'bg-sky-500/10 border-sky-500/30 text-sky-800 dark:text-sky-300'
+                                : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                        }`}>
+                            <div className="mt-0.5 shrink-0">
+                                {activeReport.status === 'fixed' ? (
+                                    <TbCircleCheck size={18} className="text-emerald-500" />
+                                ) : activeReport.status === 'in_progress' ? (
+                                    <TbRefresh size={18} className="text-sky-500 animate-spin" />
+                                ) : (
+                                    <TbAlertTriangle size={18} className="text-amber-500" />
+                                )}
+                            </div>
+                            <div className="space-y-1 flex-1 min-w-0">
+                                <span className="font-extrabold uppercase tracking-wider text-[10px] block opacity-80">
+                                    {t('Live Status Update') || 'Live Status Update'} ({t(activeReport.status) || activeReport.status})
+                                </span>
+                                <p className="font-semibold leading-relaxed">
+                                    {activeReport.status === 'fixed'
+                                        ? (activeReport.fixedNotes || t('Reported links/files have been updated and verified by admin.') || 'Links have been updated and verified by admin.')
+                                        : activeReport.status === 'in_progress'
+                                        ? t('Report received. Admins are actively working on updating links.') || 'Admins are actively working on updating links.'
+                                        : `${t('Reported') || 'Reported'}: "${activeReport.reason}" (${t('Pending review') || 'Pending review'})`}
+                                </p>
+                                {activeReport.status === 'fixed' && (
+                                  <div className="pt-1 text-[11px] opacity-80 flex items-center gap-1">
+                                    <span>{t('Verified by') || 'Verified by'} :</span>
+                                    <strong className="font-bold">{t('Admin') || 'Admin'}</strong>
+                                  </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                         <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
@@ -172,8 +237,31 @@ const NexaProjectModal: React.FC<{ project: NexaProject; onClose: () => void; on
                         </AnimatePresence>
                     </div>
 
+                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <button
+                            onClick={() => setShowReportModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition-all"
+                        >
+                            <Icon name="AlertTriangle" size={15} />
+                            <span>{t('Report an Issue') || 'Report Issue'}</span>
+                        </button>
+                    </div>
+
                 </div>
             </div>
+
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                item={{
+                    id: project.title,
+                    name: project.title,
+                    category: project.category,
+                    coverImage: project.image,
+                    version: 'Nexa Project'
+                }}
+                currentUserProfile={getLocalProfile(auth.currentUser?.uid || 'guest')}
+            />
         </motion.div>
     );
 };

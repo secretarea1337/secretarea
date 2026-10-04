@@ -59,6 +59,7 @@ const MainContent = () => {
           <Route path="/personal-space" element={<ProtectedRoute><PersonalFinance /></ProtectedRoute>} />
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<Profile defaultTab="Reports & Fixes" />} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         </Routes>
       </Suspense>

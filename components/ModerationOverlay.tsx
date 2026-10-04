@@ -84,7 +84,7 @@ export const ModerationOverlay: React.FC<ModerationOverlayProps> = ({ details, o
         {/* Support Note */}
         <p className="text-[11px] text-slate-400 mb-6">
           {t("This moderation action is authoritative. If you believe this is a technical mistake, contact administrator:")}{' '}
-          <span className="text-rose-400 font-mono font-semibold">secretarea1337@gmail.com</span>
+          <span className="text-rose-400 font-semibold">{t("Administrator Support")}</span>
         </p>
 
         {/* Action Button */}
