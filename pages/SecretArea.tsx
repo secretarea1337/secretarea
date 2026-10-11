@@ -36,7 +36,7 @@ import UpcomingTrailersSection from '../components/UpcomingTrailersSection';
 
 import { CommentsSection } from '../components/CommentsSection';
 import { BestGameSeriesSection } from '../components/BestGameSeriesSection';
-import { DuaPopup } from '../components/DuaPopup';
+import DisclaimerModal from '../components/DisclaimerModal';
 import { NetworkDiagnostic } from '../components/NetworkDiagnostic';
 import DonateModal from "../components/DonateModal";
 import MaintenancePage from '../components/MaintenancePage';
@@ -114,50 +114,6 @@ const AD_CONFIG = {
     link: "https://digitalstore-iota-five.vercel.app/"
   }
 };
-
-// --- DISCLAIMER DATA ---
-interface DisclaimerData {
-  label: string;
-  title: string;
-  text: string;
-  btn: string;
-  dir?: string;
-}
-
-const DISCLAIMER_CONTENT: Record<string, DisclaimerData> = {
-  EN: {
-    label: "English",
-    title: "⚠️ Disclaimer",
-    text: "All content shared on this website is already publicly available on the internet.\nWe do not host, modify, or crack any files. We only organize and share existing public links.\n\nWe strongly encourage users to purchase original software and games to support developers.\nThe user is solely responsible for how the content is used.",
-    btn: "I Understand"
-  },
-  AR: {
-    label: "العربية",
-    title: "⚠️ تنبيه قانوني",
-    text: "جميع المحتويات الموجودة في هذا الموقع متوفرة مسبقًا على الإنترنت بشكل علني.\nنحن لا نستضيف الملفات ولا نقوم بتعديلها أو كسر حمايتها، بل نشارك فقط روابط عامة.\n\nننصح المستخدمين بشراء النسخ الأصلية لدعم المطورين.\nالمسؤولية الكاملة تقع على عاتق المستخدم.",
-    btn: "أنا أفهم",
-    dir: "rtl"
-  },
-  FR: {
-    label: "Français",
-    title: "⚠️ Avertissement",
-    text: "Tout le contenu présent sur ce site est déjà disponible publiquement sur Internet.\nNous n’hébergeons, ne modifions ni ne crackons aucun fichier. Nous partageons uniquement des liens publics.\n\nNous encourageons fortement l’achat des versions originales pour soutenir les développeurs.\nL’utilisateur est seul responsable de l’utilisation du contenu.",
-    btn: "Je comprends"
-  },
-  ES: {
-    label: "Español",
-    title: "⚠️ Aviso legal",
-    text: "Todo el contenido de este sitio ya está disponible públicamente en Internet.\nNo alojamos, modificamos ni crackeamos archivos. Solo compartimos enlaces públicos.\n\nRecomendamos comprar las versions originales para apoyar a los desarrolladores.\nEl usuario es totalmente responsable del uso del contenido.",
-    btn: "Entiendo"
-  },
-  RU: {
-    label: "Русский",
-    title: "⚠️ Отказ от ответственности",
-    text: "Весь контент на этом сайте уже находится в открытом доступе в интернете.\nМы не размещаем, не изменяем и не взламываем файлы. Мы лишь делимся публичными ссылками.\n\nМы рекомендуем приобретать оригинальные версии для поддержки разработчиков.\nПользователь несёт полную ответственность за использование контента.",
-    btn: "Я понимаю"
-  }
-};
-
 
 const ADMIN_SOCIAL_LINKS = [
     {
@@ -895,69 +851,6 @@ const LockoutTimer: React.FC<{ targetTime: number }> = ({ targetTime }) => {
     return (
         <span className="font-mono text-xl font-black text-red-500">{timeLeft}</span>
     );
-};
-
-const DisclaimerModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const [lang, setLang] = useState<keyof typeof DISCLAIMER_CONTENT>("EN");
-  const { dir, t } = useLanguage();
-  
-  if (!open) return null;
-
-  const content = DISCLAIMER_CONTENT[lang];
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      dir={dir} className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 md:backdrop-blur-md p-4"
-    >
-      <motion.div 
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-red-500/30 flex flex-col max-h-[90vh]"
-      >
-        <div className="bg-slate-100 dark:bg-slate-950 p-4 border-b border-slate-200 dark:border-slate-800">
-           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-              {(Object.keys(DISCLAIMER_CONTENT) as Array<keyof typeof DISCLAIMER_CONTENT>).map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLang(l)}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                    lang === l 
-                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' 
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  {DISCLAIMER_CONTENT[l].label}
-                </button>
-              ))}
-           </div>
-        </div>
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto">
-           <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-2">
-                 <Icon name="Shield" size={32} className="text-red-500" />
-              </div>
-              <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight" dir={content.dir || 'ltr'}>
-                {content.title}
-              </h2>
-              <p className="text-sm md:text-base text-slate-900 dark:text-slate-200 leading-relaxed font-medium whitespace-pre-line" dir={content.dir || 'ltr'}>
-                {content.text}
-              </p>
-           </div>
-        </div>
-        <div className="p-4 md:p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
-           <button 
-             onClick={onClose}
-             className="w-full py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-xl font-bold text-sm uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all active:scale-95"
-           >
-             {content.btn}
-           </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
 };
 
 // STEAM ACCOUNTS MODAL
@@ -7605,6 +7498,10 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     if (!accepted) {
         setShowDisclaimer(true);
     }
+
+    const handleOpenModal = () => setShowDisclaimer(true);
+    window.addEventListener('open-disclaimer-modal', handleOpenModal);
+    return () => window.removeEventListener('open-disclaimer-modal', handleOpenModal);
   }, []);
 
   // --- INITIALIZE LOCKOUT STATE ---
@@ -9596,7 +9493,6 @@ const paginatedData = useMemo(() => {
       </div>
 
       <DisclaimerModal open={showDisclaimer} onClose={handleCloseDisclaimer} />
-      <DuaPopup />
 
       <AnimatePresence>
         {selectedResource && (
