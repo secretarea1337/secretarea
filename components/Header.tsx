@@ -1091,13 +1091,11 @@ const Header: React.FC = () => {
   };
 
   const handleReturnToTerminal = () => {
-    localStorage.removeItem('secret_area_unlocked');
-    localStorage.removeItem('nexa_guest_mode');
+    sessionStorage.setItem('open_terminal', 'true');
     setIsGuest(false);
-    setIsUnlocked(false);
     window.dispatchEvent(new Event('authChange'));
     window.dispatchEvent(new CustomEvent('return-to-terminal'));
-    navigate('/');
+    navigate('/terminal');
   };
 
   return (

@@ -108,11 +108,10 @@ const BottomNav: React.FC = () => {
 
   const handleReturnToTerminal = () => {
     setIsMenuOpen(false);
-    localStorage.removeItem('secret_area_unlocked');
-    localStorage.removeItem('nexa_guest_mode');
+    sessionStorage.setItem('open_terminal', 'true');
     window.dispatchEvent(new Event('authChange'));
     window.dispatchEvent(new CustomEvent('return-to-terminal'));
-    navigate('/');
+    navigate('/terminal');
   };
 
   const handleOpenLogin = () => {

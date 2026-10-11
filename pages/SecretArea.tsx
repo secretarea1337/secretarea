@@ -6649,10 +6649,78 @@ const BestStudiosCarousel: React.FC<{
 
 // --- MAIN PAGE COMPONENT ---
 
-const SecretArea: React.FC = () => {
+interface SecretAreaProps {
+  isTerminalRoute?: boolean;
+}
+
+const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const { dir, t, language } = useLanguage();
-  const [currentUser, setCurrentUser] = useState<any>(null); const [authChecked, setAuthChecked] = useState(false); const [isUnlocked, setIsUnlocked] = useState(() => localStorage.getItem('secret_area_unlocked') === 'true' || localStorage.getItem('nexa_guest_mode') === 'true');
-  const [isGuestMode, setIsGuestMode] = useState(() => localStorage.getItem('nexa_guest_mode') === 'true');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isTerminalPath = isTerminalRoute || location.pathname === '/terminal';
+  const [showTerminal, setShowTerminal] = useState(() => isTerminalPath || sessionStorage.getItem('open_terminal') === 'true');
+
+  const [currentUser, setCurrentUser] = useState<any>(null); 
+  const [authChecked, setAuthChecked] = useState(false); 
+
+  // For website visitors: bypass terminal page, auto-unlock as guest if not already authenticated
+  const [isUnlocked, setIsUnlocked] = useState(() => {
+    if (isTerminalPath || sessionStorage.getItem('open_terminal') === 'true') {
+      return localStorage.getItem('secret_area_unlocked') === 'true';
+    }
+    const val = localStorage.getItem('secret_area_unlocked');
+    if (val === 'true' || val === 'guest' || localStorage.getItem('nexa_guest_mode') === 'true') {
+      return true;
+    }
+    // Auto-bypass terminal for new visitor:
+    localStorage.setItem('secret_area_unlocked', 'guest');
+    localStorage.setItem('nexa_guest_mode', 'true');
+    return true;
+  });
+
+  const [isGuestMode, setIsGuestMode] = useState(() => {
+    return localStorage.getItem('nexa_guest_mode') === 'true' || localStorage.getItem('secret_area_unlocked') === 'guest';
+  });
+
+  // Hacker Loader: On visiting the site (when not on terminal page), show the loader page
+  const [showHackerLoader, setShowHackerLoader] = useState(() => {
+    if (isTerminalPath || sessionStorage.getItem('open_terminal') === 'true') {
+      return false;
+    }
+    return true;
+  });
+
+  const handleExitTerminal = (targetUnlocked = true, targetGuest = true) => {
+    sessionStorage.removeItem('open_terminal');
+    setShowTerminal(false);
+    if (targetUnlocked) {
+      localStorage.setItem('secret_area_unlocked', targetGuest ? 'guest' : 'true');
+      if (targetGuest) {
+        localStorage.setItem('nexa_guest_mode', 'true');
+      } else {
+        localStorage.removeItem('nexa_guest_mode');
+      }
+      setIsUnlocked(true);
+      setIsGuestMode(targetGuest);
+      setShowHackerLoader(true);
+      setHackerProgress(0);
+      window.dispatchEvent(new Event('authChange'));
+      fetchData();
+    }
+    if (location.pathname === '/terminal') {
+      navigate('/');
+    }
+  };
+
+  useEffect(() => {
+    if (location.pathname === '/terminal' || isTerminalRoute) {
+      setShowTerminal(true);
+      setShowHackerLoader(false);
+    } else if (location.pathname === '/' && sessionStorage.getItem('open_terminal') !== 'true') {
+      setShowTerminal(false);
+    }
+  }, [location.pathname, isTerminalRoute]);
 
   useEffect(() => {
     const handleAuthChange = () => {
@@ -6667,6 +6735,8 @@ const SecretArea: React.FC = () => {
     };
 
     const handleReturnToTerminal = () => {
+      sessionStorage.setItem('open_terminal', 'true');
+      setShowTerminal(true);
       setIsUnlocked(false);
       setIsGuestMode(false);
       setShowHackerLoader(false);
@@ -6700,12 +6770,17 @@ const SecretArea: React.FC = () => {
         localStorage.removeItem('nexa_guest_mode');
         localStorage.setItem('nexa_user_profile', JSON.stringify(profileObj));
         localStorage.setItem('nexa_discord_user', JSON.stringify(discordUser));
+        sessionStorage.removeItem('open_terminal');
+        setShowTerminal(false);
         setIsUnlocked(true);
         setIsGuestMode(false);
         setShowHackerLoader(true);
         setHackerProgress(0);
         window.dispatchEvent(new Event('authChange'));
         fetchData();
+        if (location.pathname === '/terminal') {
+          navigate('/');
+        }
       }
     };
 
@@ -6717,7 +6792,7 @@ const SecretArea: React.FC = () => {
       window.removeEventListener('return-to-terminal', handleReturnToTerminal);
       window.removeEventListener('message', handleAuthMessage);
     };
-  }, []);
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
     import('../src/firebase').then(({ auth }) => {
@@ -6735,7 +6810,6 @@ const SecretArea: React.FC = () => {
       return () => unsubscribe();
     });
   }, []);
-  const [showHackerLoader, setShowHackerLoader] = useState(() => localStorage.getItem('secret_area_unlocked') === 'true' || localStorage.getItem('nexa_guest_mode') === 'true');
   const [hackerProgress, setHackerProgress] = useState(0);
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
   const [password, setPassword] = useState('');
@@ -6830,7 +6904,6 @@ const SecretArea: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'game' | 'hypervisor' | 'steamtools' | 'architect' | 'extra' | 'stash'>('game');
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
   const [stash, setStash] = useState<string[]>([]);
   const [animateStashTab, setAnimateStashTab] = useState(false);
   const [showAllProfiles, setShowAllProfiles] = useState(false);
@@ -7183,13 +7256,25 @@ const SecretArea: React.FC = () => {
     const lowerCmd = cmd.toLowerCase();
 
     if (
+      lowerCmd === 'guest' ||
+      lowerCmd === 'exit' ||
+      lowerCmd === 'home' ||
+      lowerCmd === 'start' ||
+      lowerCmd === 'login guest'
+    ) {
+      newHistory.push({ type: 'success', text: '>>> ACCESS AUTHORIZED. LAUNCHING SECURE ENVIRONMENT... <<<' });
+      setTerminalHistory(newHistory);
+      setTerminalInput('');
+      setTimeout(() => {
+        handleExitTerminal(true, true);
+      }, 500);
+      return;
+    } else if (
       lowerCmd === 'wolfspace' ||
       cmd === 'Wolfspace' ||
       lowerCmd === 'login' ||
       lowerCmd === 'auth' ||
       lowerCmd === 'login wolfspace' ||
-      lowerCmd === 'login guest' ||
-      lowerCmd === 'guest' ||
       lowerCmd === 'code' ||
       lowerCmd === 'passcode' ||
       lowerCmd === 'password'
@@ -8666,12 +8751,17 @@ const paginatedData = useMemo(() => {
       }
       localStorage.setItem('secret_area_unlocked', 'true');
       localStorage.removeItem('nexa_guest_mode');
+      sessionStorage.removeItem('open_terminal');
+      setShowTerminal(false);
       setIsUnlocked(true);
       setIsGuestMode(false);
       setShowHackerLoader(true);
       setHackerProgress(0);
       window.dispatchEvent(new Event('authChange'));
       fetchData();
+      if (location.pathname === '/terminal') {
+        navigate('/');
+      }
     } catch (err: any) {
       const isUnauthorized = 
         err?.code === 'auth/unauthorized-domain' || 
@@ -8756,12 +8846,17 @@ const paginatedData = useMemo(() => {
       }
       localStorage.setItem('secret_area_unlocked', 'true');
       localStorage.removeItem('nexa_guest_mode');
+      sessionStorage.removeItem('open_terminal');
+      setShowTerminal(false);
       setIsUnlocked(true);
       setIsGuestMode(false);
       setShowHackerLoader(true);
       setHackerProgress(0);
       window.dispatchEvent(new Event('authChange'));
       fetchData();
+      if (location.pathname === '/terminal') {
+        navigate('/');
+      }
     } catch (err: any) {
       const isUnauthorized = 
         err?.code === 'auth/unauthorized-domain' || 
@@ -8797,12 +8892,17 @@ const paginatedData = useMemo(() => {
       }
       localStorage.setItem('secret_area_unlocked', 'true');
       localStorage.removeItem('nexa_guest_mode');
+      sessionStorage.removeItem('open_terminal');
+      setShowTerminal(false);
       setIsUnlocked(true);
       setIsGuestMode(false);
       setShowHackerLoader(true);
       setHackerProgress(0);
       window.dispatchEvent(new Event('authChange'));
       fetchData();
+      if (location.pathname === '/terminal') {
+        navigate('/');
+      }
     } catch (err: any) {
       const isUnauthorized = 
         err?.code === 'auth/unauthorized-domain' || 
@@ -8825,7 +8925,13 @@ const paginatedData = useMemo(() => {
     }
   }
 
-  if (!authChecked && !showHackerLoader) { return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"><div className="animate-pulse flex flex-col items-center"><div className="w-12 h-12 border-4 border-slate-300 dark:border-slate-700 border-t-blue-500 rounded-full animate-spin"></div><div className="mt-4 text-slate-500 font-mono text-sm tracking-widest uppercase">Authenticating...</div></div></div>; } if ((!isUnlocked || (!currentUser && !isGuestMode)) && !showHackerLoader) {
+  if (!authChecked && !showHackerLoader && !showTerminal && location.pathname !== '/terminal') { 
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"><div className="animate-pulse flex flex-col items-center"><div className="w-12 h-12 border-4 border-slate-300 dark:border-slate-700 border-t-blue-500 rounded-full animate-spin"></div><div className="mt-4 text-slate-500 font-mono text-sm tracking-widest uppercase">Authenticating...</div></div></div>; 
+  } 
+
+  const isTerminalView = (showTerminal || location.pathname === '/terminal' || !isUnlocked) && !showHackerLoader;
+
+  if (isTerminalView) {
     return (
       <div dir="ltr" className={`w-full min-h-[100dvh] fixed inset-0 z-[200] bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300 overflow-y-auto custom-scrollbar flex items-center justify-center p-2.5 sm:p-4 md:p-6 lg:p-8`}>
           <div className="fixed inset-0 z-0 pointer-events-none">
@@ -8965,8 +9071,13 @@ const paginatedData = useMemo(() => {
                       </div>
                       
                       <div className="h-8 sm:h-9 md:h-10 bg-slate-800/80 dark:bg-[#0f172a]/70 backdrop-blur-sm border-b border-slate-700/50 dark:border-slate-800/50 flex items-center px-2.5 sm:px-4 justify-between relative z-10 shrink-0">
-                        <div className="flex gap-1.5 sm:gap-2">
-                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+                        <div className="flex gap-1.5 sm:gap-2 items-center">
+                          <button 
+                            type="button" 
+                            onClick={() => handleExitTerminal(true, true)} 
+                            title="Back to Home" 
+                            className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 hover:opacity-80 transition-opacity cursor-pointer border-0 p-0" 
+                          />
                           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
                           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
                         </div>
@@ -8976,7 +9087,15 @@ const paginatedData = useMemo(() => {
                             </div>
                             <div className="text-[10px] sm:text-xs font-semibold text-slate-300 lowercase tracking-tight sm:tracking-widest font-mono truncate">guest@SecretArea1337:~/root</div>
                         </div>
-                        <div className="w-8 sm:w-12"></div>
+                        <button
+                          type="button"
+                          onClick={() => handleExitTerminal(true, true)}
+                          className="px-2.5 py-1 rounded-lg bg-slate-700/70 hover:bg-slate-600/90 text-slate-200 hover:text-white text-[10px] sm:text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                          title="Back to Home"
+                        >
+                          <Icon name="Home" size={13} />
+                          <span>Home</span>
+                        </button>
                       </div>
                       <div 
                         className="flex-1 min-h-0 p-3 sm:p-4 md:p-6 overflow-y-auto font-mono text-[11px] sm:text-[12px] md:text-[13px] custom-scrollbar relative z-10 text-[#D8DEE9]" 
@@ -9078,16 +9197,7 @@ const paginatedData = useMemo(() => {
               {/* Guest Mode Button */}
               <button 
                 type="button"
-                onClick={() => {
-                  localStorage.setItem('secret_area_unlocked', 'guest');
-                  localStorage.setItem('nexa_guest_mode', 'true');
-                  setIsUnlocked(true);
-                  setIsGuestMode(true);
-                  setShowHackerLoader(true);
-                  setHackerProgress(0);
-                  window.dispatchEvent(new Event('authChange'));
-                  fetchData();
-                }}
+                onClick={() => handleExitTerminal(true, true)}
                 className="flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 font-bold rounded-xl transition-all text-xs sm:text-sm cursor-pointer shadow-md active:scale-95"
               >
                 <Icon name="User" size={16} className="shrink-0" />
@@ -9129,15 +9239,7 @@ const paginatedData = useMemo(() => {
                   </a>
                   <button
                     type="button"
-                    onClick={() => {
-                      localStorage.setItem('secret_area_unlocked', 'guest');
-                      localStorage.setItem('nexa_guest_mode', 'true');
-                      setIsUnlocked(true);
-                      setIsGuestMode(true);
-                      setShowHackerLoader(true);
-                      setHackerProgress(0);
-                      fetchData();
-                    }}
+                    onClick={() => handleExitTerminal(true, true)}
                     className="text-slate-400 hover:text-white underline cursor-pointer"
                   >
                     Bypass & Enter as Guest &rarr;
