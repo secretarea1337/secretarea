@@ -1,4 +1,5 @@
 import { useLanguage } from '../src/contexts/LanguageContext';
+import { Helmet } from 'react-helmet-async';
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -12,6 +13,11 @@ const Disclaimer: React.FC = () => {
 
   return (
     <div className="w-full pt-24 pb-24 min-h-screen px-4 sm:px-6 md:px-8 font-sans bg-[#f9f9f8] dark:bg-slate-950">
+      <Helmet>
+        <title>Legal Disclaimer - Secret Area</title>
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+        <meta name="googlebot" content="noindex, nofollow, noarchive" />
+      </Helmet>
       <div className="max-w-4xl mx-auto w-full">
         
         <div className="mb-8">

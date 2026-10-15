@@ -260,11 +260,25 @@ export async function submitReport(reportData: {
   };
 }): Promise<ItemReport> {
   const reportId = `rep_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  
+  // Sanitize fields to prevent oversized payloads or malicious values
+  const cleanDetails = (reportData.details || '').trim().slice(0, 2000);
+  const cleanItemName = (reportData.itemName || 'Untitled Resource').trim().slice(0, 200);
+  const cleanReason = (reportData.reason || 'Broken Link').trim().slice(0, 200);
+
   const fullReport: ItemReport = {
     ...reportData,
     id: reportId,
+    itemName: cleanItemName,
+    reason: cleanReason,
+    details: cleanDetails,
     status: 'pending',
     createdAt: new Date().toISOString(),
+    // Strictly omit administrative resolution fields on submission
+    fixedAt: undefined,
+    fixedBy: undefined,
+    fixedNotes: undefined,
+    fixedLinks: undefined,
   };
 
   // Optimistically cache locally first

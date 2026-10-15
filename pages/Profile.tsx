@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Icon from '../components/Icon';
@@ -1044,6 +1045,11 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#070b14] pt-24 pb-16 font-sans text-slate-900 dark:text-white transition-colors duration-200" dir={dir}>
+            <Helmet>
+                <title>User Profile - Secret Area</title>
+                <meta name="robots" content="noindex, nofollow, noarchive" />
+                <meta name="googlebot" content="noindex, nofollow, noarchive" />
+            </Helmet>
             <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
                 
                 {/* Above Banner Action: "Back to Dashboard" and "Settings" */}

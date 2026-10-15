@@ -167,3 +167,10 @@ export interface NavItem {
   iconName: string;
   isExternal?: boolean;
 }
+
+export interface Ps5Button {
+  id: number;
+  label: string;
+  link: string;
+  note?: string;
+}

@@ -17,15 +17,17 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(uid)).data;
     }
 
-    // Root admin email check to bootstrap and guarantee permissions for primary administrator
+    // Root admin email check to bootstrap and guarantee permissions for primary administrator.
+    // Strictly requires email_verified == true to prevent account spoofing / impersonation!
     function isRootAdminEmail() {
       return isSignedIn() &&
         request.auth.token.email != null &&
+        request.auth.token.email_verified == true &&
         (request.auth.token.email.lower() == 'secretarea1337@gmail.com' ||
          request.auth.token.email.lower() == 'marouananouar02@gmail.com');
     }
 
-    // Role-based admin check: supports root admin emails and users/{uid}.role
+    // Role-based admin check: supports root verified admin emails and users/{uid}.role
     function isAdmin() {
       return isRootAdminEmail() || (
         isSignedIn() &&
@@ -63,7 +65,7 @@ service cloud.firestore {
     // Users collection:
     // - Blacklisted users (or >= 3 blocks): NO read or write access
     // - Blocked users: read-only access to own profile (get); cannot update
-    // - Active users: full access to own profile; cannot self-assign admin role or tamper with moderation flags
+    // - Active users: full access to own profile; STRICTLY CANNOT self-assign admin role or tamper with moderation flags
     // - Admins: full management; cannot demote existing admins
     match /users/{userId} {
       allow get: if isSignedIn() && (
@@ -77,9 +79,10 @@ service cloud.firestore {
       allow create: if isSignedIn() && (
         isAdmin() || (
           request.auth.uid == userId &&
-          (!('role' in request.resource.data) || !(request.resource.data.role in ['admin', 'Admin'])) &&
+          (!('role' in request.resource.data) || request.resource.data.role in ['user', 'User']) &&
           (!('isBlacklisted' in request.resource.data) || request.resource.data.isBlacklisted == false) &&
-          (!('isBlocked' in request.resource.data) || request.resource.data.isBlocked == false)
+          (!('isBlocked' in request.resource.data) || request.resource.data.isBlocked == false) &&
+          (!('blockCount' in request.resource.data) || request.resource.data.blockCount == 0)
         )
       );
 
@@ -89,9 +92,9 @@ service cloud.firestore {
         ) : (
           request.auth.uid == userId &&
           !isRestricted(resource.data) &&
-          (!('role' in request.resource.data) || !(request.resource.data.role in ['admin', 'Admin'])) &&
+          // Non-admins can NEVER touch the role field or moderation flags (prevents privilege escalation)
           !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-            'isBlocked', 'isBlacklisted', 'status', 'blockCount', 'blockedUntil', 'blockedAt', 'blacklistedAt'
+            'role', 'isBlocked', 'isBlacklisted', 'status', 'blockCount', 'blockedUntil', 'blockedAt', 'blacklistedAt'
           ])
         )
       );
@@ -129,12 +132,10 @@ service cloud.firestore {
     }
 
     // Banned Devices collection:
-    // - No public read: access restricted to admin or validated caller checking their status
-    // - Only admin can list, create, update, delete
+    // - Device lookup allowed by exact fingerprint for device status verification
+    // - Listing all banned devices, creation, updates, and deletes are strictly Admin only
     match /bannedDevices/{deviceId} {
-      allow get: if isAdmin() || (
-        isSignedIn() && (resource == null || resource.data.userId == request.auth.uid)
-      );
+      allow get: if true;
       allow list, create, update, delete: if isAdmin();
     }
 
@@ -163,12 +164,24 @@ service cloud.firestore {
     }
 
     // Reports collection:
-    // - Users and guests can report broken links or issues
-    // - Admins can read, update status, and fix reports
+    // - Broken link reports can be submitted by visitors
+    // - Non-admins can ONLY submit reports with 'pending' status and cannot inject resolution metadata
+    // - Listing reports is restricted to Admins to prevent scraping user emails and PII
+    // - Individual report get is allowed for Admins or the original reporter
     match /reports/{reportId} {
       allow create: if request.resource.data.keys().hasAll(['itemId', 'itemName', 'reason', 'status']) &&
-                       request.resource.data.status in ['pending', 'in_progress', 'fixed', 'dismissed'];
-      allow get, list: if true;
+                       request.resource.data.itemId is string &&
+                       request.resource.data.itemName is string &&
+                       request.resource.data.reason is string &&
+                       (isAdmin() || (
+                         request.resource.data.status == 'pending' &&
+                         (!('fixedAt' in request.resource.data) || request.resource.data.fixedAt == null) &&
+                         (!('fixedBy' in request.resource.data) || request.resource.data.fixedBy == null) &&
+                         (!('fixedNotes' in request.resource.data) || request.resource.data.fixedNotes == null) &&
+                         (!('fixedLinks' in request.resource.data) || request.resource.data.fixedLinks == null)
+                       ));
+      allow get: if isAdmin() || (isSignedIn() && resource.data.reportedBy.uid == request.auth.uid);
+      allow list: if isAdmin();
       allow update, delete: if isAdmin();
     }
 

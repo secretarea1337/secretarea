@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import { auth, db } from '../src/firebase';
 import { addDoc, collection } from 'firebase/firestore';
@@ -310,6 +311,11 @@ const Settings = () => {
 
     return (
         <div dir={dir} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 mt-16 sm:mt-24 mb-16 sm:mb-24 flex flex-col md:flex-row gap-8">
+            <Helmet>
+                <title>Settings - Secret Area</title>
+                <meta name="robots" content="noindex, nofollow, noarchive" />
+                <meta name="googlebot" content="noindex, nofollow, noarchive" />
+            </Helmet>
             
             {/* Notification Toast */}
             <AnimatePresence>

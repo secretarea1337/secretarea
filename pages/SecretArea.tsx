@@ -61,8 +61,16 @@ import {
   TbAlertCircle,
   TbRefresh,
   TbSparkles,
-  TbLinkOff
+  TbLinkOff,
+  TbDeviceGamepad2,
+  TbServer,
+  TbTools,
+  TbCircleX
 } from 'react-icons/tb';
+import { SiSteam } from 'react-icons/si';
+import { FaPlaystation } from 'react-icons/fa';
+import { GoDesktopDownload } from 'react-icons/go';
+import { Ps5Button } from '../types';
 import backupData from '../data/backup_resources.json';
 import ReportModal from '../components/ReportModal';
 import { 
@@ -661,7 +669,7 @@ interface Requirement {
 }
 
 
-type IntelCategory = 'GAME' | 'HYPERVISOR' | 'STEAMTOOLS' | 'ARCHITECT' | 'EXTRA' | 'UPCOMING';
+type IntelCategory = 'GAME' | 'HYPERVISOR' | 'STEAMTOOLS' | 'PS5' | 'ARCHITECT' | 'EXTRA' | 'UPCOMING';
 
 interface IntelItem {
   id: string;
@@ -685,6 +693,7 @@ export interface ResourceItem {
   genres: string;
   languages: string;
   repackBy: string;
+  publishBy?: string;
   coverImage: string;
   galleryImages: string[];
   description: string;
@@ -700,10 +709,13 @@ export interface ResourceItem {
   isPinned?: boolean;
   isFree: boolean;
   toolsNeeded?: { name: string; url: string }[];
+  buttons?: Ps5Button[];
   links: {
     parts: { id: number, link: string, note?: string }[];
     mirrors: { id: number, link: string, note?: string }[];
     ankerParts: { id: number, link: string, note?: string }[];
+    buttons?: Ps5Button[];
+    ps5Buttons?: Ps5Button[];
     full?: string;
     fullNote?: string;
         tutorial?: string; 
@@ -730,6 +742,7 @@ interface CompanyProfile {
   gameIds?: string[];
   hypervisorIds?: string[];
   steamtoolsIds?: string[];
+  ps5Ids?: string[];
   architectIds?: string[];
   extraIds?: string[];
 }
@@ -2566,7 +2579,7 @@ const UpcomingListsDisplay: React.FC<{ lists: { [key: string]: string[] } }> = (
     const [activeCategory, setActiveCategory] = useState<string>('game');
     const [currentPage, setCurrentPage] = useState<number>(1);
     const itemsPerPage = 10;
-    const tabs = ['game', 'hypervisor', 'steamtools', 'tools', 'savegames'];
+    const tabs = ['game', 'hypervisor', 'steamtools', 'ps5', 'tools', 'savegames'];
     
     const handleCategoryChange = (tab: string) => {
         setActiveCategory(tab);
@@ -2580,6 +2593,8 @@ const UpcomingListsDisplay: React.FC<{ lists: { [key: string]: string[] } }> = (
                 return 'https://webvator.com/wp-content/uploads/2025/10/1712163651504.jpg';
             case 'steamtools':
                 return 'https://cdn.fastly.steamstatic.com/store/home/store_home_share.jpg';
+            case 'ps5':
+                return 'https://gmedia.playstation.com/is/image/SIEPDC/ps5-product-thumbnail-01-en-14sep21?$facebook$';
             case 'tools':
                 return 'https://img.magnific.com/premium-photo/hacker-guy-black-clothes-wearing-mask-with-laptop-funny-comic-3d-illustration-white_926199-4299052.jpg';
             case 'savegames':
@@ -2618,19 +2633,25 @@ const UpcomingListsDisplay: React.FC<{ lists: { [key: string]: string[] } }> = (
                     <span>{new Date().toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
                 </div>
 
-                {/* Category Tabs */}
+                {/* Category Tabs with Icons */}
                 <div className="flex flex-wrap items-center gap-2 mb-6">
                     {tabs.map(tab => (
                         <button
                             key={tab}
                             onClick={() => handleCategoryChange(tab)}
-                            className={`px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-sm border ${
+                            className={`px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-sm border flex items-center gap-1.5 ${
                                 activeCategory === tab 
                                 ? 'bg-emerald-500 text-white border-emerald-500 scale-105' 
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
                             }`}
                         >
-                            {t(tab.toUpperCase())}
+                            {tab === 'game' && <TbDeviceGamepad2 className="text-xs shrink-0" />}
+                            {tab === 'hypervisor' && <TbServer className="text-xs shrink-0" />}
+                            {tab === 'steamtools' && <SiSteam className="text-xs shrink-0" />}
+                            {tab === 'ps5' && <FaPlaystation className="text-xs shrink-0" />}
+                            {tab === 'tools' && <TbTools className="text-xs shrink-0" />}
+                            {tab === 'savegames' && <TbDeviceFloppy className="text-xs shrink-0" />}
+                            <span>{t(tab.toUpperCase())}</span>
                         </button>
                     ))}
                 </div>
@@ -3729,6 +3750,7 @@ export const ResourceDetailModal: React.FC<{
       if (idStr.startsWith('A-') || (/^A\d+$/i.test(idStr))) return 'architect';
       if (idStr.startsWith('H-') || (/^H\d+$/i.test(idStr))) return 'hypervisor';
       if (idStr.startsWith('S-') || (/^S\d+$/i.test(idStr))) return 'steamtools';
+      if (idStr.startsWith('P-') || idStr.startsWith('PS5-') || (/^P\d+$/i.test(idStr))) return 'ps5';
       if (idStr.startsWith('E-') || (/^E\d+$/i.test(idStr))) return 'extra';
       return itemObj?.category || 'game';
     };
@@ -3863,12 +3885,14 @@ export const ResourceDetailModal: React.FC<{
     if (c === 'architect' || c === 'tools') return t('Tools') || 'Tools';
     if (c === 'hypervisor') return t('Hypervisor') || 'Hypervisor';
     if (c === 'steamtools') return t('SteamTools') || 'SteamTools';
+    if (c === 'ps5') return t('PS5') || 'PS5';
     if (c === 'extra' || c === 'savegame') return t('SaveGame') || 'SaveGame';
     if (itemId) {
       const upperId = String(itemId).trim().toUpperCase();
       if (upperId.startsWith('A-') || /^A\d+$/i.test(upperId)) return t('Tools') || 'Tools';
       if (upperId.startsWith('H-') || /^H\d+$/i.test(upperId)) return t('Hypervisor') || 'Hypervisor';
       if (upperId.startsWith('S-') || /^S\d+$/i.test(upperId)) return t('SteamTools') || 'SteamTools';
+      if (upperId.startsWith('P-') || upperId.startsWith('PS5-') || /^P\d+$/i.test(upperId)) return t('PS5') || 'PS5';
       if (upperId.startsWith('E-') || /^E\d+$/i.test(upperId)) return t('SaveGame') || 'SaveGame';
     }
     return t('Games') || 'Games';
@@ -4146,8 +4170,15 @@ export const ResourceDetailModal: React.FC<{
   };
 
   const handleCopyLink = () => {
-    const base = window.location.origin + window.location.pathname;
-    const url = `${base}#/?item=${item.id}`;
+    const origin = window.location.origin.includes('localhost') || window.location.origin.includes('run.app')
+      ? window.location.origin
+      : 'https://nexa1337.com';
+    const sectionSlug = item.category === 'ps5' ? 'ps5' :
+                        item.category === 'hypervisor' ? 'hypervisor' :
+                        item.category === 'steamtools' ? 'steamtools' :
+                        item.category === 'architect' ? 'tools' :
+                        item.category === 'extra' ? 'savegame' : 'game';
+    const url = `${origin}/${sectionSlug}/${encodeURIComponent(item.id)}`;
     navigator.clipboard.writeText(url);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
@@ -4265,6 +4296,67 @@ export const ResourceDetailModal: React.FC<{
       className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-slate-50 dark:bg-[#0B1120] overflow-y-auto custom-scrollbar flex flex-col w-full h-full pb-16 sm:pb-20 md:pb-16"
       onClick={(e) => e.stopPropagation()}
     >
+      <Helmet>
+        <title>{(() => {
+          const cat = (item.category || '').toLowerCase();
+          if (cat === 'ps5') return `${item.name} PS5 Edition – Download & Requirements | Secret Area`;
+          if (cat === 'hypervisor') return `${item.name} Hypervisor Edition – Download & Setup | Secret Area`;
+          if (cat === 'steamtools') return `${item.name} SteamTools – Files & Details | Secret Area`;
+          if (cat === 'architect' || cat === 'tools') return `${item.name} – Developer & Gaming Tools | Secret Area`;
+          if (cat === 'extra' || cat === 'savegame') return `${item.name} – Save Game Download & Backup | Secret Area`;
+          return `${item.name} – Download, System Requirements & Install | Secret Area`;
+        })()}</title>
+        <meta name="description" content={`Download ${item.name} (${item.category.toUpperCase()}). Version: ${item.version || 'v1.0'}. Size: ${item.originalSize || item.repackSize || 'N/A'}. Full installation guide, system specifications, and direct download mirrors.`} />
+        <meta name="keywords" content={`${item.name}, ${item.category}, download ${item.name}, ${item.genres || 'gaming'}, Secret Area, repack, free download, PC games, PS5 games, hypervisor, steamtools`} />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        {(() => {
+          const secSlug = item.category === 'ps5' ? 'ps5' :
+                          item.category === 'hypervisor' ? 'hypervisor' :
+                          item.category === 'steamtools' ? 'steamtools' :
+                          item.category === 'architect' ? 'tools' :
+                          item.category === 'extra' ? 'savegame' : 'game';
+          const itemUrl = `https://nexa1337.com/${secSlug}/${encodeURIComponent(item.id)}`;
+          return (
+            <>
+              <link rel="canonical" href={itemUrl} />
+              <meta property="og:url" content={itemUrl} />
+            </>
+          );
+        })()}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${item.name} | Secret Area`} />
+        <meta name="twitter:description" content={`Download ${item.name} (${item.category.toUpperCase()}). Version: ${item.version || 'v1.0'}. Size: ${item.originalSize || item.repackSize || 'N/A'}.`} />
+        <meta name="twitter:image" content={item.coverImage} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": item.category === 'architect' ? "SoftwareApplication" : "VideoGame",
+            "name": item.name,
+            "description": item.description || `Download ${item.name} on Secret Area.`,
+            "image": item.coverImage,
+            "applicationCategory": item.category === 'architect' ? "UtilityApplication" : "GameApplication",
+            "operatingSystem": item.category === 'ps5' ? "PlayStation 5" : "Windows 10/11",
+            "gamePlatform": item.category === 'ps5' ? ["PlayStation 5"] : ["PC", "Windows"],
+            "genre": (item.genres || "").split(',').map((s: string) => s.trim()).filter(Boolean),
+            "author": {
+              "@type": "Organization",
+              "name": item.publishBy || item.developer || item.repackBy || "SecretArea"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": item.publishBy || "SecretArea"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          })}
+        </script>
+      </Helmet>
+
       {/* Header with Breadcrumb and Close Button */}
       <div className="sticky top-0 z-50 bg-slate-50/90 dark:bg-[#0B1120]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/50 px-4 sm:px-8 py-4 flex items-center justify-between">
          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 overflow-hidden">
@@ -4366,11 +4458,34 @@ export const ResourceDetailModal: React.FC<{
 
                  {/* Quick Stats Row */}
                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium">
-                     <div className="flex items-center gap-2 bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded font-bold text-slate-900 dark:text-slate-200 text-xs">
-                         PC
+                     <div className={`flex items-center gap-2 px-2.5 py-1 rounded font-bold text-xs ${
+                       item.category === 'ps5'
+                         ? 'bg-gradient-to-r from-blue-700 to-indigo-600 text-white shadow-sm'
+                         : 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-200'
+                     }`}>
+                         {item.category === 'ps5' ? (
+                           <span className="flex items-center gap-1.5">
+                             <FaPlaystation size={14} className="shrink-0" /> PS5
+                           </span>
+                         ) : (
+                           'PC'
+                         )}
                      </div>
-                     {item.repackSize && <span>{item.repackSize}</span>}
-                     {item.originalSize && <span className="opacity-60 line-through text-xs">{item.originalSize}</span>}
+                     {item.category === 'ps5' ? (
+                       <>
+                         <span className="font-bold text-slate-900 dark:text-white">{item.originalSize || item.repackSize}</span>
+                         {(item.publishBy || item.developer) && (
+                           <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold">
+                             <FaPlaystation size={12} className="shrink-0" /> {item.publishBy || item.developer}
+                           </span>
+                         )}
+                       </>
+                     ) : (
+                       <>
+                         {item.repackSize && <span>{item.repackSize}</span>}
+                         {item.originalSize && <span className="opacity-60 line-through text-xs">{item.originalSize}</span>}
+                       </>
+                     )}
                      {item.id && <span>ID : {item.id}</span>}
                      {item.languages && <span className="opacity-80">{t('Languages')}: {item.languages}</span>}
                      {item.category === 'steamtools' && item.gameId && (
@@ -4719,10 +4834,23 @@ export const ResourceDetailModal: React.FC<{
                              <span className="text-sm font-bold text-slate-900 dark:text-white">{item.dateAdded}</span>
                          </div>
                      )}
-                     {resolvedDev && (
+                     {(item.publishBy || resolvedDev) && (
                          <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                             <span className="text-xs text-slate-500 dark:text-slate-400">{['architect', 'extra'].includes(item.category) ? t('Dev Studio') : t('Game Studio')} /</span>
-                             <span className="text-sm font-bold text-slate-900 dark:text-white cursor-pointer hover:text-primary-500 transition-colors" onClick={(e) => { e.stopPropagation(); if(onCompanyClick) onCompanyClick(resolvedDev); }}>{resolvedDev}</span>
+                             <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                               {item.category === 'ps5' ? (
+                                 <>
+                                   <FaPlaystation size={12} className="text-indigo-500 shrink-0" />
+                                   <span>{t('Published By') || 'Published By'}</span>
+                                 </>
+                               ) : ['architect', 'extra'].includes(item.category) ? (
+                                 t('Dev Studio')
+                               ) : (
+                                 t('Game Studio')
+                               )} /
+                             </span>
+                             <span className="text-sm font-bold text-slate-900 dark:text-white cursor-pointer hover:text-primary-500 transition-colors" onClick={(e) => { e.stopPropagation(); if(onCompanyClick) onCompanyClick(item.publishBy || resolvedDev || ''); }}>
+                               {item.publishBy || resolvedDev}
+                             </span>
                          </div>
                      )}
                  </div>
@@ -4753,6 +4881,17 @@ export const ResourceDetailModal: React.FC<{
                                   </div>
                               </div>
                               <Icon name="ExternalLink" size={20} className="text-[#2AABEE]" />
+                          </a>
+                      ) : item.category === 'ps5' ? (
+                          <a href={`https://store.playstation.com/en-us/search/${encodeURIComponent(item.name)}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto flex-1 flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-all text-slate-900 dark:text-white">
+                              <div className="flex items-center gap-3">
+                                  <FaPlaystation size={24} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+                                  <div className="flex flex-col text-start">
+                                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{t('Check database stats and info')}</span>
+                                      <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{t('Get it on Playstation')}</span>
+                                  </div>
+                              </div>
+                              <Icon name="ExternalLink" size={20} className="text-slate-400" />
                           </a>
                       ) : item.category === 'extra' ? null : (
                           <a href={`https://steamdb.info/search/?a=app&q=${encodeURIComponent(item.name)}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto flex-1 flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-all text-slate-900 dark:text-white">
@@ -5042,14 +5181,16 @@ export const ResourceDetailModal: React.FC<{
                   </div>
 
                   {/* Download Channels */}
-                  {((item.links?.full) || (item.links?.utorrent) || (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) || (item.links?.ankerParts && item.links.ankerParts.length > 0) || (item.links?.preInstalled && (item.links.preInstalled.download || item.links.preInstalled.cloudDrop || item.links.preInstalled.torrent))) && (
+                  {((item.buttons && item.buttons.length > 0) || (item.links?.ps5Buttons && item.links.ps5Buttons.length > 0) || (item.links?.full) || (item.links?.utorrent) || (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) || (item.links?.ankerParts && item.links.ankerParts.length > 0) || (item.links?.preInstalled && (item.links.preInstalled.download || item.links.preInstalled.cloudDrop || item.links.preInstalled.torrent))) && (
                   <div className="py-6 sm:py-12" id="download">
                       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                           <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-primary-500/10 text-primary-500 rounded-xl flex items-center justify-center">
-                                  <Icon name="Download" size={20} />
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.category === 'ps5' ? 'bg-indigo-600/15 text-indigo-500' : 'bg-primary-500/10 text-primary-500'}`}>
+                                  {item.category === 'ps5' ? <GoDesktopDownload size={22} /> : <Icon name="Download" size={20} />}
                               </div>
-                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('Download Channels')}</h3>
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                {item.category === 'ps5' ? t('PlayStation 5 Download Channels') : t('Download Channels')}
+                              </h3>
                           </div>
 
                           {(item.isFixedByAdmin || activeReport?.status === 'fixed') ? (
@@ -5069,8 +5210,41 @@ export const ResourceDetailModal: React.FC<{
                               </span>
                           ) : null}
                       </div>
+
+                      {/* PS5 Custom Dynamic Buttons (button1, button2, button3, button4 ....) */}
+                      {item.category === 'ps5' && ((item.buttons && item.buttons.length > 0) || (item.links?.ps5Buttons && item.links.ps5Buttons.length > 0)) && (
+                          <div className="mb-8">
+                              <div className="flex flex-col gap-1 mb-3">
+                                  <div className="flex items-center justify-between gap-2">
+                                      <h4 className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+                                          <FaPlaystation size={14} className="shrink-0" />
+                                          <span>{t('PS5 Direct Packages')}</span>
+                                      </h4>
+                                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] font-bold border border-indigo-500/30">
+                                          {((item.buttons || item.links?.ps5Buttons) || []).length} {t('Packages')}
+                                      </span>
+                                  </div>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                                      {t('(choose just one or read button note)')}
+                                  </p>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                                  {((item.buttons || item.links?.ps5Buttons) || []).map((btn) => (
+                                      <DownloadButton
+                                          key={'ps5_btn_' + btn.id}
+                                          label={btn.label || `Package ${String(btn.id).padStart(2, '0')}`}
+                                          sub={btn.note || t('Direct Download')}
+                                          href={btn.link}
+                                          icon="Download"
+                                          badge={btn.id === 1 ? 'Primary' : undefined}
+                                          customIcon={<GoDesktopDownload size={24} className="text-white" />}
+                                      />
+                                  ))}
+                              </div>
+                          </div>
+                      )}
                       
-                      {item.links?.full && (
+                      {item.links?.full && item.category !== 'ps5' && (
                           <div className="mb-6">
                               <div className="flex items-center gap-2 mb-3">
                                   <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t('Direct Full Download')}</h4>
@@ -5124,7 +5298,7 @@ export const ResourceDetailModal: React.FC<{
                       )}
 
                                                                   {/* Pre-Installed / SteamUnlocked */}
-                      {item.links?.preInstalled && (item.links?.preInstalled?.download || item.links?.preInstalled?.cloudDrop || item.links?.preInstalled?.torrent) && (
+                      {item.category !== 'ps5' && item.links?.preInstalled && (item.links?.preInstalled?.download || item.links?.preInstalled?.cloudDrop || item.links?.preInstalled?.torrent) && (
                           <details className="mb-6 group">
                               <summary className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors select-none list-none">
                                   <Icon name="ChevronRight" size={14} className="group-open:rotate-90 transition-transform" />
@@ -5169,7 +5343,7 @@ export const ResourceDetailModal: React.FC<{
                           </details>
                       )}
                       
-                      {( (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) ) && (
+                      {item.category !== 'ps5' && ( (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) ) && (
                           <details className="mb-6 group">
                               <summary className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors select-none list-none">
                                   <Icon name="ChevronRight" size={14} className="group-open:rotate-90 transition-transform" />
@@ -5208,7 +5382,7 @@ export const ResourceDetailModal: React.FC<{
                           </details>
                       )}
                       
-                      {item.links?.ankerParts && item.links.ankerParts.length > 0 && (
+                      {item.category !== 'ps5' && item.links?.ankerParts && item.links.ankerParts.length > 0 && (
                           <details className="mb-6 group">
                               <summary className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors select-none list-none">
                                   <Icon name="ChevronRight" size={14} className="group-open:rotate-90 transition-transform" />
@@ -5767,12 +5941,13 @@ const DownloadButton: React.FC<{
   href: string;
   icon: string;
   imageUrl?: string;
+  customIcon?: React.ReactNode;
   secondary?: boolean;
   note?: string;
   badge?: string;
   onNoteClick?: (note: string) => void;
   onClick?: (e: React.MouseEvent) => void;
-}> = ({ label, sub, href, icon, imageUrl, secondary, note, badge, onNoteClick, onClick }) => {
+}> = ({ label, sub, href, icon, imageUrl, customIcon, secondary, note, badge, onNoteClick, onClick }) => {
   const validNote = note && note.trim().toLowerCase() !== 'undefined' && note.trim() !== '-' && note.trim() !== '' ? note.trim() : null;
   const isShortNote = validNote && validNote.length <= 50;
 
@@ -5798,7 +5973,9 @@ const DownloadButton: React.FC<{
             ? 'bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400' 
             : 'bg-primary-500 text-white shadow-[0_0_15px_rgba(var(--color-primary-500),0.3)]'
         }`}>
-          {imageUrl ? (
+          {customIcon ? (
+             customIcon
+          ) : imageUrl ? (
              <img src={imageUrl} alt={label} className="w-full h-full object-contain" />
           ) : (
              <Icon name={icon as any} size={24} />
@@ -6461,7 +6638,7 @@ const BestStudiosCarousel: React.FC<{
             .map(p => {
                 let count = 0;
                 if (categoryType === 'games') {
-                    count = (p.gameIds?.length || 0) + (p.hypervisorIds?.length || 0) + (p.steamtoolsIds?.length || 0);
+                    count = (p.gameIds?.length || 0) + (p.hypervisorIds?.length || 0) + (p.steamtoolsIds?.length || 0) + (p.ps5Ids?.length || 0);
                 } else {
                     count = (p.architectIds?.length || 0) + (p.extraIds?.length || 0);
                 }
@@ -6730,7 +6907,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   useEffect(() => { imageProgressRef.current = imageProgress; }, [imageProgress]);
 
   const [networkStatus, setNetworkStatus] = useState<{ quality: string | null, isTesting: boolean }>({ quality: null, isTesting: false });
-  const [allResources, setAllResources] = useState<Record<string, ResourceItem[]>>({ game: [], hypervisor: [], steamtools: [], architect: [], extra: [] });
+  const [allResources, setAllResources] = useState<Record<string, ResourceItem[]>>({ game: [], hypervisor: [], steamtools: [], ps5: [], architect: [], extra: [] });
   const [companyProfiles, setCompanyProfiles] = useState<CompanyProfile[]>([]);
   const [topGames, setTopGames] = useState<TopGame[]>([]);
   const [bestGameSeries, setBestGameSeries] = useState<BestGameSeries[]>([]);
@@ -6744,6 +6921,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           'game': 'gameIds',
           'hypervisor': 'hypervisorIds',
           'steamtools': 'steamtoolsIds',
+          'ps5': 'ps5Ids',
           'architect': 'architectIds',
           'extra': 'extraIds'
       };
@@ -6795,7 +6973,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       return '';
   };
 
-  const [activeTab, setActiveTab] = useState<'game' | 'hypervisor' | 'steamtools' | 'architect' | 'extra' | 'stash'>('game');
+  const [activeTab, setActiveTab] = useState<'game' | 'hypervisor' | 'steamtools' | 'ps5' | 'architect' | 'extra' | 'stash'>('game');
   const [searchQuery, setSearchQuery] = useState('');
   const [stash, setStash] = useState<string[]>([]);
   const [animateStashTab, setAnimateStashTab] = useState(false);
@@ -6956,7 +7134,17 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     setSelectedResource(null);
     setSelectedResourceAction(undefined);
     setOpenedViaRandom(false);
-    if (routerLocation.pathname.startsWith('/game/')) {
+    const p = routerLocation.pathname;
+    if (
+      p.startsWith('/game/') ||
+      p.startsWith('/hypervisor/') ||
+      p.startsWith('/steamtools/') ||
+      p.startsWith('/ps5/') ||
+      p.startsWith('/tools/') ||
+      p.startsWith('/architect/') ||
+      p.startsWith('/savegame/') ||
+      p.startsWith('/extra/')
+    ) {
       navigate('/', { replace: true });
     } else if (new URLSearchParams(window.location.search).get('item')) {
       const url = new URL(window.location.href);
@@ -6969,9 +7157,10 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     // If there's a state passed via history or router state
     const stateOpenId = (routerLocation.state as any)?.openGameId || window.history.state?.usr?.openGameId;
     const searchParamId = new URLSearchParams(window.location.search).get('item');
-    const pathGameId = routerLocation.pathname.startsWith('/game/')
-      ? decodeURIComponent(routerLocation.pathname.replace(/^\/game\//, ''))
-      : null;
+    const pathSectionMatch = routerLocation.pathname.match(/^\/(?:game|hypervisor|steamtools|ps5|tools|architect|savegame|extra)\/(.+)/i);
+    const pathGameId = pathSectionMatch
+      ? decodeURIComponent(pathSectionMatch[1])
+      : (routerLocation.pathname.startsWith('/game/') ? decodeURIComponent(routerLocation.pathname.replace(/^\/game\//, '')) : null);
     const targetId = stateOpenId || searchParamId || pathGameId;
 
     if (targetId) {
@@ -7002,7 +7191,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       if (!gameToOpen && (routerLocation.state as any)?.gameData) {
         const gd = (routerLocation.state as any).gameData;
         const targetIdUpper = String(gd.id || targetId).toUpperCase();
-        const fallbackCat = gd.category || (targetIdUpper.startsWith('A') ? 'architect' : targetIdUpper.startsWith('H') ? 'hypervisor' : targetIdUpper.startsWith('S') ? 'steamtools' : targetIdUpper.startsWith('E') ? 'extra' : 'game');
+        const fallbackCat = gd.category || (targetIdUpper.startsWith('A') ? 'architect' : targetIdUpper.startsWith('H') ? 'hypervisor' : targetIdUpper.startsWith('S') ? 'steamtools' : (targetIdUpper.startsWith('P') || targetIdUpper.startsWith('PS5')) ? 'ps5' : targetIdUpper.startsWith('E') ? 'extra' : 'game');
         gameToOpen = {
           id: String(gd.id || targetId),
           name: gd.name || targetId,
@@ -7070,6 +7259,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       game: [],
       hypervisor: [],
       steamtools: [],
+      ps5: [],
       tools: [],
       savegames: []
   });
@@ -7433,6 +7623,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     addItems(allResources['game'] || [], 'GAME');
     addItems(allResources['hypervisor'] || [], 'HYPERVISOR');
     addItems(allResources['steamtools'] || [], 'STEAMTOOLS');
+    addItems(allResources['ps5'] || [], 'PS5');
     addItems(allResources['architect'] || [], 'ARCHITECT');
     addItems(allResources['extra'] || [], 'EXTRA');
 
@@ -7451,7 +7642,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     let all: { item: ResourceItem, rowIndex: number, dateScore: number }[] = [];
     
     // The items in allResources are already reversed (newest from bottom of sheet are at index 0).
-    ["game", "hypervisor", "steamtools", "architect", "extra"].forEach(cat => {
+    ["game", "hypervisor", "steamtools", "ps5", "architect", "extra"].forEach(cat => {
         const items = allResources[cat] || [];
         items.forEach((item, index) => {
              let d = 0;
@@ -7786,6 +7977,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             game: [],
             hypervisor: [],
             steamtools: [],
+            ps5: [],
             tools: [],
             savegames: []
         };
@@ -7808,6 +8000,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             game: [],
             hypervisor: [],
             steamtools: [],
+            ps5: [],
             tools: [],
             savegames: []
         });
@@ -7897,7 +8090,9 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
                gameIds: (getVal('gamesid') || getVal('gameids') || getVal('gameid') || '').toString().split(',').map(s => s.trim()).filter(Boolean),
                hypervisorIds: (getVal('hypervisionid') || getVal('hypervisorid') || getVal('hypervisorids') || '').toString().split(',').map(s => s.trim()).filter(Boolean),
                steamtoolsIds: (getVal('steamtoolsid') || getVal('steamtoolsids') || '').toString().split(',').map(s => s.trim()).filter(Boolean),
-               architectIds: (getVal('toolsid') || getVal('architectids') || getVal('architectid') || '').toString().split(',').map(s => s.trim()).filter(Boolean)
+               architectIds: (getVal('toolsid') || getVal('architectids') || getVal('architectid') || '').toString().split(',').map(s => s.trim()).filter(Boolean),
+               ps5Ids: (getVal('ps5id') || getVal('ps5ids') || getVal('playstationid') || '').toString().split(',').map(s => s.trim()).filter(Boolean),
+               extraIds: (getVal('extraid') || getVal('extraids') || getVal('savegameid') || '').toString().split(',').map(s => s.trim()).filter(Boolean)
            };
         });
         setCompanyProfiles(profiles);
@@ -8016,7 +8211,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       setSheetUpcomingTrailers([]);
     }
 
-    const transformed: Record<string, ResourceItem[]> = { game: [], hypervisor: [], steamtools: [], architect: [], extra: [] };
+    const transformed: Record<string, ResourceItem[]> = { game: [], hypervisor: [], steamtools: [], ps5: [], architect: [], extra: [] };
     Object.keys(data).forEach(tabKey => {
       const normalizedKey = tabKey.toLowerCase();
       let targetKey = '';
@@ -8024,6 +8219,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       
       if (normalizedKey.includes('hypervisor')) { targetKey = 'hypervisor'; idPrefix = 'H'; }
       else if (normalizedKey.includes('upcoming') || normalizedKey.includes('steamaccounts') || normalizedKey.includes('mastergift') || normalizedKey.includes('profil') || normalizedKey.includes('topgames') || normalizedKey.includes('popularrepack') || normalizedKey.includes('bestgameseries')) { return; }
+      else if (normalizedKey.includes('ps5') || normalizedKey.includes('playstation')) { targetKey = 'ps5'; idPrefix = 'P'; }
       else if (normalizedKey.includes('game') && !normalizedKey.includes('savegame')) { targetKey = 'game'; idPrefix = 'G'; }
       else if (normalizedKey.includes('steamtools')) { targetKey = 'steamtools'; idPrefix = 'S'; }
       else if (normalizedKey.includes('architect')) { targetKey = 'architect'; idPrefix = 'A'; }
@@ -8048,22 +8244,44 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           };
           
           const reqsStr = getVal('requirements');
-          const reqs = (reqsStr || '').toString().split('|').map((s: string) => {
-            const parts = s.split(':');
+          const reqs = (reqsStr || '').toString().split(/[|\n\r]+/).map((s: string) => {
+            const trimmed = s.trim();
+            if (!trimmed) return null;
+            const parts = trimmed.split(':');
+            if (parts.length === 1) {
+              return {
+                label: targetKey === 'ps5' ? 'Firmware' : 'Requirement',
+                value: parts[0]?.trim(),
+                icon: targetKey === 'ps5' ? 'Cpu' : 'Box',
+                link: undefined
+              };
+            }
             return { 
               label: parts[0]?.trim() || 'Info', 
               value: parts[1]?.trim() || 'N/A', 
-              icon: parts[2]?.trim() || 'Box',
+              icon: parts[2]?.trim() || (targetKey === 'ps5' ? 'Cpu' : 'Box'),
               link: parts[3]?.trim() || undefined
             };
-          }).filter((r: any) => r.value && r.value !== 'N/A');
+          }).filter((r: any) => r && r.value && r.value !== 'N/A');
 
-          const steps = (getVal('steps') || '').toString().split('|').map((s: string) => s.trim()).filter((s: string) => s);
-          const gallery = (getVal('gallery') || '').toString().split('|').map((s: string) => s.trim()).filter((s: string) => s && s.startsWith('http'));
-          const toolsParsed = (getVal('tools') || '').toString().split('|').map((s: string) => {
-              const parts = s.split('^');
-              return { name: parts[0]?.trim(), url: parts[1]?.trim() };
-          }).filter((t: any) => t.name && t.url);
+          const steps = (getVal('steps') || '').toString().split(/[|\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s);
+          const gallery = (getVal('gallery') || '').toString().split(/[|,\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s && s.startsWith('http'));
+          const toolsParsed = (getVal('tools') || '').toString().split(/[|\n\r]+/).map((s: string) => {
+              const str = s.trim();
+              if (!str) return null;
+              if (str.includes('^')) {
+                const parts = str.split('^');
+                return { name: parts[0]?.trim() || 'Tool', url: parts[1]?.trim() || '' };
+              }
+              if (str.includes('|')) {
+                const parts = str.split('|');
+                return { name: parts[0]?.trim() || 'Tool', url: parts[1]?.trim() || '' };
+              }
+              if (/^https?:\/\//i.test(str)) {
+                return { name: 'Direct Tool Link', url: str };
+              }
+              return null;
+          }).filter((t: any) => t && t.name && t.url);
 
           const partsArr: { id: number, link: string, note?: string }[] = [];
           const mirrorsArr: { id: number, link: string, note?: string }[] = [];
@@ -8130,20 +8348,123 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
               if (aVal) ankerArr.push({ id: i, link: aVal, note: aNote });
           }
 
+          // Dynamic button parsing for PS5 tab (button1, button2, button3, button4 ....)
+          const ps5Buttons: Ps5Button[] = [];
+          if (targetKey === 'ps5') {
+            const seenIndices = new Set<number>();
+            const rowKeys = Object.keys(row);
+            const btnKeyPattern = /^(?:button|btn)[_ ]?(\d+)$/i;
+            const detectedKeys = rowKeys
+              .filter(k => btnKeyPattern.test(k.trim()))
+              .sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '') || '0', 10);
+                const numB = parseInt(b.replace(/\D/g, '') || '0', 10);
+                return numA - numB;
+              });
+
+            const parseBtnVal = (val: string, idx: number): Ps5Button | null => {
+              if (!val) return null;
+              val = String(val).trim();
+              if (!val) return null;
+
+              if (val.includes('^')) {
+                const parts = val.split('^').map(s => s.trim());
+                const isUrl0 = /^https?:\/\//i.test(parts[0]);
+                return {
+                  id: idx,
+                  label: isUrl0 ? (parts[1] || `Button ${idx}`) : parts[0],
+                  link: isUrl0 ? parts[0] : parts[1]
+                };
+              }
+
+              if (val.includes('|')) {
+                const parts = val.split('|').map(s => s.trim());
+                const isUrl0 = /^https?:\/\//i.test(parts[0]);
+                const link = isUrl0 ? parts[0] : parts[1];
+                const label = isUrl0 ? (parts[1] || `Button ${idx}`) : parts[0];
+                return {
+                  id: idx,
+                  label: label,
+                  link: link,
+                  note: parts.length > 2 ? parts[2] : undefined
+                };
+              }
+
+              const parenMatch = val.match(/^(https?:\/\/[^\s]+)\s*[\(\[]([^\)\]]+)[\)\]]$/i);
+              if (parenMatch) {
+                return { id: idx, label: parenMatch[2].trim() || `Button ${idx}`, link: parenMatch[1].trim() };
+              }
+
+              const quoteMatch = val.match(/^(https?:\/\/[^\s]+)\s*['"]([^'"]+)['"]$/i);
+              if (quoteMatch) {
+                return { id: idx, label: quoteMatch[2].trim() || `Button ${idx}`, link: quoteMatch[1].trim() };
+              }
+
+              const spaceMatch = val.match(/^(https?:\/\/[^\s]+)\s+(.+)$/i);
+              if (spaceMatch) {
+                return { id: idx, label: spaceMatch[2].trim() || `Button ${idx}`, link: spaceMatch[1].trim() };
+              }
+
+              return {
+                id: idx,
+                label: `Button ${idx}`,
+                link: val
+              };
+            };
+
+            detectedKeys.forEach(k => {
+              const num = parseInt(k.replace(/\D/g, '') || '1', 10);
+              const val = row[k];
+              if (val && String(val).trim()) {
+                const parsed = parseBtnVal(String(val), num);
+                if (parsed && parsed.link) {
+                  ps5Buttons.push(parsed);
+                  seenIndices.add(num);
+                }
+              }
+            });
+
+            for (let b = 1; b <= 40; b++) {
+              if (!seenIndices.has(b)) {
+                const bVal = getVal(`button${b}`) || getVal(`btn${b}`) || getVal(`button_${b}`) || getVal(`button ${b}`);
+                if (bVal && String(bVal).trim()) {
+                  const parsed = parseBtnVal(String(bVal), b);
+                  if (parsed && parsed.link) {
+                    ps5Buttons.push(parsed);
+                    seenIndices.add(b);
+                  }
+                }
+              }
+            }
+
+            // Fallback: If partsArr was empty, fill partsArr from buttons for standard components
+            if (partsArr.length === 0 && ps5Buttons.length > 0) {
+              ps5Buttons.forEach(b => {
+                partsArr.push({ id: b.id, link: b.link, note: b.label });
+              });
+            }
+          }
+
           const isPinnedRaw = getVal('pinned');
           const isFreeRaw = getVal('price') || getVal('isfree') || getVal('free');
+          const publishByVal = getVal('publishBy') || getVal('publishedBy') || getVal('publisher') || getVal('repackBy') || '';
+          const origSizeVal = getVal('originalSize') || getVal('size') || getVal('repackSize') || 'N/A';
+          const repackSizeVal = targetKey === 'ps5' ? origSizeVal : (getVal('repackSize') || origSizeVal);
+          const rawId = String(row.id || (idx + 1)).trim();
+          const finalId = (/^[A-Za-z]/.test(rawId)) ? rawId : `${idPrefix}${rawId}`;
 
           return {
-            id: `${idPrefix}${row.id || (idx + 1)}`,
+            id: finalId,
             category: targetKey,
             name: getVal('name') || 'Secure Fragment',
             version: getVal('version') || 'v1.0',
-            repackSize: getVal('repackSize') || 'N/A',
-            originalSize: getVal('originalSize') || 'N/A',
+            repackSize: repackSizeVal,
+            originalSize: origSizeVal,
             genres: getVal('genres') || '',
             languages: getVal('languages') || 'ENG',
-            repackBy: getVal('repackBy') || '',
-            developer: getVal('developer') || getVal('studio') || getVal('company') || '',
+            publishBy: publishByVal,
+            repackBy: publishByVal || getVal('repackBy') || '',
+            developer: publishByVal || getVal('developer') || getVal('studio') || getVal('company') || '',
             coverImage: getVal('coverImage') || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED',
             galleryImages: gallery,
             description: getVal('description') || 'No intel available.',
@@ -8158,13 +8479,16 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             isPinned: String(isPinnedRaw).toLowerCase() === 'true' || String(isPinnedRaw).toLowerCase() === 'yes' || String(isPinnedRaw).toLowerCase() === 'on',
             isFree: String(isFreeRaw).toLowerCase() === 'true' || String(isFreeRaw).toLowerCase() === 'yes' || String(isFreeRaw).toLowerCase() === 'free' || String(isFreeRaw) === '0',
             toolsNeeded: toolsParsed,
+            buttons: ps5Buttons,
             links: { 
               parts: partsArr,
               mirrors: mirrorsArr,
               ankerParts: ankerArr,
-              full: getVal('full'), 
+              buttons: ps5Buttons,
+              ps5Buttons: ps5Buttons,
+              full: getVal('full') || (targetKey === 'ps5' && ps5Buttons.length > 0 ? ps5Buttons[0].link : undefined), 
               fullNote: getVal('fullNote') || getVal('note'),
-                            tutorial: getVal('tutorial'), 
+              tutorial: getVal('tutorial'), 
               dlc: getVal('dlc'), 
               trailer: getVal('trailer'),
               preInstalled: {
@@ -8428,6 +8752,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       if (allResources.game) resources.push(...allResources.game.filter(item => isMatch(item, profile.gameIds || [])));
       if (allResources.hypervisor) resources.push(...allResources.hypervisor.filter(item => isMatch(item, profile.hypervisorIds || [])));
       if (allResources.steamtools) resources.push(...allResources.steamtools.filter(item => isMatch(item, profile.steamtoolsIds || [])));
+      if (allResources.ps5) resources.push(...allResources.ps5.filter(item => isMatch(item, profile.ps5Ids || [])));
       if (allResources.architect) resources.push(...allResources.architect.filter(item => isMatch(item, profile.architectIds || [])));
       if (allResources.extra) resources.push(...allResources.extra.filter(item => isMatch(item, profile.extraIds || [])));
 
@@ -8527,7 +8852,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
                   const foundItem = allItems.find(i => i.id === itemId);
                   if (foundItem) {
                       setSelectedResource(foundItem);
-                      if (['game', 'hypervisor', 'steamtools', 'architect', 'extra'].includes(foundItem.category.toLowerCase())) {
+                      if (['game', 'hypervisor', 'steamtools', 'ps5', 'architect', 'extra'].includes(foundItem.category.toLowerCase())) {
                           setActiveTab(foundItem.category.toLowerCase() as any);
                       }
                       // Remove the query param to prevent reopening on reload
@@ -9340,6 +9665,7 @@ const paginatedData = useMemo(() => {
                       const targetTab = (c === 'architect' || c === 'tools') ? 'architect'
                         : (c === 'hypervisor') ? 'hypervisor'
                         : (c === 'steamtools') ? 'steamtools'
+                        : (c === 'ps5' || c === 'playstation') ? 'ps5'
                         : (c === 'extra' || c === 'savegame') ? 'extra'
                         : 'game';
                       setActiveTab(targetTab);
@@ -9518,6 +9844,7 @@ const paginatedData = useMemo(() => {
                 const targetTab = (c === 'architect' || c === 'tools') ? 'architect'
                   : (c === 'hypervisor') ? 'hypervisor'
                   : (c === 'steamtools') ? 'steamtools'
+                  : (c === 'ps5' || c === 'playstation') ? 'ps5'
                   : (c === 'extra' || c === 'savegame') ? 'extra'
                   : 'game';
                 setActiveTab(targetTab);
@@ -9831,7 +10158,7 @@ const paginatedData = useMemo(() => {
           </div>
         </section>
 
-        {/* Section Header: Title and Subtitle for game, hypervisor, steamtools, tools, savegame */}
+        {/* Section Header: Title and Subtitle for game, hypervisor, steamtools, ps5, tools, savegame */}
         <section id="secretarea-library" className="scroll-mt-24" dir={dir}>
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -9846,6 +10173,7 @@ const paginatedData = useMemo(() => {
                    activeTab === 'architect' ? t('Tools & Software') :
                    activeTab === 'extra' ? t('SaveGame Archives') :
                    activeTab === 'steamtools' ? t('SteamTools') :
+                   activeTab === 'ps5' ? t('PS5 Games') :
                    t('PC Games')}
                 </span>
               </div>
@@ -9856,6 +10184,7 @@ const paginatedData = useMemo(() => {
                 {activeTab === 'game' ? t('PC Games') :
                  activeTab === 'hypervisor' ? t('Game Hypervisor') :
                  activeTab === 'steamtools' ? t('SteamTools') :
+                 activeTab === 'ps5' ? t('PS5 Games') :
                  activeTab === 'architect' ? t('Tools & Software') :
                  t('SaveGame Archives')}
               </h2>
@@ -9863,6 +10192,7 @@ const paginatedData = useMemo(() => {
                 {activeTab === 'game' ? t('Explore verified PC games, repacks, and direct download channels.') :
                  activeTab === 'hypervisor' ? t('Virtualization platforms, emulators, and system runtimes.') :
                  activeTab === 'steamtools' ? t('Steam utility items, manifests, and library management tools.') :
+                 activeTab === 'ps5' ? t('Explore verified PS5 games, packages, and direct download links.') :
                  activeTab === 'architect' ? t('Architecture, graphic design, and productivity software tools.') :
                  t('Completed game saves, progression unlocks, and backup archives.')}
               </p>
@@ -9875,16 +10205,24 @@ const paginatedData = useMemo(() => {
               <div className="flex flex-col gap-2.5 sm:gap-3 items-stretch justify-between">
                   <div className="flex flex-row gap-2 sm:gap-3 items-center justify-between w-full min-w-0">
                       <div className="flex overflow-x-auto no-scrollbar p-1 bg-slate-100 dark:bg-slate-950 rounded-xl flex-1 gap-1">
-                        {(['game', 'hypervisor', 'steamtools', 'architect', 'extra'] as const).map(tab => (
+                        {(['game', 'hypervisor', 'steamtools', 'ps5', 'architect', 'extra'] as const).map(tab => (
                           <button 
                               key={tab}
                               onClick={() => setActiveTab(tab as any)}
-                              className={`shrink-0 relative px-3 py-2 sm:px-5 md:px-7 sm:py-2.5 md:py-3 rounded-lg font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-all z-10 flex items-center justify-center ${activeTab === tab ? 'text-black dark:text-white' : 'text-slate-700 dark:text-slate-400 hover:text-black dark:hover:text-white'}`}
+                              className={`shrink-0 relative px-3 py-2 sm:px-4 md:px-5 sm:py-2.5 md:py-3 rounded-lg font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-all z-10 flex items-center justify-center gap-1.5 ${activeTab === tab ? 'text-black dark:text-white' : 'text-slate-700 dark:text-slate-400 hover:text-black dark:hover:text-white'}`}
                           >
                             {activeTab === tab && (
                               <motion.div layoutId="activeTab" className="absolute inset-0 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
                             )}
                             <span className="relative z-10 flex items-center gap-1.5">
+                              {/* Distinct Icons for each section: game, hypervisor, steamtools, ps5, tools, savegame */}
+                              {tab === 'game' && <TbDeviceGamepad2 className="text-sm sm:text-base shrink-0 text-sky-500" />}
+                              {tab === 'hypervisor' && <TbServer className="text-sm sm:text-base shrink-0 text-red-500" />}
+                              {tab === 'steamtools' && <SiSteam className="text-xs sm:text-sm shrink-0 text-blue-500" />}
+                              {tab === 'ps5' && <FaPlaystation className="text-sm sm:text-base shrink-0 text-indigo-500" />}
+                              {tab === 'architect' && <TbTools className="text-sm sm:text-base shrink-0 text-amber-500" />}
+                              {tab === 'extra' && <TbDeviceFloppy className="text-sm sm:text-base shrink-0 text-emerald-500" />}
+
                               {tab === 'hypervisor' ? (
                                 <>
                                   <span>{t('GAME')}</span>
@@ -9892,19 +10230,34 @@ const paginatedData = useMemo(() => {
                                     {t('HYPERVISOR')}
                                   </span>
                                 </>
+                              ) : tab === 'ps5' ? (
+                                <span>{t('PS5')}</span>
                               ) : tab === 'architect' ? (
-                                t('TOOLS')
+                                <span>{t('TOOLS')}</span>
                               ) : tab === 'extra' ? (
-                                t('SAVEGAME')
+                                <span>{t('SAVEGAME')}</span>
                               ) : tab === 'steamtools' ? (
-                                t('STEAMTOOLS')
-                              ) : t('GAME')}
+                                <span>{t('STEAMTOOLS')}</span>
+                              ) : (
+                                <span>{t('GAME')}</span>
+                              )}
                             </span>
                           </button>
                         ))}
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
+                          {(searchQuery || (activeTab === 'ps5' && selectedGenreView)) && (
+                            <button 
+                              onClick={() => { setSearchQuery(''); setSelectedGenreView(null); }}
+                              className="flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                              title={t('Clear Filters') || 'Clear Filters'}
+                              aria-label="Clear Filters"
+                            >
+                              <Icon name="X" size={16} />
+                              <span className="hidden sm:inline">{t('Clear')}</span>
+                            </button>
+                          )}
                           <button 
                             onClick={() => fetchData(false, true)}
                             className="flex items-center justify-center p-2.5 sm:p-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-200 rounded-xl transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
@@ -9928,11 +10281,23 @@ const paginatedData = useMemo(() => {
                         activeTab === 'game' ? `${t('SEARCH')} ${t('GAME')}...` :
                         activeTab === 'hypervisor' ? `${t('SEARCH')} ${t('HYPERVISOR')}...` :
                         activeTab === 'steamtools' ? `${t('SEARCH')} ${t('STEAMTOOLS')}...` :
+                        activeTab === 'ps5' ? `${t('SEARCH')} ${t('PS5')}...` :
                         activeTab === 'architect' ? `${t('SEARCH')} ${t('TOOLS')}...` :
                         `${t('SEARCH')} ${t('SAVEGAME')}...`
                       } 
-                      className="w-full ps-11 sm:ps-12 pe-4 py-2.5 sm:py-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all truncate"
+                      className="w-full ps-11 sm:ps-12 pe-10 py-2.5 sm:py-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/20 text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all truncate"
                     />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        className="absolute end-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                        title={t('Clear search') || 'Clear search'}
+                        aria-label="Clear search"
+                      >
+                        <Icon name="X" size={16} />
+                      </button>
+                    )}
                   </div>
               </div>
            </div>
@@ -9988,6 +10353,12 @@ const paginatedData = useMemo(() => {
                               if (item.category === 'profil') {
                                   handleCompanyClick(resolvedDev || item.name);
                               } else {
+                                  const secSlug = item.category === 'ps5' ? 'ps5' :
+                                                  item.category === 'hypervisor' ? 'hypervisor' :
+                                                  item.category === 'steamtools' ? 'steamtools' :
+                                                  item.category === 'architect' ? 'tools' :
+                                                  item.category === 'extra' ? 'savegame' : 'game';
+                                  window.history.pushState(null, '', `/${secSlug}/${encodeURIComponent(item.id)}`);
                                   setSelectedResource(item);
                               }
                           }}
@@ -10022,6 +10393,7 @@ const paginatedData = useMemo(() => {
                                         HV
                                     </div>
                                 )}
+
                             </div>
 
                             {/* Top Right Badges */}
@@ -10042,6 +10414,12 @@ const paginatedData = useMemo(() => {
                                             ID: {item.gameId}
                                         </div>
                                     )
+                                ) : item.category === 'ps5' ? (
+                                    (item.originalSize || item.repackSize) ? (
+                                        <div className="px-2 py-1 bg-indigo-950/80 md:backdrop-blur-md rounded-md border border-indigo-500/40 text-[10px] font-mono font-bold text-indigo-300 shadow-sm">
+                                            <span>{item.originalSize || item.repackSize}</span>
+                                        </div>
+                                    ) : null
                                 ) : (
                                     <div className="px-2 py-1 bg-white/90 dark:bg-black/60 md:backdrop-blur-md rounded-md border border-slate-200 dark:border-white/10 text-[10px] font-mono font-bold text-primary-600 dark:text-primary-400">
                                         {item.repackSize}
@@ -10060,7 +10438,20 @@ const paginatedData = useMemo(() => {
                             </div>
                             
                             <div className="absolute bottom-0 start-0 end-0 p-5 z-20">
-                                {resolvedDev && (
+                                {item.category === 'ps5' ? (
+                                    (item.publishBy || resolvedDev) && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleCompanyClick(item.publishBy || resolvedDev);
+                                            }}
+                                            className="mb-2 flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-950/80 md:backdrop-blur-sm text-indigo-300 border border-indigo-500/40 hover:bg-indigo-900/90 transition-colors w-max"
+                                        >
+                                            <FaPlaystation size={10} className="shrink-0 text-white" />
+                                            <span>{item.publishBy || resolvedDev}</span>
+                                        </button>
+                                    )
+                                ) : resolvedDev && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -10185,7 +10576,7 @@ const paginatedData = useMemo(() => {
             />
         </div>
 
-        {['game', 'hypervisor', 'steamtools'].includes(activeTab) && (
+        {['game', 'hypervisor', 'steamtools', 'ps5'].includes(activeTab) && (
             <>
                 <BestStudiosCarousel 
                     profiles={companyProfiles}
@@ -10290,7 +10681,7 @@ const paginatedData = useMemo(() => {
               setShowAllProfiles(false);
               setSelectedCompanyProfile(profile);
           }}
-          categoryType={['game', 'hypervisor', 'steamtools'].includes(activeTab) ? 'games' : 'tools'}
+          categoryType={['game', 'hypervisor', 'steamtools', 'ps5'].includes(activeTab) ? 'games' : 'tools'}
       />
     </div>
   );
@@ -10313,7 +10704,7 @@ const AllProfilesModal: React.FC<{
             .map(p => {
                 let count = 0;
                 if (categoryType === 'games') {
-                    count = (p.gameIds?.length || 0) + (p.hypervisorIds?.length || 0) + (p.steamtoolsIds?.length || 0);
+                    count = (p.gameIds?.length || 0) + (p.hypervisorIds?.length || 0) + (p.steamtoolsIds?.length || 0) + (p.ps5Ids?.length || 0);
                 } else {
                     count = (p.architectIds?.length || 0) + (p.extraIds?.length || 0);
                 }

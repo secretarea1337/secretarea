@@ -23,7 +23,7 @@ import {
 
 import {
   SiAutodesk, SiBlender, SiSketchup, SiUnrealengine, SiUnity,
-  SiPython, SiReact, SiPhp, SiLinux, SiAndroid, SiPlaystation,
+  SiPython, SiReact, SiPhp, SiLinux, SiAndroid,
   SiSteam, SiGodotengine,
   SiLaravel, SiFlutter, SiDart, SiMysql, SiHackthebox, SiKalilinux, SiWireshark,
   SiMetasploit, SiNotion, SiShopify, SiGoogleanalytics,
@@ -32,6 +32,8 @@ import {
 } from 'react-icons/si';
 
 import { FaLandmark } from 'react-icons/fa6';
+import { FaPlaystation } from 'react-icons/fa';
+import { GoDesktopDownload } from 'react-icons/go';
 import { BsGpuCard } from 'react-icons/bs';
 
 interface IconProps {
@@ -60,6 +62,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Plus: TbPlus,
   Minus: TbMinus,
   Download: TbDownload,
+  DesktopDownload: GoDesktopDownload,
+  GoDesktopDownload: GoDesktopDownload,
   Upload: TbUpload,
   UploadCloud: TbCloudUpload,
   Edit: TbEdit,
@@ -192,7 +196,18 @@ const ICON_MAP: Record<string, React.ElementType> = {
   BrandWindows: TbBrandWindows,
   BrandAndroid: SiAndroid,
   BrandRuby: TbCode,
-  BrandPlaystation: SiPlaystation,
+  BrandPlaystation: FaPlaystation,
+  BrandPlaystation5: FaPlaystation,
+  Playstation: FaPlaystation,
+  Playstation5: FaPlaystation,
+  PS5: FaPlaystation,
+  ps5: FaPlaystation,
+  Steamtools: SiSteam,
+  steamtools: SiSteam,
+  Savegame: TbDeviceFloppy,
+  savegame: TbDeviceFloppy,
+  Hypervisor: TbServer,
+  hypervisor: TbServer,
   BrandXbox: TbBrandXbox,
   BrandSteam: SiSteam,
   BrandGodot: SiGodotengine,
@@ -240,6 +255,9 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Bell: TbBell,
   History: TbHistory,
   Filter: TbFilter,
+  Clear: TbCircleX,
+  ClearAll: TbCircleX,
+  Eraser: TbCircleX,
   MoreHorizontal: TbDots,
   Menu: TbMenu2,
   Hash: TbHash,

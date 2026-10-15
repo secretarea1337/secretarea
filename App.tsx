@@ -31,29 +31,63 @@ const AppBehavior = () => {
 
 // Protected routes logic
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isUnlocked =
+  let isUnlocked =
     localStorage.getItem('secret_area_unlocked') === 'true' ||
     localStorage.getItem('secret_area_unlocked') === 'guest' ||
     localStorage.getItem('nexa_guest_mode') === 'true';
   if (!isUnlocked) {
-    return <Navigate to="/" replace />;
+    localStorage.setItem('secret_area_unlocked', 'guest');
+    localStorage.setItem('nexa_guest_mode', 'true');
+    isUnlocked = true;
   }
   return <>{children}</>;
 };
 
+const isGameSectionRoute = (pathname: string): boolean => {
+  return (
+    pathname === '/' ||
+    pathname === '/terminal' ||
+    pathname.startsWith('/game/') ||
+    pathname === '/game' ||
+    pathname.startsWith('/hypervisor/') ||
+    pathname === '/hypervisor' ||
+    pathname.startsWith('/steamtools/') ||
+    pathname === '/steamtools' ||
+    pathname.startsWith('/ps5/') ||
+    pathname === '/ps5' ||
+    pathname.startsWith('/tools/') ||
+    pathname === '/tools' ||
+    pathname.startsWith('/architect/') ||
+    pathname === '/architect' ||
+    pathname.startsWith('/savegame/') ||
+    pathname === '/savegame' ||
+    pathname.startsWith('/extra/') ||
+    pathname === '/extra'
+  );
+};
+
 const MainContent = () => {
   const location = useLocation();
-  const isDashboard = location.pathname === '/';
+  const isDashboard = isGameSectionRoute(location.pathname);
+  const isTerminal = location.pathname === '/terminal';
 
   return (
     <main className="flex-grow">
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"><div className="animate-pulse flex flex-col items-center"><div className="w-12 h-12 border-4 border-slate-300 dark:border-slate-700 border-t-blue-500 rounded-full animate-spin"></div><div className="mt-4 text-slate-500 font-mono text-sm tracking-widest uppercase">Loading Core...</div></div></div>}>
-        <div style={{ display: isDashboard ? 'block' : 'none' }}>
-          <SecretArea />
+        <div style={{ display: (isDashboard || isTerminal) ? 'block' : 'none' }}>
+          <SecretArea isTerminalRoute={isTerminal} />
         </div>
         <Routes>
           <Route path="/" element={<div />} />
-          <Route path="/game/*" element={<Navigate to="/" replace />} />
+          <Route path="/terminal" element={<div />} />
+          <Route path="/game/*" element={<div />} />
+          <Route path="/hypervisor/*" element={<div />} />
+          <Route path="/steamtools/*" element={<div />} />
+          <Route path="/ps5/*" element={<div />} />
+          <Route path="/tools/*" element={<div />} />
+          <Route path="/architect/*" element={<div />} />
+          <Route path="/savegame/*" element={<div />} />
+          <Route path="/extra/*" element={<div />} />
           <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
           <Route path="/roadmap/:id" element={<ProtectedRoute><CategoryDetail /></ProtectedRoute>} />
           <Route path="/personal-space" element={<ProtectedRoute><PersonalFinance /></ProtectedRoute>} />
@@ -61,6 +95,7 @@ const MainContent = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Profile defaultTab="Reports & Fixes" />} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
       <Footer />
@@ -109,18 +144,21 @@ const App: React.FC = () => {
         
         
         <Helmet>
-          <title>Secret Area</title>
+          <title>Secret Area – Digital Gaming Catalog & Hypervisor Ecosystem</title>
           <meta name="description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea." />
-          <meta name="keywords" content="games Repack, Secret Area, Premium Tools, Hypervisor, Gaming Resources" />
-          <meta property="og:title" content="Secret Area" />
+          <meta name="keywords" content="games Repack, Secret Area, Premium Tools, Hypervisor, PS5 Games, SteamTools, Gaming Resources" />
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+          <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+          <meta property="og:title" content="Secret Area – Digital Gaming Catalog & Hypervisor Ecosystem" />
           <meta property="og:description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea." />
           <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://nexa1337.com/" />
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="Secret Area" />
+          <meta name="twitter:title" content="Secret Area – Digital Gaming Catalog & Hypervisor Ecosystem" />
           <meta name="twitter:description" content="Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea." />
           <link rel="canonical" href="https://nexa1337.com/" />
           <script type="application/ld+json">
-            {`{"@context":"https://schema.org","@type":"WebSite","name":"Secret Area","url":"https://nexa1337.com/","description":"Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea."}`}
+            {`{"@context":"https://schema.org","@type":"WebSite","name":"Secret Area","url":"https://nexa1337.com/","description":"Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem crafted by SecretArea.","potentialAction":{"@type":"SearchAction","target":"https://nexa1337.com/?q={search_term_string}","query-input":"required name=search_term_string"}}`}
           </script>
         </Helmet>
         <Header />

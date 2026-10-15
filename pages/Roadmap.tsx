@@ -1,4 +1,5 @@
 import { useLanguage } from '../src/contexts/LanguageContext';
+import { Helmet } from 'react-helmet-async';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,6 +32,11 @@ const Roadmap: React.FC = () => {
 
   return (
     <div className="w-full pt-28 pb-32 min-h-screen bg-[#fcfcfc] dark:bg-[#030712] px-4 sm:px-6 md:px-8 font-sans overflow-hidden">
+      <Helmet>
+        <title>Roadmap - Secret Area</title>
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+        <meta name="googlebot" content="noindex, nofollow, noarchive" />
+      </Helmet>
       <div className="max-w-6xl mx-auto relative">
         
         {/* Subtle grid background for the "intelligent" look */}

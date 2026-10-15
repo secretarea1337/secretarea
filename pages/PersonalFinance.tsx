@@ -1,5 +1,5 @@
 import { useLanguage } from '../src/contexts/LanguageContext';
-
+import { Helmet } from 'react-helmet-async';
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -903,6 +903,11 @@ const PersonalFinance: React.FC = () => {
   // --- MAIN DASHBOARD ---
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pt-24 pb-32 transition-colors duration-300 relative">
+      <Helmet>
+        <title>Personal Space - Secret Area</title>
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+        <meta name="googlebot" content="noindex, nofollow, noarchive" />
+      </Helmet>
       
       {/* AUTH OVERLAY MODAL */}
       <AnimatePresence>

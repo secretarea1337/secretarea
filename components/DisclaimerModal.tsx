@@ -169,7 +169,7 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ open, onClose 
     return 'EN';
   };
 
-  const [activeLang, setActiveLang] = useState<DisclaimerLang>(getInitialLanguage);
+  const [activeLang, setActiveLang] = useState<DisclaimerLang>(() => getInitialLanguage());
 
   // Sync if outer app language changes while modal is active
   useEffect(() => {
@@ -179,16 +179,15 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ open, onClose 
   const currentContent = DISCLAIMER_LOCALES[activeLang] || DISCLAIMER_LOCALES.EN;
   const isRTL = currentContent.dir === 'rtl';
 
-  if (!open) return null;
-
   return (
     <AnimatePresence>
-      <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-opacity"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="disclaimer-title"
-      >
+      {open && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-opacity"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="disclaimer-title"
+        >
         {/* Backdrop click dismiss */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -340,6 +339,7 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ open, onClose 
           </div>
         </motion.div>
       </div>
+      )}
     </AnimatePresence>
   );
 };

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { auth, db } from '../src/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { recordGameInteraction, getLocalProfile } from '../src/services/userService';
@@ -374,6 +375,11 @@ const CategoryDetail: React.FC = () => {
 
   return (
     <div className="w-full pt-20 pb-24 min-h-screen bg-slate-50 dark:bg-slate-950">
+      <Helmet>
+        <title>{category?.title ? `${category.title} - Secret Area` : 'Roadmap - Secret Area'}</title>
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+        <meta name="googlebot" content="noindex, nofollow, noarchive" />
+      </Helmet>
       
       {/* --- NEXA PROJECT MODAL --- */}
       <AnimatePresence>

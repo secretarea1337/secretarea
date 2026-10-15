@@ -1,26 +1,41 @@
 import type { IncomingMessage, ServerResponse } from "http";
+import { checkRateLimit, getClientIp } from "../_rateLimit";
+import { handleCors, isValidRedirectUri, applySecurityHeaders } from "../_security";
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  // CORS
-  const origin = req.headers.origin as string | undefined;
-  if (origin) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
+  applySecurityHeaders(res);
+
+  // Strict CORS
+  if (handleCors(req, res)) {
+    return;
   }
 
-  if (req.method === "OPTIONS") {
-    res.statusCode = 204;
-    res.end();
+  // Rate Limiting: 30 requests per 15 minutes per IP
+  const clientIp = getClientIp(req);
+  const rateLimit = checkRateLimit(`auth_url:${clientIp}`, 30, 15 * 60 * 1000);
+  res.setHeader("X-RateLimit-Limit", "30");
+  res.setHeader("X-RateLimit-Remaining", String(rateLimit.remaining));
+  res.setHeader("X-RateLimit-Reset", String(Math.ceil(rateLimit.resetTime / 1000)));
+
+  if (!rateLimit.allowed) {
+    res.statusCode = 429;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: "Too many authentication attempts. Please try again later." }));
+    return;
+  }
+
+  if (req.method !== "GET") {
+    res.statusCode = 405;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
     return;
   }
 
   const clientId = process.env.DISCORD_CLIENT_ID;
   if (!clientId) {
-    res.statusCode = 400;
+    res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "DISCORD_CLIENT_ID not configured in Vercel environment variables" }));
+    res.end(JSON.stringify({ error: "OAuth service is not configured" }));
     return;
   }
 
@@ -30,10 +45,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const urlObj = new URL(req.url || "", `${proto}://${host}`);
   let redirectUri = urlObj.searchParams.get("redirect_uri")?.trim();
 
-  if (!redirectUri) {
+  // Validate or set default redirectUri to prevent open redirects and SSRF
+  if (!redirectUri || !isValidRedirectUri(redirectUri, host)) {
     redirectUri = `${proto}://${host}/auth/discord/callback`;
   }
 
+  // Create state token with timestamp and redirectUri
   const state = Buffer.from(JSON.stringify({ redirectUri, ts: Date.now() })).toString("base64url");
 
   const params = new URLSearchParams({

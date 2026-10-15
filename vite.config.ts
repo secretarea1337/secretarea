@@ -20,7 +20,23 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
-        }
+        },
+        dedupe: ['react', 'react-dom']
+      },
+      optimizeDeps: {
+        include: [
+          'react',
+          'react-dom',
+          'react-dom/client',
+          'react/jsx-runtime',
+          'react/jsx-dev-runtime',
+          'framer-motion',
+          'lucide-react',
+          'react-icons/fa',
+          'react-icons/go',
+          'react-icons/si',
+          'react-icons/tb'
+        ]
       }
     };
 });

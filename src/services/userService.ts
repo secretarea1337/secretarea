@@ -184,7 +184,15 @@ export function detectUserLoginMethod(user: any): 'discord' | 'github' | 'gmail'
 }
 
 export function isUserAdmin(email?: string | null, role?: string | null): boolean {
-  if (email && ROOT_ADMIN_EMAILS.some(e => e.toLowerCase() === email.trim().toLowerCase())) return true;
+  if (email && ROOT_ADMIN_EMAILS.some(e => e.toLowerCase() === email.trim().toLowerCase())) {
+    // If auth state is loaded, verify that the email is verified to prevent unverified email impersonation
+    if (auth.currentUser && auth.currentUser.email && auth.currentUser.email.toLowerCase() === email.trim().toLowerCase()) {
+      if (auth.currentUser.emailVerified === false) {
+        return false;
+      }
+    }
+    return true;
+  }
   if (role && role.toLowerCase() === 'admin') return true;
   return false;
 }
@@ -330,7 +338,8 @@ export async function ensureUserProfile(user: any): Promise<UserProfileData> {
   const uid = user.uid;
   const userDocRef = doc(db, 'users', uid);
   const detectedMethod = detectUserLoginMethod(user);
-  const isAdmin = !!(user.email && ROOT_ADMIN_EMAILS.some(e => e.toLowerCase() === user.email?.trim().toLowerCase()));
+  const isEmailAdmin = !!(user.email && ROOT_ADMIN_EMAILS.some(e => e.toLowerCase() === user.email?.trim().toLowerCase()));
+  const isAdmin = isEmailAdmin && user.emailVerified !== false;
 
   try {
     const snap = await getDoc(userDocRef);
