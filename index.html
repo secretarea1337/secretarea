@@ -87,20 +87,26 @@
       }
     </style>
     
-    <!-- Ko-Fi Widget -->
-    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-    <script>
-      kofiWidgetOverlay.draw('mrwolfzonex', {
-        'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Support me',
-        'floating-chat.donateButton.background-color': '#00b9fe',
-        'floating-chat.donateButton.text-color': '#fff'
-      });
-    </script>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700;900&display=swap" rel="stylesheet">
+  <script>
+    // Suppress harmless WebSocket disconnect messages in dev preview
+    window.addEventListener('error', function(e) {
+      if (e.message && (e.message.indexOf('WebSocket') !== -1 || e.message.indexOf('unauthorized-domain') !== -1)) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      var reason = '' + ((e.reason && e.reason.message) || e.reason || '');
+      if (reason.indexOf('WebSocket') !== -1 || reason.indexOf('unauthorized-domain') !== -1) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    });
+  </script>
 </head>
   <body class="bg-gray-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

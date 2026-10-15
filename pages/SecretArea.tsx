@@ -8265,7 +8265,11 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           }).filter((r: any) => r && r.value && r.value !== 'N/A');
 
           const steps = (getVal('steps') || '').toString().split(/[|\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s);
-          const gallery = (getVal('gallery') || '').toString().split(/[|,\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s && s.startsWith('http'));
+          const rawGallery = (getVal('gallery') || '').toString();
+          const galleryMatches = rawGallery.match(/https?:\/\/[^\s|"\n\r]+/g) || [];
+          const gallery = galleryMatches.length > 0
+            ? galleryMatches.map((s: string) => s.replace(/[,\s]+$/, '').trim()).filter((s: string) => s && s.startsWith('http'))
+            : rawGallery.split(/[|\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s && s.startsWith('http'));
           const toolsParsed = (getVal('tools') || '').toString().split(/[|\n\r]+/).map((s: string) => {
               const str = s.trim();
               if (!str) return null;

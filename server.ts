@@ -16,8 +16,11 @@ function escapeHtml(unsafe: string | null | undefined): string {
 }
 
 const ALLOWED_ORIGINS = [
+  "https://secretarea.site",
+  "https://www.secretarea.site",
   "https://secretarea.vercel.app",
   "https://nexa1337.com",
+  "https://www.nexa1337.com",
   "http://localhost:3000",
   "http://localhost:5173",
 ];
@@ -31,6 +34,14 @@ function isOriginAllowed(origin: string | undefined): boolean {
     if (parsed.hostname.endsWith(".run.app") && parsed.protocol === "https:") {
       return true;
     }
+    // Allow any Vercel deployment preview / production domain
+    if (parsed.hostname.endsWith(".vercel.app") && parsed.protocol === "https:") {
+      return true;
+    }
+    // Allow secretarea.site domain and subdomains
+    if ((parsed.hostname === "secretarea.site" || parsed.hostname.endsWith(".secretarea.site")) && parsed.protocol === "https:") {
+      return true;
+    }
   } catch (e) {
     return false;
   }
@@ -42,9 +53,11 @@ function isValidRedirectUri(uri: string | undefined, hostHeader?: string): boole
   try {
     const parsed = new URL(uri);
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
-    if (parsed.origin === "https://secretarea.vercel.app" || parsed.origin === "https://nexa1337.com") return true;
+    if (ALLOWED_ORIGINS.includes(parsed.origin)) return true;
     if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") return true;
     if (parsed.hostname.endsWith(".run.app") && parsed.protocol === "https:") return true;
+    if (parsed.hostname.endsWith(".vercel.app") && parsed.protocol === "https:") return true;
+    if (parsed.hostname === "secretarea.site" || parsed.hostname.endsWith(".secretarea.site")) return true;
     if (hostHeader && (parsed.host === hostHeader || parsed.host === hostHeader.split(",")[0].trim())) return true;
   } catch (e) {
     return false;
@@ -63,7 +76,7 @@ async function startServer() {
     helmet({
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
-      crossOriginOpenerPolicy: false,
+      crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
       crossOriginResourcePolicy: { policy: "cross-origin" },
       frameguard: false,
       hidePoweredBy: true,

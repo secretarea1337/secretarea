@@ -691,7 +691,9 @@ export const parseGoogleSheetsTrailers = (rawData: any[]): UpcomingGameTrailer[]
 
     const multiUrlStr = getVal('trailerurls', 'trailers', 'youtubeurls', 'yt_urls', 'urls', 'trailer', 'video', 'link');
     if (multiUrlStr) {
-      const splitted = multiUrlStr.split(/[\n,\|\;]/).map(s => s.trim()).filter(Boolean);
+      const splitted = multiUrlStr.includes('|') || multiUrlStr.includes('\n')
+        ? multiUrlStr.split(/[\n\|\;]+/).map(s => s.trim()).filter(Boolean)
+        : (multiUrlStr.match(/https?:\/\/[^\s|"\n\r]+/g) || multiUrlStr.split(/[\n,\|\;]/)).map(s => s.trim().replace(/,$/, '')).filter(Boolean);
       splitted.forEach((entry, tIdx) => {
         let label = `Trailer ${tIdx + 1}`;
         let url = entry;
