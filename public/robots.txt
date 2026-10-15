@@ -60,4 +60,4 @@ Disallow: /admin/*
 Disallow: /settings
 Disallow: /settings/*
 
-Sitemap: https://nexa1337.com/sitemap.xml
+Sitemap: https://secretarea.site/sitemap.xml
