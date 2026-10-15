@@ -8,7 +8,7 @@ import {
   signOut as firebaseSignOut, 
   onAuthStateChanged as firebaseOnAuthStateChanged 
 } from 'firebase/auth';
-import { getFirestore, doc } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, doc } from 'firebase/firestore';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyCs7GCq4TKOqjaEo7OsoQ6RkGhaT1m0bXw",
@@ -24,7 +24,16 @@ export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfi
 
 // Initialize Firebase Auth & Firestore
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = (() => {
+  try {
+    return initializeFirestore(app, {
+      experimentalAutoDetectLongPolling: true,
+      ignoreUndefinedProperties: true
+    });
+  } catch {
+    return getFirestore(app);
+  }
+})();
 
 // Augment auth instance to preserve compatibility with existing call sites
 if (typeof (auth as any).onAuthStateChanged !== 'function') {

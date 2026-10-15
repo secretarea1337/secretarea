@@ -394,7 +394,13 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
                                     languages: getVal('languages') || 'ENG',
                                     repackBy: getVal('repackby') || '',
                                     coverImage: coverVal,
-                                    galleryImages: (getVal('galleryimages') || '').toString().split(/[,\n\|]/).map((s: string) => s.trim()).filter(Boolean),
+                                    galleryImages: (() => {
+                                        const rawG = (getVal('galleryimages') || '').toString();
+                                        const matches = rawG.match(/https?:\/\/[^\s|"\n\r]+/g);
+                                        return matches && matches.length > 0
+                                            ? matches.map((s: string) => s.replace(/[,|]+$/, '').trim()).filter((s: string) => s.startsWith('http'))
+                                            : rawG.split(/[|\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s.startsWith('http'));
+                                    })(),
                                     description: getVal('description') || '',
                                     gameId: getVal('gameid') || '',
                                     developer: getVal('developer') || '',

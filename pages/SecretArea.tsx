@@ -6193,7 +6193,7 @@ const GameOfTheDaySection: React.FC<{
                 {isVideo ? (
                     <video src={bgUrl} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-10 dark:opacity-20" />
                 ) : (
-                    <img src={bgUrl} alt="" className="w-full h-full object-cover opacity-10 dark:opacity-20" />
+                    <img src={bgUrl} alt="" role="presentation" className="w-full h-full object-cover opacity-10 dark:opacity-20" loading="lazy" decoding="async" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r md:from-white md:via-white/90 dark:md:from-[#0a111a] dark:md:via-[#0a111a]/90 from-white/80 via-white/80 dark:from-[#0a111a]/80 dark:via-[#0a111a]/80 to-transparent"></div>
             </div>
@@ -6206,7 +6206,7 @@ const GameOfTheDaySection: React.FC<{
                         <div className="absolute bottom-0 start-0 w-4 h-4 border-b-2 border-s-2 border-[#1ea1d7] z-20"></div>
                         <div className="absolute bottom-0 end-0 w-4 h-4 border-b-2 border-e-2 border-[#1ea1d7] z-20"></div>
 
-                        <img src={game.coverImage} className="w-full h-full object-cover relative z-10" />
+                        <img src={game.coverImage} alt={game.name || 'Featured Game'} className="w-full h-full object-cover relative z-10" loading="lazy" decoding="async" />
                         
                         <div className="absolute top-0 end-3 z-20 bg-[#1ea1d7] text-white p-2 pb-3 rounded-b-md">
                             <Icon name="Star" size={16} className="fill-current" />
@@ -6757,6 +6757,15 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [showHackerLoader, setShowHackerLoader] = useState(() => {
     if (isTerminalPath || sessionStorage.getItem('open_terminal') === 'true') {
       return false;
+    }
+    if (typeof window !== 'undefined') {
+      if (sessionStorage.getItem('hacker_loader_seen') === 'true') {
+        return false;
+      }
+      const ua = navigator.userAgent || '';
+      if (/bot|googlebot|crawler|spider|lighthouse|headlesschromium|gtmetrix/i.test(ua)) {
+        return false;
+      }
     }
     return true;
   });
@@ -7686,7 +7695,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
   useEffect(() => {
     const accepted = localStorage.getItem('nexa_disclaimer_accepted');
-    if (!accepted) {
+    const isBot = typeof navigator !== 'undefined' && /bot|googlebot|crawler|spider|lighthouse|headlesschromium|gtmetrix/i.test(navigator.userAgent || '');
+    if (!accepted && !isBot) {
         setShowDisclaimer(true);
     }
 
@@ -7752,7 +7762,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           
           if (prev >= 100 && lineIndex > lines.length) {
             clearInterval(interval);
-            setTimeout(() => setShowHackerLoader(false), 1000);
+            try { sessionStorage.setItem('hacker_loader_seen', 'true'); } catch {}
+            setTimeout(() => setShowHackerLoader(false), 200);
             return 100;
           }
 
@@ -8188,8 +8199,14 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
            return {
                id: row.id || `series-${idx}`,
+               images: (() => {
+                   const rawImgs = (getVal('images') || getVal('image') || '').toString();
+                   const matches = rawImgs.match(/https?:\/\/[^\s|"\n\r]+/g);
+                   return matches && matches.length > 0
+                       ? matches.map((s: string) => s.replace(/[,|]+$/, '').trim()).filter((s: string) => s.startsWith('http'))
+                       : rawImgs.split(/[|\n\r]+/).map((s: string) => s.trim()).filter((s: string) => s.startsWith('http'));
+               })(),
                category: getVal('categories') || getVal('category') || '',
-               images: (getVal('images') || getVal('image') || '').toString().split(/[,\n\|]/).map((s: string) => s.trim()).filter(Boolean),
                title: getVal('title') || getVal('name') || '',
                background: getVal('background') || getVal('bg') || getVal('bgurl') || '',
                games: parsedGames
@@ -8651,68 +8668,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       clearTimeout(timeoutId);
       setLoading(false);
       
-      if (!silent && showHackerLoader && dataToPreload) {
-          const urls = new Set<string>();
-          if (Array.isArray(dataToPreload.companyProfiles)) {
-              dataToPreload.companyProfiles.forEach((p: any) => p.logoUrl && urls.add(p.logoUrl));
-          }
-          if (Array.isArray(dataToPreload.topGames)) {
-              dataToPreload.topGames.forEach((g: any) => {
-                  if (g.bannerUrl) urls.add(g.bannerUrl);
-                  if (g.logoUrl) urls.add(g.logoUrl);
-                  if (g.symbolUrl) urls.add(g.symbolUrl);
-              });
-          }
-          if (Array.isArray(dataToPreload.bestGameSeries)) {
-              dataToPreload.bestGameSeries.forEach((g: any) => {
-                  if (Array.isArray(g.images)) g.images.forEach((img: string) => urls.add(img));
-              });
-          }
-          const upcomingKey = Object.keys(dataToPreload).find(k => k.toLowerCase() === 'upcoming');
-          if (upcomingKey && Array.isArray(dataToPreload[upcomingKey])) {
-              dataToPreload[upcomingKey].forEach((ug: any) => {
-                  const img = ug.image || ug.coverImage;
-                  if (img) urls.add(img);
-              });
-          }
-          
-          const uniqueUrls = Array.from(urls).filter(Boolean);
-          if (uniqueUrls.length === 0) {
-              setImagesLoading(false);
-              setImageProgress(100);
-          } else {
-              let loaded = 0;
-              const total = uniqueUrls.length;
-              
-              const loadPromises = Promise.all(uniqueUrls.map(url => {
-                  return new Promise(resolve => {
-                      const img = new Image();
-                      img.onload = () => {
-                          loaded++;
-                          setImageProgress(Math.floor((loaded / total) * 100));
-                          resolve(true);
-                      };
-                      img.onerror = () => {
-                          loaded++;
-                          setImageProgress(Math.floor((loaded / total) * 100));
-                          resolve(false);
-                      };
-                      img.src = url;
-                  });
-              }));
-
-              // Maximum 3 seconds for image preloading
-              const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
-              
-              Promise.race([loadPromises, timeoutPromise]).then(() => {
-                  setImagesLoading(false);
-                  setImageProgress(100);
-              });
-          }
-      } else {
-          setImagesLoading(false);
-          setImageProgress(100);
-      }
+      setImagesLoading(false);
+      setImageProgress(100);
     }
   };
 

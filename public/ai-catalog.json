@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "SecretArea",
+  "version": "1.0.0",
+  "description": "Discover premium tools, gaming resources, digital assets, and an exclusive hypervisor ecosystem.",
+  "url": "https://nexa1337.com",
+  "contact": {
+    "email": "contact@nexa1337.com"
+  },
+  "capabilities": [
+    {
+      "name": "game-catalog",
+      "description": "Search and discover PC and console gaming resources and repacks",
+      "endpoint": "/"
+    },
+    {
+      "name": "roadmap",
+      "description": "View upcoming tool features and milestone status",
+      "endpoint": "/roadmap"
+    },
+    {
+      "name": "legal-disclaimer",
+      "description": "View compliance and platform disclaimer information",
+      "endpoint": "/disclaimer"
+    }
+  ]
+}

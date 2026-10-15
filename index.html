@@ -19,46 +19,15 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="shortcut icon" href="/images/logo04.png" />
     
-    <!-- Fonts -->
+    <!-- Fonts - Asynchronously loaded to eliminate render-blocking delay -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Caveat+Brush&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Caveat+Brush&family=Oswald:wght@400;700;900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Caveat+Brush&family=Oswald:wght@400;700;900&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Caveat+Brush&family=Oswald:wght@400;700;900&display=swap" />
+    </noscript>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            },
-            colors: {
-              primary: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                500: '#0ea5e9',
-                600: '#0284c7',
-                700: '#0369a1',
-                900: '#0c4a6e',
-              },
-              nexa: {
-                dark: '#0f172a',
-                accent: '#38bdf8',
-                card: '#1e293b'
-              }
-            },
-            keyframes: {
-              shimmer: {
-                '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' }
-              }
-            }
-          },
-        },
-      }
-    </script>
     <style>
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
@@ -86,8 +55,7 @@
         font-family: 'Cairo', 'Amiri', sans-serif, serif;
       }
     </style>
-    
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700;900&display=swap" rel="stylesheet">
+
   <script>
     // Suppress harmless WebSocket disconnect messages in dev preview
     window.addEventListener('error', function(e) {
