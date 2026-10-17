@@ -8,14 +8,13 @@ import BottomNav from './components/BottomNav';
 import Footer from './components/Footer';
 import LatestIntelPanel from './components/LatestIntelPanel';
 
+import Roadmap from './pages/Roadmap';
+import CategoryDetail from './pages/CategoryDetail';
 import SecretArea from './pages/SecretArea';
-
-const Roadmap = lazy(() => import('./pages/Roadmap'));
-const CategoryDetail = lazy(() => import('./pages/CategoryDetail'));
-const PersonalFinance = lazy(() => import('./pages/PersonalFinance'));
-const Disclaimer = lazy(() => import('./pages/Disclaimer'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Settings = lazy(() => import('./pages/Settings'));
+import PersonalFinance from './pages/PersonalFinance';
+import Disclaimer from './pages/Disclaimer';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 
 // Logic to handle initial redirect and scrolling
 const AppBehavior = () => {

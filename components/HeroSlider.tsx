@@ -298,12 +298,10 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
         >
           <img
             src={bgImage}
-            alt={currentItem.name || "Hero Banner"}
+            alt={currentItem.name}
             className="w-full h-full object-cover object-center filter saturate-[1.15] contrast-[1.05]"
             referrerPolicy="no-referrer"
             onError={handleImageError}
-            fetchPriority="high"
-            decoding="async"
           />
 
           {/* High-fidelity light/dark mode dual scrim gradient - direction aware */}
@@ -486,11 +484,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                 {/* Poster Cover Image */}
                 <img
                   src={currentItem.coverImage}
-                  alt={currentItem.name || "Game Cover"}
+                  alt={currentItem.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
                 />
 
                 {/* Top Badge: NEW or Top Pick */}
@@ -543,11 +539,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                 >
                   <img
                     src={g.coverImage}
-                    alt={g.name || "Game thumbnail"}
+                    alt={g.name}
                     className="w-8 h-10 object-cover rounded shrink-0 shadow-xs"
                     referrerPolicy="no-referrer"
-                    loading="lazy"
-                    decoding="async"
                   />
                   <div className="min-w-0 flex-1">
                     <p className={`text-[11px] font-bold truncate ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-800 dark:text-slate-200'}`}>
