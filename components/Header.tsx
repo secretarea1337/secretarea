@@ -523,7 +523,9 @@ const LoginModal = ({
           {/* Close button */}
           <button 
             onClick={onClose}
-            className="absolute top-4 end-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="absolute top-4 end-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Close dialog"
+            aria-label="Close dialog"
           >
             <Icon name="X" size={18} />
           </button>
@@ -796,6 +798,7 @@ const UserDropdown = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full text-white flex items-center justify-center font-bold text-xs sm:text-sm overflow-hidden border-2 border-slate-200 dark:border-slate-700/80 hover:border-[#29aaea] dark:hover:border-[#29aaea] transition-all shadow-xs relative group bg-gradient-to-tr from-blue-600 to-cyan-500 shrink-0 cursor-pointer active:scale-95"
         title={displayName}
+        aria-label={displayName || 'User Profile Menu'}
       >
         {avatarSrc ? (
           <img 

@@ -18,7 +18,8 @@ import {
   TbHash, TbFolder, TbDeviceFloppy, TbChartPie, TbCircleX, TbLogout, TbLogin, TbMessageCircle, TbBuildingMosque,
   TbCurrencyBitcoin, TbCurrencyEthereum, TbCurrencyMonero, TbCoin, TbWallet, TbStar,
   TbShare, TbBrandAdobe, TbBrandOpenai, TbMagnet, TbSettings, TbAdjustments,
-  TbEdit, TbPencil, TbUpload, TbCloudUpload, TbCrown, TbShieldCheck
+  TbEdit, TbPencil, TbUpload, TbCloudUpload, TbCrown, TbShieldCheck,
+  TbPackage, TbArchive, TbDisc, TbBox
 } from 'react-icons/tb';
 
 import {
@@ -234,7 +235,18 @@ const ICON_MAP: Record<string, React.ElementType> = {
   BrandWooCommerce: SiWoocommerce,
   BrandZapier: SiZapier,
   Aperture: TbCamera,
-  Box: TbCode, 
+  Box: TbPackage,
+  Package: TbPackage,
+  package: TbPackage,
+  Archive: TbArchive,
+  archive: TbArchive,
+  Disc: TbDisc,
+  disc: TbDisc,
+  Repack: TbPackage,
+  repack: TbPackage,
+  Repacker: TbPackage,
+  repacker: TbPackage,
+  BoxSeam: TbBox,
   Orbit: TbWorld,
   Workflow: TbSitemap,
   Bold: TbBold,

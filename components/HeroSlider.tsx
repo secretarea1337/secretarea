@@ -348,6 +348,16 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                   <span className="text-slate-400 dark:text-slate-600 select-none">·</span>
                   <span>{gameGenre}</span>
 
+                  {currentItem.developer && (
+                    <>
+                      <span className="text-slate-400 dark:text-slate-600 select-none">·</span>
+                      <span className="inline-flex items-center gap-1 text-violet-600 dark:text-violet-400 font-bold">
+                        <Icon name="Briefcase" size={13} className="shrink-0" />
+                        <span>{currentItem.developer}</span>
+                      </span>
+                    </>
+                  )}
+
                   {currentItem.repackSize && (
                     <>
                       <span className="text-slate-400 dark:text-slate-600 select-none">·</span>
@@ -408,8 +418,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                   {currentItem.repackBy && (
                     <>
                       <span className="text-slate-400 dark:text-slate-600 select-none">/</span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-slate-500 dark:text-slate-500">{t('Repack by')}:</span>
+                      <span className="flex items-center gap-1.5">
+                        <Icon name="Package" size={14} className="text-amber-500 shrink-0" />
+                        <span className="text-slate-500 dark:text-slate-400">{t('Repack by')}:</span>
                         <span className="font-bold text-slate-800 dark:text-slate-200">{currentItem.repackBy}</span>
                       </span>
                     </>

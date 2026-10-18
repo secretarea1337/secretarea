@@ -3319,14 +3319,20 @@ const CompanyProfileModal: React.FC<{
                                  <Icon name="BrandSteam" size={14} />
                              </div>
                          )}
+                         {item.category === 'ps5' && (
+                             <div className="bg-indigo-900 text-white p-1 rounded shadow-md border border-indigo-500/30">
+                                 <FaPlaystation size={14} />
+                             </div>
+                         )}
                          {item.category === 'game' && (
-                             <div className="bg-white p-0.5 rounded shadow-md w-6 h-6 flex items-center justify-center overflow-hidden">
-                                 <img src="https://fitgirl-repacks.site/wp-content/uploads/2016/08/icon.jpg" alt="FitGirl" className="w-full h-full object-contain rounded-sm" />
+                             <div className="bg-slate-900/90 text-amber-400 px-1.5 py-0.5 rounded shadow-md border border-amber-500/30 flex items-center justify-center gap-1 text-[9px] font-bold" title={item.repackBy ? `Repack by: ${item.repackBy}` : 'PC Game'}>
+                                 <Icon name="Package" size={13} />
+                                 {item.repackBy && <span className="text-[8px] font-mono pe-0.5">{item.repackBy}</span>}
                              </div>
                          )}
 
                          {/* Fallback if category is missing or different */}
-                         {!['hypervisor', 'steamtools', 'game'].includes(item.category) && (
+                         {!['hypervisor', 'steamtools', 'game', 'ps5'].includes(item.category) && (
                              <div className="bg-primary-600 text-white px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest shadow-md">
                                  {(item.category || '').toUpperCase()}
                              </div>
@@ -3337,6 +3343,9 @@ const CompanyProfileModal: React.FC<{
                              {item.version}
                          </div>
                      )}
+                  </div>
+                  <div className="absolute bottom-0 inset-x-0 p-2.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                     <div className="text-white text-[11px] font-bold line-clamp-2 drop-shadow-md">{item.name}</div>
                   </div>
                </div>
             ))}
@@ -4834,7 +4843,10 @@ export const ResourceDetailModal: React.FC<{
                              <span className="text-sm font-bold text-slate-900 dark:text-white">{item.dateAdded}</span>
                          </div>
                      )}
-                     {(item.publishBy || resolvedDev) && (
+                     {(() => {
+                       const studioName = resolvedDev || item.developer || item.publishBy;
+                       if (!studioName) return null;
+                       return (
                          <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                              <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                                {item.category === 'ps5' ? (
@@ -4843,13 +4855,31 @@ export const ResourceDetailModal: React.FC<{
                                    <span>{t('Published By') || 'Published By'}</span>
                                  </>
                                ) : ['architect', 'extra'].includes(item.category) ? (
-                                 t('Dev Studio')
+                                 <>
+                                   <Icon name="Briefcase" size={12} className="text-violet-500 shrink-0" />
+                                   <span>{t('Dev Studio')}</span>
+                                 </>
                                ) : (
-                                 t('Game Studio')
+                                 <>
+                                   <Icon name="Briefcase" size={12} className="text-violet-500 shrink-0" />
+                                   <span>{t('Game Studio')}</span>
+                                 </>
                                )} /
                              </span>
-                             <span className="text-sm font-bold text-slate-900 dark:text-white cursor-pointer hover:text-primary-500 transition-colors" onClick={(e) => { e.stopPropagation(); if(onCompanyClick) onCompanyClick(item.publishBy || resolvedDev || ''); }}>
-                               {item.publishBy || resolvedDev}
+                             <span className="text-sm font-bold text-slate-900 dark:text-white cursor-pointer hover:text-primary-500 transition-colors" onClick={(e) => { e.stopPropagation(); if(onCompanyClick) onCompanyClick(studioName); }}>
+                               {studioName}
+                             </span>
+                         </div>
+                       );
+                     })()}
+                     {item.repackBy && (
+                         <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                             <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                               <Icon name="Package" size={13} className="text-amber-500 shrink-0" />
+                               <span>{t('Repack by')}:</span>
+                             </span>
+                             <span className="text-sm font-bold text-slate-900 dark:text-white">
+                               {item.repackBy}
                              </span>
                          </div>
                      )}
@@ -6253,6 +6283,24 @@ const GameOfTheDaySection: React.FC<{
                     <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium flex-wrap justify-center md:justify-start">
                         <span className="bg-slate-200 dark:bg-slate-800/80 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-slate-300 dark:border-slate-700/50">PC</span>
                         <span className="bg-slate-200 dark:bg-slate-800/80 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-slate-300 dark:border-slate-700/50">2026</span>
+                        {game.developer && (
+                            <>
+                                <span className="opacity-50">—</span>
+                                <span className="font-bold text-violet-600 dark:text-violet-400 flex items-center gap-1">
+                                    <Icon name="Briefcase" size={13} />
+                                    {game.developer}
+                                </span>
+                            </>
+                        )}
+                        {game.repackBy && (
+                            <>
+                                <span className="opacity-50">—</span>
+                                <span className="font-bold text-amber-500 flex items-center gap-1">
+                                    <Icon name="Package" size={13} />
+                                    {t('Repack by')}: {game.repackBy}
+                                </span>
+                            </>
+                        )}
                         <span className="opacity-50">—</span>
                         <span>{game.genres?.split(',').slice(0, 3).join(', ')}</span>
                     </div>
@@ -6916,7 +6964,13 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [popularRepackIds, setPopularRepackIds] = useState<string[]>([]);
   
   const getResolvedDeveloper = (item: ResourceItem) => {
-      if (item.developer && item.developer.trim()) return item.developer;
+      const knownRepackers = ['fitgirl', 'dodi', 'elamigos', 'kaos', 'xatab', 'chovka', 'r.g. mechanics', 'skidrow', 'codex', 'empress', 'razor1911', 'repack', 'repacker'];
+      if (item.developer && item.developer.trim()) {
+          const devLower = item.developer.trim().toLowerCase();
+          if (!knownRepackers.some(r => devLower === r || devLower.includes(r))) {
+              return item.developer.trim();
+          }
+      }
       const catMap: Record<string, keyof CompanyProfile> = {
           'game': 'gameIds',
           'hypervisor': 'hypervisorIds',
@@ -6927,7 +6981,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       };
       
       const key = catMap[item.category];
-      if (!key) return '';
+      if (!key) return (item.developer && !knownRepackers.some(r => item.developer!.toLowerCase().includes(r))) ? item.developer : '';
 
       for (const profile of companyProfiles) {
           const ids = (profile[key] as string[]) || [];
@@ -8060,12 +8114,13 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     }
 
     // Handle Company Profiles
+    let parsedProfiles: CompanyProfile[] = [];
     const profilKey = Object.keys(data).find(k => {
         const lowerK = k.toLowerCase().trim();
         return lowerK === 'profil' || lowerK === 'profile' || lowerK === 'profiles' || lowerK === 'company';
     });
     if (profilKey && Array.isArray(data[profilKey])) {
-        const profiles: CompanyProfile[] = data[profilKey]
+        parsedProfiles = data[profilKey]
           .filter((row: any) => {
               if (!row || typeof row !== 'object') return false;
               const normalizedSearchKey = 'name';
@@ -8095,7 +8150,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
                extraIds: (getVal('extraid') || getVal('extraids') || getVal('savegameid') || '').toString().split(',').map(s => s.trim()).filter(Boolean)
            };
         });
-        setCompanyProfiles(profiles);
+        setCompanyProfiles(parsedProfiles);
     } else {
         setCompanyProfiles([]);
     }
@@ -8457,11 +8512,68 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
           const isPinnedRaw = getVal('pinned');
           const isFreeRaw = getVal('price') || getVal('isfree') || getVal('free');
-          const publishByVal = getVal('publishBy') || getVal('publishedBy') || getVal('publisher') || getVal('repackBy') || '';
+          const repackByVal = getVal('repackBy') || getVal('repackby') || getVal('repacker') || getVal('repack') || '';
+          const publishByVal = getVal('publishBy') || getVal('publishedBy') || getVal('publisher') || '';
+          const explicitDevVal = getVal('developer') || getVal('studio') || getVal('company') || '';
           const origSizeVal = getVal('originalSize') || getVal('size') || getVal('repackSize') || 'N/A';
           const repackSizeVal = targetKey === 'ps5' ? origSizeVal : (getVal('repackSize') || origSizeVal);
           const rawId = String(row.id || (idx + 1)).trim();
           const finalId = (/^[A-Za-z]/.test(rawId)) ? rawId : `${idPrefix}${rawId}`;
+
+          // Resolve game studio from parsed company profiles
+          let resolvedStudio = explicitDevVal || publishByVal;
+          if (!resolvedStudio && parsedProfiles.length > 0) {
+            const catFieldMap: Record<string, keyof CompanyProfile> = {
+              'game': 'gameIds',
+              'hypervisor': 'hypervisorIds',
+              'steamtools': 'steamtoolsIds',
+              'ps5': 'ps5Ids',
+              'architect': 'architectIds',
+              'extra': 'extraIds'
+            };
+            const catField = catFieldMap[targetKey];
+            if (catField) {
+              const itemIdsToMatch = [
+                finalId.toLowerCase().trim(),
+                finalId.replace(/^[A-Za-z]+[-]?/, '').toLowerCase().trim(),
+                rawId.toLowerCase().trim(),
+                String(getVal('gameId') || '').toLowerCase().trim()
+              ].filter(Boolean);
+
+              for (const prof of parsedProfiles) {
+                const pIds = (prof[catField] as string[]) || [];
+                const lowerPIds = pIds.map(id => String(id).toLowerCase().trim()).filter(Boolean);
+                const numericPIds = pIds.map(id => String(id).replace(/^[A-Za-z]+[-]?/, '').toLowerCase().trim()).filter(Boolean);
+                
+                const isMatch = lowerPIds.some(id => 
+                  itemIdsToMatch.includes(id) || 
+                  itemIdsToMatch.some(itemId => itemId === id || itemId.endsWith(`-${id}`) || itemId.endsWith(id))
+                ) || numericPIds.some(id => itemIdsToMatch.includes(id));
+
+                if (isMatch) {
+                  resolvedStudio = prof.name;
+                  break;
+                }
+              }
+
+              // Fallback title regex match against company names
+              if (!resolvedStudio) {
+                const itemName = (getVal('name') || '').toLowerCase().replace(/[^a-z0-9]/g, ' ');
+                for (const prof of parsedProfiles) {
+                  const profName = String(prof.name || '').trim().toLowerCase();
+                  if (!profName || profName === 'unknown' || profName.length < 3) continue;
+                  const catIds = (prof[catField] as string[]) || [];
+                  if (catIds.length === 0 && !['architect', 'extra'].includes(targetKey)) continue;
+                  const cleanProfName = profName.replace(/[^a-z0-9]/g, ' ');
+                  const regex = new RegExp(`(^|\\s)${cleanProfName.replace(/\\s+/g, '\\s+')}(\\s|$)`, 'i');
+                  if (regex.test(itemName) || itemName.startsWith(cleanProfName)) {
+                    resolvedStudio = prof.name;
+                    break;
+                  }
+                }
+              }
+            }
+          }
 
           return {
             id: finalId,
@@ -8473,8 +8585,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             genres: getVal('genres') || '',
             languages: getVal('languages') || 'ENG',
             publishBy: publishByVal,
-            repackBy: publishByVal || getVal('repackBy') || '',
-            developer: publishByVal || getVal('developer') || getVal('studio') || getVal('company') || '',
+            repackBy: repackByVal,
+            developer: resolvedStudio || '',
             coverImage: getVal('coverImage') || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED',
             galleryImages: gallery,
             description: getVal('description') || 'No intel available.',
@@ -10380,13 +10492,19 @@ const paginatedData = useMemo(() => {
                             
                             {/* Top Left Badges */}
                             <div className="absolute top-3 start-3 flex flex-col gap-2 z-30 items-start">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 flex-wrap">
                                     <div className="px-2 py-1 bg-primary-600 text-white rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg transition-all flex items-center gap-1">
                                       <span>{item.id}</span>
                                       {popularRepackIds.map(id => String(id).toLowerCase()).includes(String(item.id).toLowerCase()) && (
                                           <Icon name="Star" size={10} className="text-yellow-400 fill-yellow-400" />
                                       )}
                                     </div>
+                                    {item.repackBy && (
+                                        <div className="px-2 py-1 bg-slate-950/80 md:backdrop-blur-md text-amber-300 border border-amber-500/30 rounded-md text-[9px] font-bold tracking-wider shadow-md flex items-center gap-1">
+                                            <Icon name="Package" size={11} className="text-amber-400 shrink-0" />
+                                            <span>{item.repackBy}</span>
+                                        </div>
+                                    )}
                                     {item.isPinned && (
                                         <div className="bg-yellow-500 text-white p-1.5 rounded-lg shadow-lg border border-white/20">
                                             <Icon name="Pin" size={16} />
@@ -10449,28 +10567,28 @@ const paginatedData = useMemo(() => {
                             
                             <div className="absolute bottom-0 start-0 end-0 p-5 z-20">
                                 {item.category === 'ps5' ? (
-                                    (item.publishBy || resolvedDev) && (
+                                    (resolvedDev || item.publishBy) && (
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleCompanyClick(item.publishBy || resolvedDev);
+                                                handleCompanyClick(resolvedDev || item.publishBy || '');
                                             }}
                                             className="mb-2 flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-950/80 md:backdrop-blur-sm text-indigo-300 border border-indigo-500/40 hover:bg-indigo-900/90 transition-colors w-max"
                                         >
                                             <FaPlaystation size={10} className="shrink-0 text-white" />
-                                            <span>{item.publishBy || resolvedDev}</span>
+                                            <span>{resolvedDev || item.publishBy}</span>
                                         </button>
                                     )
-                                ) : resolvedDev && (
+                                ) : (resolvedDev || item.developer) && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleCompanyClick(resolvedDev);
+                                            handleCompanyClick(resolvedDev || item.developer || '');
                                         }}
                                         className="mb-2 flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-black/60 md:backdrop-blur-sm text-violet-300 border border-violet-500/30 hover:bg-violet-900/60 transition-colors w-max"
                                     >
                                         <Icon name="Briefcase" size={10} />
-                                        {resolvedDev}
+                                        <span>{resolvedDev || item.developer}</span>
                                     </button>
                                 )}
                                 <h3 className="font-black text-lg text-white leading-tight uppercase italic mb-2 line-clamp-2 group-hover:text-primary-400 transition-colors drop-shadow-md">
