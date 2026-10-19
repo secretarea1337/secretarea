@@ -29,7 +29,11 @@
       "anker2": "",
       "unlock 01": "",
       "unlock 02": "",
-      "unlock 03": ""
+      "unlock 03": "",
+      "dodi 1": "https://dodi-repacks.site/grand-theft-auto-v-part-1/",
+      "dodi 2": "https://dodi-repacks.site/grand-theft-auto-v-part-2/",
+      "skidrow 1": "https://www.skidrowreloaded.com/grand-theft-auto-v-reloaded/",
+      "steamrip 1": "https://steamrip.com/grand-theft-auto-v-free-download/"
     },
     {
       "id": 2,
@@ -60,7 +64,10 @@
       "anker2": "",
       "unlock 01": "",
       "unlock 02": "",
-      "unlock 03": ""
+      "unlock 03": "",
+      "dodi 1": "https://dodi-repacks.site/red-dead-redemption-2/",
+      "skidrow 1": "https://www.skidrowreloaded.com/red-dead-redemption-2-reloaded/",
+      "steamrip 1": "https://steamrip.com/red-dead-redemption-2-free-download/"
     },
     {
       "id": 3,
@@ -11341,7 +11348,10 @@
       "pinned": "",
       "tools": "qBittorrent^https://www.qbittorrent.org | JDownloader^https://jdownloader.org",
       "Free": "",
-      "Date": "2026-08-20T09:06:59.427Z"
+      "Date": "2026-08-20T09:06:59.427Z",
+      "dodi 1": "https://dodi-repacks.site/resident-evil-requiem/",
+      "skidrow 1": "https://www.skidrowreloaded.com/resident-evil-requiem/",
+      "steamrip 1": "https://steamrip.com/resident-evil-requiem/"
     },
     {
       "id": 2,

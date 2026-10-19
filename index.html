@@ -57,20 +57,38 @@
     </style>
 
   <script>
-    // Suppress harmless WebSocket disconnect messages in dev preview
-    window.addEventListener('error', function(e) {
-      if (e.message && (e.message.indexOf('WebSocket') !== -1 || e.message.indexOf('unauthorized-domain') !== -1)) {
-        e.stopImmediatePropagation();
-        e.preventDefault();
-      }
-    });
-    window.addEventListener('unhandledrejection', function(e) {
-      var reason = '' + ((e.reason && e.reason.message) || e.reason || '');
-      if (reason.indexOf('WebSocket') !== -1 || reason.indexOf('unauthorized-domain') !== -1) {
-        e.stopImmediatePropagation();
-        e.preventDefault();
-      }
-    });
+    // Suppress harmless Vite HMR WebSocket and auth domain warnings in dev preview
+    (function() {
+      var origError = console.error;
+      console.error = function() {
+        var msg = arguments && arguments[0] ? String(arguments[0]) : '';
+        if (msg.indexOf('[vite] failed to connect to websocket') !== -1 || msg.indexOf('WebSocket closed without opened') !== -1 || msg.indexOf('WebSocket') !== -1) {
+          return;
+        }
+        origError.apply(console, arguments);
+      };
+      var origWarn = console.warn;
+      console.warn = function() {
+        var msg = arguments && arguments[0] ? String(arguments[0]) : '';
+        if (msg.indexOf('QuotaExceededError') !== -1 || msg.indexOf('WebSocket') !== -1) {
+          return;
+        }
+        origWarn.apply(console, arguments);
+      };
+      window.addEventListener('error', function(e) {
+        if (e.message && (e.message.indexOf('WebSocket') !== -1 || e.message.indexOf('unauthorized-domain') !== -1 || e.message.indexOf('QuotaExceededError') !== -1)) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        var reason = '' + ((e.reason && e.reason.message) || e.reason || '');
+        if (reason.indexOf('WebSocket') !== -1 || reason.indexOf('unauthorized-domain') !== -1 || reason.indexOf('QuotaExceededError') !== -1) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }
+      });
+    })();
   </script>
 </head>
   <body class="bg-gray-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">

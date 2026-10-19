@@ -82,6 +82,7 @@ import {
   getItemActiveReport, 
   ItemReport 
 } from '../src/services/reportService';
+import { setCatalogCache, getCatalogCache, saveMaintenanceCache, getMaintenanceCache } from '../src/services/catalogCache';
 
 // --- CONFIGURATION ---
 const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec';
@@ -714,6 +715,9 @@ export interface ResourceItem {
     parts: { id: number, link: string, note?: string }[];
     mirrors: { id: number, link: string, note?: string }[];
     ankerParts: { id: number, link: string, note?: string }[];
+    dodiParts?: { id: number, link: string, note?: string }[];
+    skidrowParts?: { id: number, link: string, note?: string }[];
+    steamripParts?: { id: number, link: string, note?: string }[];
     buttons?: Ps5Button[];
     ps5Buttons?: Ps5Button[];
     full?: string;
@@ -2314,35 +2318,88 @@ const AboutSecretAreaSection: React.FC = () => {
                     </div>
 
                     {/* Progress Bars */}
-                    <div className="mt-6 space-y-5 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/50 backdrop-blur-sm transition-colors duration-300">
+                    <div className="mt-6 space-y-4 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/50 backdrop-blur-sm transition-colors duration-300">
                         {/* FitGirl */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-wide">
-                                <span className="text-emerald-600 dark:text-emerald-400">FitGirl Repack</span>
-                                <span className="text-emerald-600 dark:text-emerald-400">90%</span>
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                                    <img src="https://fitgirl-repacks.site/wp-content/uploads/2016/08/icon.jpg" alt="FitGirl" className="w-4 h-4 rounded-sm object-contain" />
+                                    <span>Fitgirl Repack <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File + Parts File') || 'Utorrent File + Parts File'})</span></span>
+                                </span>
+                                <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">100%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
-                                <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards]" style={{ '--target-width': '90%' } as React.CSSProperties}></div>
+                                <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards]" style={{ '--target-width': '100%', width: '100%' } as React.CSSProperties}></div>
                             </div>
                         </div>
+
+                        {/* Dodi Repacks */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                    <img src="https://avatars.githubusercontent.com/u/214397634?s=200&v=4" alt="DODI" className="w-4 h-4 rounded-sm object-contain" />
+                                    <span>Dodi Repacks <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
+                                </span>
+                                <span className="font-mono font-black text-indigo-600 dark:text-indigo-400">40%</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
+                                <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.2s]" style={{ '--target-width': '40%', width: '40%' } as React.CSSProperties}></div>
+                            </div>
+                        </div>
+
+                        {/* SteamRIP */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
+                                    <img src="https://consumersiteimages.trustpilot.net/business-units/612663f3a458ff001df5503b-198x149-1x.jpg" alt="SteamRIP" className="w-4 h-4 rounded-sm object-contain" />
+                                    <span>SteamRIP <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Files') || 'Files'})</span></span>
+                                </span>
+                                <span className="font-mono font-black text-sky-600 dark:text-sky-400">40%</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
+                                <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.3s]" style={{ '--target-width': '40%', width: '40%' } as React.CSSProperties}></div>
+                            </div>
+                        </div>
+
+                        {/* Skidrow */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                                    <img src="https://art.pixilart.com/50c0d16b052ad81.gif" alt="Skidrow" className="w-4 h-4 rounded-sm object-contain" />
+                                    <span>Skidrow <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File + Files') || 'Utorrent File + Files'})</span></span>
+                                </span>
+                                <span className="font-mono font-black text-amber-600 dark:text-amber-400">40%</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
+                                <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.4s]" style={{ '--target-width': '40%', width: '40%' } as React.CSSProperties}></div>
+                            </div>
+                        </div>
+
                         {/* Ankergames */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-wide">
-                                <span className="text-blue-600 dark:text-blue-400">Ankergames</span>
-                                <span className="text-blue-600 dark:text-blue-400">10%</span>
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYdQ_DlScM7nLh2AxH9ds27fTftrY9Jz1WhjBthb514jeSHnu2W6lT0Oo&s=10" alt="Ankergames" className="w-4 h-4 rounded-sm object-contain opacity-70" />
+                                    <span>Ankergames</span>
+                                </span>
+                                <span className="font-mono font-bold text-slate-400 dark:text-slate-500">0%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
-                                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.3s]" style={{ '--target-width': '10%' } as React.CSSProperties}></div>
+                                <div className="h-full bg-slate-400/50 rounded-full w-0" style={{ width: '0%' }}></div>
                             </div>
                         </div>
-                        {/* Dodi */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-wide">
-                                <span className="text-red-600 dark:text-red-400">Dodi Repack <span className="text-slate-500 dark:text-slate-400 lowercase normal-case">({t('he use Ads')})</span></span>
-                                <span className="text-red-600 dark:text-red-400">0%</span>
+
+                        {/* Steamunlocked */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                    <img src="https://dka575ofm4ao0.cloudfront.net/pages-transactional_logos/retina/802345/unnamed-b4a32b8b-803c-454f-a411-5a9c33494c3c.jpg" alt="Steamunlocked" className="w-4 h-4 rounded-sm object-contain opacity-70" />
+                                    <span>Steamunlocked</span>
+                                </span>
+                                <span className="font-mono font-bold text-slate-400 dark:text-slate-500">0%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
-                                <div className="h-full bg-red-500 rounded-full w-0"></div>
+                                <div className="h-full bg-slate-400/50 rounded-full w-0" style={{ width: '0%' }}></div>
                             </div>
                         </div>
                     </div>
@@ -3832,29 +3889,11 @@ export const ResourceDetailModal: React.FC<{
         }
       }
 
-      // 3. Fallback to localStorage cache
+      // 3. Fallback to bundled catalog
       if (!found) {
         try {
-          const cached = localStorage.getItem('cached_transformed_resources');
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (targetCat && Array.isArray(parsed[targetCat])) {
-              found = parsed[targetCat].find(checkItem);
-            }
-            if (!found) {
-              for (const cat of Object.keys(parsed)) {
-                if (cat === targetCat) continue;
-                if (targetCat === 'architect' && cat !== 'architect') continue;
-                if (targetCat === 'hypervisor' && cat !== 'hypervisor') continue;
-                if (targetCat === 'steamtools' && cat !== 'steamtools') continue;
-                if (targetCat === 'extra' && cat !== 'extra') continue;
-                if (Array.isArray(parsed[cat])) {
-                  found = parsed[cat].find(checkItem);
-                  if (found) break;
-                }
-              }
-            }
-          }
+          const flatBackup = Object.values(backupData).flat() as any[];
+          found = flatBackup.find(checkItem);
         } catch (e) {}
       }
 
@@ -3868,7 +3907,7 @@ export const ResourceDetailModal: React.FC<{
           name: resolvedName,
           category: resolvedCategory,
           coverImage: (found.coverImage && !found.coverImage.includes('unsplash.com')) ? found.coverImage : (current.coverImage || found.coverImage),
-          links: (found.links && (found.links.full || found.links.mirrors?.length || found.links.parts?.length)) ? found.links : (current.links || { parts: [], mirrors: [], ankerParts: [] }),
+          links: (found.links && (found.links.full || found.links.mirrors?.length || found.links.parts?.length || found.links.ankerParts?.length || found.links.dodiParts?.length || found.links.skidrowParts?.length || found.links.steamripParts?.length)) ? found.links : (current.links || { parts: [], mirrors: [], ankerParts: [], dodiParts: [], skidrowParts: [], steamripParts: [] }),
           description: found.description || current.description,
           repackSize: found.repackSize || current.repackSize,
           originalSize: found.originalSize || current.originalSize,
@@ -3917,7 +3956,7 @@ export const ResourceDetailModal: React.FC<{
 
   // Ensure safe fallback for links to prevent uncaught TypeErrors if links object is missing
   if (item && !item.links) {
-    (item as any).links = { parts: [], mirrors: [], ankerParts: [] };
+    (item as any).links = { parts: [], mirrors: [], ankerParts: [], dodiParts: [], skidrowParts: [], steamripParts: [] };
   }
 
   useEffect(() => {
@@ -5211,7 +5250,7 @@ export const ResourceDetailModal: React.FC<{
                   </div>
 
                   {/* Download Channels */}
-                  {((item.buttons && item.buttons.length > 0) || (item.links?.ps5Buttons && item.links.ps5Buttons.length > 0) || (item.links?.full) || (item.links?.utorrent) || (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) || (item.links?.ankerParts && item.links.ankerParts.length > 0) || (item.links?.preInstalled && (item.links.preInstalled.download || item.links.preInstalled.cloudDrop || item.links.preInstalled.torrent))) && (
+                  {((item.buttons && item.buttons.length > 0) || (item.links?.ps5Buttons && item.links.ps5Buttons.length > 0) || (item.links?.full) || (item.links?.utorrent) || (item.links?.mirrors && item.links.mirrors.length > 0) || (item.links?.parts && item.links.parts.length > 0) || (item.links?.ankerParts && item.links.ankerParts.length > 0) || (item.links?.dodiParts && item.links.dodiParts.length > 0) || (item.links?.skidrowParts && item.links.skidrowParts.length > 0) || (item.links?.steamripParts && item.links.steamripParts.length > 0) || (item.links?.preInstalled && (item.links.preInstalled.download || item.links.preInstalled.cloudDrop || item.links.preInstalled.torrent))) && (
                   <div className="py-6 sm:py-12" id="download">
                       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                           <div className="flex items-center gap-4">
@@ -5504,6 +5543,87 @@ export const ResourceDetailModal: React.FC<{
                                           </li>
                                       </ul>
                                   </div>
+                              </div>
+                          </details>
+                      )}
+
+                      {/* DODI Repacks */}
+                      {item.category !== 'ps5' && item.links?.dodiParts && item.links.dodiParts.length > 0 && (
+                          <details className="mb-6 group" open>
+                              <summary className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors select-none list-none">
+                                  <Icon name="ChevronRight" size={14} className="group-open:rotate-90 transition-transform" />
+                                  <img src="https://avatars.githubusercontent.com/u/214397634?s=200&v=4" alt="DODI Repacks" className="w-4 h-4 rounded-sm object-contain" />
+                                  <span>{t('DODI Repacks')} ({item.links.dodiParts.length})</span>
+                              </summary>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+                                  {item.links.dodiParts.map(part => (
+                                      <DownloadButton
+                                          key={'dodi_' + part.id}
+                                          label={part.note && !part.note.startsWith('http') ? part.note : (item.links.dodiParts!.length === 1 ? t('Direct Download') : `DODI Part ${part.id}`)}
+                                          badge={part.id === 1 ? 'DODI' : undefined}
+                                          sub={t('Download')}
+                                          href={part.link}
+                                          icon="Package"
+                                          imageUrl="https://avatars.githubusercontent.com/u/214397634?s=200&v=4"
+                                          secondary
+                                          note={part.note}
+                                          onNoteClick={(note) => setNoteModalContent(note)}
+                                      />
+                                  ))}
+                              </div>
+                          </details>
+                      )}
+
+                      {/* Skidrow & Reloaded */}
+                      {item.category !== 'ps5' && item.links?.skidrowParts && item.links.skidrowParts.length > 0 && (
+                          <details className="mb-6 group" open>
+                              <summary className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors select-none list-none">
+                                  <Icon name="ChevronRight" size={14} className="group-open:rotate-90 transition-transform" />
+                                  <img src="https://art.pixilart.com/50c0d16b052ad81.gif" alt="Skidrow & Reloaded" className="w-4 h-4 rounded-sm object-contain" />
+                                  <span>{t('Skidrow & Reloaded')} ({item.links.skidrowParts.length})</span>
+                              </summary>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+                                  {item.links.skidrowParts.map(part => (
+                                      <DownloadButton
+                                          key={'skidrow_' + part.id}
+                                          label={part.note && !part.note.startsWith('http') ? part.note : (item.links.skidrowParts!.length === 1 ? t('Direct Download') : `Skidrow Part ${part.id}`)}
+                                          badge={part.id === 1 ? 'Skidrow' : undefined}
+                                          sub={t('Download')}
+                                          href={part.link}
+                                          icon="Disc"
+                                          imageUrl="https://art.pixilart.com/50c0d16b052ad81.gif"
+                                          secondary
+                                          note={part.note}
+                                          onNoteClick={(note) => setNoteModalContent(note)}
+                                      />
+                                  ))}
+                              </div>
+                          </details>
+                      )}
+
+                      {/* SteamRIP */}
+                      {item.category !== 'ps5' && item.links?.steamripParts && item.links.steamripParts.length > 0 && (
+                          <details className="mb-6 group" open>
+                              <summary className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors select-none list-none">
+                                  <Icon name="ChevronRight" size={14} className="group-open:rotate-90 transition-transform" />
+                                  <img src="https://consumersiteimages.trustpilot.net/business-units/612663f3a458ff001df5503b-198x149-1x.jpg" alt="SteamRIP" className="w-4 h-4 rounded-sm object-contain" />
+                                  <span>{t('SteamRIP')} ({item.links.steamripParts.length})</span>
+                              </summary>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+                                  {item.links.steamripParts.map(part => (
+                                      <DownloadButton
+                                          key={'steamrip_' + part.id}
+                                          label={part.note && !part.note.startsWith('http') ? part.note : (item.links.steamripParts!.length === 1 ? t('Direct Download') : `SteamRIP Part ${part.id}`)}
+                                          badge={part.id === 1 ? 'SteamRIP' : undefined}
+                                          sub={t('Download')}
+                                          href={part.link}
+                                          icon="Zap"
+                                          imageUrl="https://consumersiteimages.trustpilot.net/business-units/612663f3a458ff001df5503b-198x149-1x.jpg"
+                                          secondary
+                                          note={part.note}
+                                          onNoteClick={(note) => setNoteModalContent(note)}
+                                      />
+                                  ))}
                               </div>
                           </details>
                       )}
@@ -7225,19 +7345,15 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
         g.name?.toLowerCase() === String(targetId).toLowerCase()
       );
 
-      // Fallback: check cached_secret_resources in localStorage
+      // Fallback: check bundled catalog
       if (!gameToOpen) {
         try {
-          const cached = localStorage.getItem('cached_secret_resources');
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            const flatCached = Object.values(parsed).flat() as any[];
-            gameToOpen = flatCached.find(g => 
-              String(g?.id) === String(targetId) || 
-              String(g?.gameId) === String(targetId) || 
-              g?.name?.toLowerCase() === String(targetId).toLowerCase()
-            );
-          }
+          const flatCached = Object.values(backupData).flat() as any[];
+          gameToOpen = flatCached.find(g => 
+            String(g?.id) === String(targetId) || 
+            String(g?.gameId) === String(targetId) || 
+            g?.name?.toLowerCase() === String(targetId).toLowerCase()
+          );
         } catch (e) {}
       }
 
@@ -7322,25 +7438,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [scriptError, setScriptError] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [maintenanceConfig, setMaintenanceConfig] = useState<{active: boolean, endTime: string | null, message: string} | null>(() => {
-    try {
-        const cached = localStorage.getItem('cached_secret_resources');
-        if (cached) {
-            const data = JSON.parse(cached);
-            const maintenanceKey = Object.keys(data).find(k => k.toLowerCase() === 'maintenance');
-            if (maintenanceKey && Array.isArray(data[maintenanceKey]) && data[maintenanceKey].length > 0) {
-                const config = data[maintenanceKey][0];
-                const isActiveStr = String(config.active || '').toLowerCase().trim();
-                if (isActiveStr === 'true' || isActiveStr === 'yes' || isActiveStr === '1' || config.active === true) {
-                    return {
-                        active: true,
-                        endTime: config.time || config.endTime || config.date || null,
-                        message: config.message || "Our website is under temporary maintenance, we will be back soon :)"
-                    };
-                }
-            }
-        }
-    } catch (e) {}
-    return null;
+    return getMaintenanceCache();
   });
 
   useEffect(() => {
@@ -7986,17 +8084,21 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
         const config = data[maintenanceKey][0];
         const isActiveStr = String(config.active || '').toLowerCase().trim();
         if (isActiveStr === 'true' || isActiveStr === 'yes' || isActiveStr === '1' || config.active === true) {
-            setMaintenanceConfig({
+            const conf = {
                 active: true,
                 endTime: config.time || config.endTime || config.date || null,
                 message: config.message || "Our website is under temporary maintenance, we will be back soon :)"
-            });
+            };
+            setMaintenanceConfig(conf);
+            saveMaintenanceCache(conf);
             // Don't return early so we still process the rest of the data just in case, but the UI will render maintenance mode
         } else {
             setMaintenanceConfig(null);
+            saveMaintenanceCache(null);
         }
     } else {
         setMaintenanceConfig(null);
+        saveMaintenanceCache(null);
     }
 
     const upcomingKey = Object.keys(data).find(k => k.toLowerCase() === 'upcoming');
@@ -8351,66 +8453,122 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           const partsArr: { id: number, link: string, note?: string }[] = [];
           const mirrorsArr: { id: number, link: string, note?: string }[] = [];
           const ankerArr: { id: number, link: string, note?: string }[] = [];
-          for (let i = 1; i <= 20; i++) {
-              let pVal = getVal(`part${i}`);
-              let pNote = getVal(`partNote${i}`) || getVal(`note${i}`);
+          const dodiArr: { id: number, link: string, note?: string }[] = [];
+          const skidrowArr: { id: number, link: string, note?: string }[] = [];
+          const steamripArr: { id: number, link: string, note?: string }[] = [];
+
+          const extractNote = (val: string) => {
+              if (!val) return { link: '', note: '' };
+              val = val.trim();
+              if (val.includes('|')) {
+                  const parts = val.split('|');
+                  return { link: parts[0].trim(), note: parts[1].trim() };
+              }
               
-              const extractNote = (val: string) => {
-                  if (!val) return { link: '', note: '' };
-                  val = val.trim();
-                  if (val.includes('|')) {
-                      const parts = val.split('|');
-                      return { link: parts[0].trim(), note: parts[1].trim() };
-                  }
-                  
-                  const singleQuoteMatch = val.match(/^(.*?)\s+'([^']+)'\s*$/);
-                  if (singleQuoteMatch) {
-                      return { link: singleQuoteMatch[1].trim(), note: singleQuoteMatch[2].trim() };
-                  }
-                  
-                  const quoteMatch = val.match(/^(.*?)\s+"([^"]+)"\s*$/);
-                  if (quoteMatch) {
-                      return { link: quoteMatch[1].trim(), note: quoteMatch[2].trim() };
-                  }
+              const singleQuoteMatch = val.match(/^(.*?)\s+'([^']+)'\s*$/);
+              if (singleQuoteMatch) {
+                  return { link: singleQuoteMatch[1].trim(), note: singleQuoteMatch[2].trim() };
+              }
+              
+              const quoteMatch = val.match(/^(.*?)\s+"([^"]+)"\s*$/);
+              if (quoteMatch) {
+                  return { link: quoteMatch[1].trim(), note: quoteMatch[2].trim() };
+              }
 
-                  const parenMatch = val.match(/^(.*?)\s+\(([^)]+)\)\s*$/);
-                  if (parenMatch) {
-                      return { link: parenMatch[1].trim(), note: parenMatch[2].trim() };
-                  }
+              const parenMatch = val.match(/^(.*?)\s+\(([^)]+)\)\s*$/);
+              if (parenMatch) {
+                  return { link: parenMatch[1].trim(), note: parenMatch[2].trim() };
+              }
 
-                  const spaceMatch = val.match(/^(https?:\/\/[^\s]+)\s+(.+)$/);
-                  if (spaceMatch) {
-                      return { link: spaceMatch[1].trim(), note: spaceMatch[2].trim() };
-                  }
+              const spaceMatch = val.match(/^(https?:\/\/[^\s]+)\s+(.+)$/);
+              if (spaceMatch) {
+                  return { link: spaceMatch[1].trim(), note: spaceMatch[2].trim() };
+              }
 
-                  return { link: val.trim(), note: '' };
-              };
+              return { link: val.trim(), note: '' };
+          };
+
+          for (let i = 1; i <= 50; i++) {
+              let pVal = i <= 20 ? getVal(`part${i}`) : '';
+              let pNote = i <= 20 ? (getVal(`partNote${i}`) || getVal(`note${i}`)) : '';
+              let mVal = i <= 20 ? getVal(`mirror${i}`) : '';
+              let mNote = i <= 20 ? getVal(`mirrorNote${i}`) : '';
+              let aVal = i <= 20 ? getVal(`anker${i}`) : '';
+              let aNote = i <= 20 ? getVal(`ankerNote${i}`) : '';
 
               if (pVal) {
                   const extracted = extractNote(pVal);
                   pVal = extracted.link;
                   if (extracted.note) pNote = extracted.note;
+                  partsArr.push({ id: i, link: pVal, note: pNote });
               }
-
-              let mVal = getVal(`mirror${i}`);
-              let mNote = getVal(`mirrorNote${i}`);
-              let aVal = getVal(`anker${i}`);
-              let aNote = getVal(`ankerNote${i}`);
 
               if (mVal) {
                   const extracted = extractNote(mVal);
                   mVal = extracted.link;
                   if (extracted.note) mNote = extracted.note;
+                  mirrorsArr.push({ id: i, link: mVal, note: mNote });
               }
               if (aVal) {
                   const extracted = extractNote(aVal);
                   aVal = extracted.link;
                   if (extracted.note) aNote = extracted.note;
+                  ankerArr.push({ id: i, link: aVal, note: aNote });
               }
 
-              if (pVal) partsArr.push({ id: i, link: pVal, note: pNote });
-              if (mVal) mirrorsArr.push({ id: i, link: mVal, note: mNote });
-              if (aVal) ankerArr.push({ id: i, link: aVal, note: aNote });
+              // DODI Repacks
+              const paddedI = String(i).padStart(2, '0');
+              let dVal = getVal(`dodi ${i}`) || getVal(`dodi${i}`) || getVal(`dodi_${i}`) || getVal(`dodi ${paddedI}`) || getVal(`dodi${paddedI}`);
+              let dNote = getVal(`dodiNote${i}`) || getVal(`dodi note ${i}`) || getVal(`dodiNote ${i}`) || getVal(`dodi note${i}`);
+              if (dVal) {
+                  const extracted = extractNote(dVal);
+                  dVal = extracted.link;
+                  if (extracted.note) dNote = extracted.note;
+                  dodiArr.push({ id: i, link: dVal, note: dNote });
+              }
+
+              // Skidrow & Reloaded
+              let sVal = getVal(`skidrow ${i}`) || getVal(`skidrow${i}`) || getVal(`skidrow_${i}`) || getVal(`skidrow ${paddedI}`) || getVal(`skidrow${paddedI}`) || getVal(`skidrow & reloaded ${i}`) || getVal(`reloaded ${i}`) || getVal(`reloaded${i}`);
+              let sNote = getVal(`skidrowNote${i}`) || getVal(`skidrow note ${i}`) || getVal(`skidrowNote ${i}`) || getVal(`reloadedNote${i}`);
+              if (sVal) {
+                  const extracted = extractNote(sVal);
+                  sVal = extracted.link;
+                  if (extracted.note) sNote = extracted.note;
+                  skidrowArr.push({ id: i, link: sVal, note: sNote });
+              }
+
+              // SteamRIP
+              let srVal = getVal(`steamrip ${i}`) || getVal(`steamrip${i}`) || getVal(`steam rip ${i}`) || getVal(`steam_rip_${i}`) || getVal(`steamrip ${paddedI}`) || getVal(`steamrip${paddedI}`);
+              let srNote = getVal(`steamripNote${i}`) || getVal(`steamrip note ${i}`) || getVal(`steamripNote ${i}`) || getVal(`steam rip note ${i}`);
+              if (srVal) {
+                  const extracted = extractNote(srVal);
+                  srVal = extracted.link;
+                  if (extracted.note) srNote = extracted.note;
+                  steamripArr.push({ id: i, link: srVal, note: srNote });
+              }
+          }
+
+          // Single direct links fallback if no numbered parts were found
+          if (dodiArr.length === 0) {
+              const singleDodi = getVal('dodi') || getVal('dodi repack') || getVal('dodi repacks') || getVal('dodirepack');
+              if (singleDodi) {
+                  const ext = extractNote(singleDodi);
+                  dodiArr.push({ id: 1, link: ext.link, note: ext.note || getVal('dodiNote') || getVal('dodi note') });
+              }
+          }
+          if (skidrowArr.length === 0) {
+              const singleSkidrow = getVal('skidrow') || getVal('skidrow & reloaded') || getVal('skidrow and reloaded') || getVal('reloaded');
+              if (singleSkidrow) {
+                  const ext = extractNote(singleSkidrow);
+                  skidrowArr.push({ id: 1, link: ext.link, note: ext.note || getVal('skidrowNote') || getVal('skidrow note') });
+              }
+          }
+          if (steamripArr.length === 0) {
+              const singleSteamrip = getVal('steamrip') || getVal('steam rip') || getVal('steam_rip');
+              if (singleSteamrip) {
+                  const ext = extractNote(singleSteamrip);
+                  steamripArr.push({ id: 1, link: ext.link, note: ext.note || getVal('steamripNote') || getVal('steamrip note') });
+              }
           }
 
           // Dynamic button parsing for PS5 tab (button1, button2, button3, button4 ....)
@@ -8520,8 +8678,25 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           const rawId = String(row.id || (idx + 1)).trim();
           const finalId = (/^[A-Za-z]/.test(rawId)) ? rawId : `${idPrefix}${rawId}`;
 
+          const knownRepackers = ['fitgirl', 'dodi', 'elamigos', 'kaos', 'xatab', 'chovka', 'r.g. mechanics', 'skidrow', 'codex', 'empress', 'razor1911', 'repack', 'repacker', 'steamrip'];
+          const isRepackerName = (str: string) => {
+            const low = String(str || '').toLowerCase().trim();
+            return knownRepackers.some(r => low === r || low.includes(r));
+          };
+
+          let safeRepackBy = repackByVal;
+          if (!safeRepackBy && isRepackerName(publishByVal)) {
+            safeRepackBy = publishByVal;
+          }
+          if (!safeRepackBy && isRepackerName(explicitDevVal)) {
+            safeRepackBy = explicitDevVal;
+          }
+
+          let safePublishBy = isRepackerName(publishByVal) ? '' : publishByVal;
+          let safeExplicitDev = isRepackerName(explicitDevVal) ? '' : explicitDevVal;
+
           // Resolve game studio from parsed company profiles
-          let resolvedStudio = explicitDevVal || publishByVal;
+          let resolvedStudio = safeExplicitDev || safePublishBy;
           if (!resolvedStudio && parsedProfiles.length > 0) {
             const catFieldMap: Record<string, keyof CompanyProfile> = {
               'game': 'gameIds',
@@ -8584,8 +8759,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             originalSize: origSizeVal,
             genres: getVal('genres') || '',
             languages: getVal('languages') || 'ENG',
-            publishBy: publishByVal,
-            repackBy: repackByVal,
+            publishBy: safePublishBy,
+            repackBy: safeRepackBy,
             developer: resolvedStudio || '',
             coverImage: getVal('coverImage') || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED',
             galleryImages: gallery,
@@ -8606,6 +8781,9 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
               parts: partsArr,
               mirrors: mirrorsArr,
               ankerParts: ankerArr,
+              dodiParts: dodiArr,
+              skidrowParts: skidrowArr,
+              steamripParts: steamripArr,
               buttons: ps5Buttons,
               ps5Buttons: ps5Buttons,
               full: getVal('full') || (targetKey === 'ps5' && ps5Buttons.length > 0 ? ps5Buttons[0].link : undefined), 
@@ -8633,13 +8811,61 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
         transformed[targetKey] = [...transformed[targetKey], ...newItems];
       }
     });
+
+    // Merge or integrate dedicated external repacker tabs: DODI, Skidrow & Reloaded, SteamRIP
+    Object.keys(data).forEach(tabKey => {
+      const normKey = tabKey.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const isDodi = normKey.includes('dodi');
+      const isSkidrow = normKey.includes('skidrow') || normKey.includes('reloaded');
+      const isSteamrip = normKey.includes('steamrip') || normKey.includes('steam_rip');
+      if (!isDodi && !isSkidrow && !isSteamrip) return;
+
+      const rows = data[tabKey];
+      if (!Array.isArray(rows)) return;
+
+      rows.forEach((row: any) => {
+        if (!row || typeof row !== 'object') return;
+        const getVal = (k: string) => {
+          const nk = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const found = Object.keys(row).find(x => x.toLowerCase().replace(/[^a-z0-9]/g, '') === nk);
+          return found ? String(row[found] || '').trim() : '';
+        };
+
+        const rowName = getVal('name') || getVal('title') || getVal('game') || '';
+        const rowId = getVal('id') || getVal('gameId') || '';
+        if (!rowName && !rowId) return;
+
+        const extractedParts: { id: number, link: string, note?: string }[] = [];
+        for (let i = 1; i <= 50; i++) {
+          const val = getVal(`dodi${i}`) || getVal(`skidrow${i}`) || getVal(`steamrip${i}`) || getVal(`part${i}`) || getVal(`mirror${i}`) || getVal(`link${i}`) || (i === 1 ? (getVal('link') || getVal('download') || getVal('full')) : '');
+          if (val) {
+            extractedParts.push({ id: i, link: val, note: getVal(`note${i}`) || getVal(`partNote${i}`) || getVal('note') });
+          }
+        }
+        if (extractedParts.length === 0) return;
+
+        const cleanRowName = rowName.toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (const cat of ['game', 'hypervisor'] as const) {
+          const matched = transformed[cat].find(item => {
+            if (rowId && (item.id.toLowerCase() === rowId.toLowerCase() || item.gameId?.toLowerCase() === rowId.toLowerCase())) return true;
+            if (cleanRowName && item.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanRowName) return true;
+            return false;
+          });
+          if (matched) {
+            if (isDodi) {
+              matched.links.dodiParts = [...(matched.links.dodiParts || []), ...extractedParts];
+            } else if (isSkidrow) {
+              matched.links.skidrowParts = [...(matched.links.skidrowParts || []), ...extractedParts];
+            } else if (isSteamrip) {
+              matched.links.steamripParts = [...(matched.links.steamripParts || []), ...extractedParts];
+            }
+          }
+        }
+      });
+    });
     
     setAllResources(transformed);
-    try {
-      localStorage.setItem('cached_transformed_resources', JSON.stringify(transformed));
-    } catch (e) {
-      console.warn("Writing transformed cache failed:", e);
-    }
+    setCatalogCache('transformed', transformed);
   };
 
   const fetchData = async (silent = false, isManualReload = false) => {
@@ -8684,13 +8910,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       processRawData(data);
       dataToPreload = data;
 
-      // Update cache with new valid data
-      try {
-        localStorage.setItem('cached_secret_resources', JSON.stringify(data));
-        localStorage.removeItem('cached_transformed_resources');
-      } catch (cacheErr) {
-        console.warn("Writing to cache failed:", cacheErr);
-      }
+      // Update cache safely in IndexedDB
+      setCatalogCache('raw', data);
 
       if (isManualReload) {
         const notifId = Date.now();
@@ -8718,11 +8939,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
       let loadedData = null;
       try {
-        const cached = localStorage.getItem('cached_secret_resources');
-        if (cached) {
-          loadedData = JSON.parse(cached);
-          if (!silent) console.log("Loaded resources from local cache.");
-        }
+        loadedData = await getCatalogCache('raw');
+        if (loadedData && !silent) console.log("Loaded resources from local IndexedDB cache.");
       } catch (e) {
         if (!silent) console.warn("Local cache read failed:", e);
       }

@@ -1164,6 +1164,48 @@ export const translations: Translations = {
         es: 'Repack por',
         ar: 'إعداد ريباك'
     },
+    'DODI Repacks': {
+        en: 'DODI Repacks',
+        fr: 'DODI Repacks',
+        es: 'DODI Repacks',
+        ar: 'ريبـاك دودي (DODI)'
+    },
+    'Skidrow & Reloaded': {
+        en: 'Skidrow & Reloaded',
+        fr: 'Skidrow & Reloaded',
+        es: 'Skidrow & Reloaded',
+        ar: 'سكيدرو آند ريلودد (Skidrow)'
+    },
+    'SteamRIP': {
+        en: 'SteamRIP',
+        fr: 'SteamRIP',
+        es: 'SteamRIP',
+        ar: 'ستيم ريب (SteamRIP)'
+    },
+    'Utorrent File + Parts File': {
+        en: 'Utorrent File + Parts File',
+        fr: 'Fichier Utorrent + Fichiers en parties',
+        es: 'Archivo Utorrent + Archivos por partes',
+        ar: 'ملف تورنت + أجزاء مقسمة'
+    },
+    'Utorrent File': {
+        en: 'Utorrent File',
+        fr: 'Fichier Utorrent',
+        es: 'Archivo Utorrent',
+        ar: 'ملف تورنت'
+    },
+    'Files': {
+        en: 'Files',
+        fr: 'Fichiers',
+        es: 'Archivos',
+        ar: 'ملفات مباشرة'
+    },
+    'Utorrent File + Files': {
+        en: 'Utorrent File + Files',
+        fr: 'Fichier Utorrent + Fichiers directs',
+        es: 'Archivo Utorrent + Archivos directos',
+        ar: 'ملف تورنت + ملفات مباشرة'
+    },
     'Direct Cloud Links': {
         en: 'Direct Cloud Links',
         fr: 'Liens Cloud Directs',
