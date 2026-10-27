@@ -39,6 +39,8 @@ import { BestGameSeriesSection } from '../components/BestGameSeriesSection';
 import DisclaimerModal from '../components/DisclaimerModal';
 import { NetworkDiagnostic } from '../components/NetworkDiagnostic';
 import DonateModal from "../components/DonateModal";
+import SpinWheelIcon from '../components/SpinWheelIcon';
+import RandomGameSpinModal from '../components/RandomGameSpinModal';
 import MaintenancePage from '../components/MaintenancePage';
 import HardwareCompatibility from "../components/HardwareCompatibility";
 import { LowPolyBackground } from '../components/LowPolyBackground';
@@ -7082,6 +7084,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [sheetUpcomingTrailers, setSheetUpcomingTrailers] = useState<any[]>([]);
   const [openedViaRandom, setOpenedViaRandom] = useState(false);
   const [popularRepackIds, setPopularRepackIds] = useState<string[]>([]);
+  const [isSpinModalOpen, setIsSpinModalOpen] = useState(false);
+  const [spinCandidates, setSpinCandidates] = useState<any[]>([]);
   
   const getResolvedDeveloper = (item: ResourceItem) => {
       const knownRepackers = ['fitgirl', 'dodi', 'elamigos', 'kaos', 'xatab', 'chovka', 'r.g. mechanics', 'skidrow', 'codex', 'empress', 'razor1911', 'repack', 'repacker'];
@@ -9160,25 +9164,26 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   useEffect(() => { setCurrentPage(1); }, [activeTab, searchQuery]);
 
     useEffect(() => {
-            const handleRandomGame = () => {
-          let popularItems = [];
-          if (popularRepackIds.length > 0) {
-              const allItems = Object.values(allResources).flat();
-              popularItems = allItems.filter(item => popularRepackIds.some(id => String(id).toLowerCase() === String(item.id).toLowerCase()));
-          }
-          if (popularItems.length === 0 && allResources['game'] && allResources['game'].length > 0) {
-              popularItems = allResources['game'];
-          }
-          if (popularItems.length > 0) {
-              const randomIndex = Math.floor(Math.random() * popularItems.length);
-              const randomGame = popularItems[randomIndex];
-              setOpenedViaRandom(true);
-              setSelectedResource(randomGame);
-          }
+      const handleRandomGame = () => {
+        let popularItems: any[] = [];
+        if (popularRepackIds.length > 0) {
+          const allItems = Object.values(allResources).flat();
+          popularItems = allItems.filter(item => popularRepackIds.some(id => String(id).toLowerCase() === String(item.id).toLowerCase()));
+        }
+        if (popularItems.length === 0 && allResources['game'] && allResources['game'].length > 0) {
+          popularItems = allResources['game'];
+        }
+        if (popularItems.length === 0) {
+          popularItems = Object.values(allResources).flat();
+        }
+        if (popularItems.length > 0) {
+          setSpinCandidates(popularItems);
+          setIsSpinModalOpen(true);
+        }
       };
       window.addEventListener('randomPopularGame', handleRandomGame);
       return () => window.removeEventListener('randomPopularGame', handleRandomGame);
-  }, [popularRepackIds, allResources]);
+    }, [popularRepackIds, allResources]);
 
   useEffect(() => {
       const hash = window.location.hash;
@@ -10204,20 +10209,18 @@ const paginatedData = useMemo(() => {
                 exit={{ opacity: 0, scale: 0.8, y: -20 }}
                 className="fixed bottom-6 start-1/2 -translate-x-1/2 lg:bottom-10 lg:start-auto lg:end-10 lg:translate-x-0 z-[9999]"
               >
-                <div 
-                  className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden flex items-center justify-center shrink-0 group shadow-2xl cursor-pointer transition-transform hover:scale-110 active:scale-95 border-2 border-white/20 hover:border-white/50" 
+                <button
+                  type="button"
+                  className="relative flex items-center gap-2.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white border-2 border-amber-400/70 hover:border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.5)] backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
                   title="Discover another random game"
+                  aria-label="Discover another random game"
                   onClick={() => window.dispatchEvent(new CustomEvent('randomPopularGame'))}
                 >
-                  <div className="absolute inset-0 bg-[conic-gradient(from_0deg,#ff0000,#ff8000,#ffff00,#00ff00,#00ffff,#0000ff,#8000ff,#ff00ff,#ff0000)] animate-[spin_4s_linear_infinite] group-hover:animate-[spin_1s_linear_infinite]" />
-                  <div className="absolute inset-[3px] sm:inset-[4px] rounded-full bg-slate-900 flex items-center justify-center z-10 overflow-hidden transition-colors duration-300 group-hover:bg-slate-800">
-                    <div className="absolute top-1/2 start-1/2 w-full h-full origin-top-start -ms-0 -mt-0 bg-gradient-to-br from-indigo-500/50 to-transparent animate-[spin_2s_linear_infinite] group-hover:from-indigo-400/80 group-hover:animate-[spin_0.5s_linear_infinite]" />
-                    <div className="absolute w-[60%] h-[60%] rounded-full border border-indigo-500/60 border-dashed animate-[spin_10s_linear_infinite] group-hover:border-indigo-400 group-hover:animate-[spin_3s_linear_infinite_reverse] group-hover:scale-110 transition-transform" />
-                    <div className="absolute w-[30%] h-[30%] rounded-full border border-indigo-500/60 group-hover:border-indigo-400 group-hover:scale-125 transition-transform" />
-                    <Icon name="RefreshCw" size={16} className="text-white relative z-20 group-hover:animate-spin hidden sm:block" />
-                    <Icon name="RefreshCw" size={14} className="text-white relative z-20 group-hover:animate-spin sm:hidden" />
-                  </div>
-                </div>
+                  <SpinWheelIcon size="sm" isSpinning={isSpinModalOpen} />
+                  <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-amber-300 drop-shadow">
+                    Spin Wheel
+                  </span>
+                </button>
               </motion.div>
             )}
           </>
@@ -10292,6 +10295,17 @@ const paginatedData = useMemo(() => {
             />
         )}
       </AnimatePresence>
+
+      <RandomGameSpinModal
+        isOpen={isSpinModalOpen}
+        onClose={() => setIsSpinModalOpen(false)}
+        games={spinCandidates}
+        onSelectGame={(game) => {
+          setOpenedViaRandom(true);
+          setSelectedResource(game);
+          setIsSpinModalOpen(false);
+        }}
+      />
 
       <HeroSlider 
         games={allResources['game']?.slice(0, 8) || []}
@@ -10914,14 +10928,6 @@ const paginatedData = useMemo(() => {
             />
         </>
         )}
-        <div className="mt-6 mb-4 w-full flex justify-center">
-            <AdBanner 
-                desktopSrc={AD_CONFIG.banner3.desktop} 
-                mobileSrc={AD_CONFIG.banner3.mobile} 
-                link={AD_CONFIG.banner3.link} 
-            />
-        </div>
-
         {['game', 'hypervisor', 'steamtools', 'ps5'].includes(activeTab) && (
             <>
                 <BestStudiosCarousel 
@@ -10930,21 +10936,7 @@ const paginatedData = useMemo(() => {
                     onSeeAll={() => setShowAllProfiles(true)}
                     categoryType="games"
                 />
-                <div className="mt-6 mb-6 w-full flex justify-center">
-                    <AdBanner 
-                        desktopSrc={AD_CONFIG.banner4.desktop} 
-                        mobileSrc={AD_CONFIG.banner4.mobile} 
-                        link={AD_CONFIG.banner4.link} 
-                    />
-                </div>
                 <TopGamesSection games={topGames} />
-                <div className="mt-16 mb-16 w-full flex justify-center">
-                    <AdBanner 
-                        desktopSrc={AD_CONFIG.banner5.desktop} 
-                        mobileSrc={AD_CONFIG.banner5.mobile} 
-                        link={AD_CONFIG.banner5.link} 
-                    />
-                </div>
             </>
         )}
         {['architect', 'extra'].includes(activeTab) && (
@@ -10955,13 +10947,6 @@ const paginatedData = useMemo(() => {
                     onSeeAll={() => setShowAllProfiles(true)}
                     categoryType="tools"
                 />
-                <div className="mt-16 mb-16 w-full flex justify-center">
-                    <AdBanner 
-                        desktopSrc={AD_CONFIG.banner4.desktop} 
-                        mobileSrc={AD_CONFIG.banner4.mobile} 
-                        link={AD_CONFIG.banner4.link} 
-                    />
-                </div>
             </>
         )}
 

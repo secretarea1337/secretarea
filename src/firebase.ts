@@ -12,7 +12,7 @@ import { initializeFirestore, getFirestore, doc } from 'firebase/firestore';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyCs7GCq4TKOqjaEo7OsoQ6RkGhaT1m0bXw",
-  authDomain: "secretarea-1337.firebaseapp.com",
+  authDomain: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN) || "secretarea-1337.firebaseapp.com",
   projectId: "secretarea-1337",
   storageBucket: "secretarea-1337.firebasestorage.app",
   messagingSenderId: "58466402021",

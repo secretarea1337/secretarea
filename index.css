@@ -71,3 +71,37 @@ body {
   animation-play-state: paused !important;
 }
 
+@keyframes cyberConicSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes diceRoll3D {
+  0% { transform: rotate(0deg) scale(0.9); }
+  25% { transform: rotate(180deg) scale(1.18) translateY(-2px); }
+  50% { transform: rotate(360deg) scale(0.95); }
+  75% { transform: rotate(540deg) scale(1.12) translateY(1px); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+
+@keyframes neonAuraPulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); filter: blur(6px); }
+  50% { opacity: 0.85; transform: scale(1.08); filter: blur(10px); }
+}
+
+.animate-cyber-conic {
+  animation: cyberConicSpin 7s linear infinite;
+}
+
+.animate-cyber-conic-fast {
+  animation: cyberConicSpin 1.6s linear infinite;
+}
+
+.animate-dice-roll {
+  animation: diceRoll3D 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-neon-aura {
+  animation: neonAuraPulse 3s ease-in-out infinite;
+}
+

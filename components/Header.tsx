@@ -9,6 +9,7 @@ import { TbMoon, TbSun } from 'react-icons/tb';
 import { auth, signInWithGoogle, signInWithDiscord, signInWithGithub } from '../src/firebase';
 import { subscribeUserProfile, getLocalProfile, ensureUserProfile, isUserAdmin, UserProfileData } from '../src/services/userService';
 import { subscribeReports, getDeletedReportIds, getCachedReports } from '../src/services/reportService';
+import SpinWheelIcon from './SpinWheelIcon';
 
 const Flags = () => {
   const { t } = useLanguage();
@@ -42,21 +43,50 @@ const Flags = () => {
 
 const DiscoverGameButton = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleDiscover = () => {
+    const isGameRoute = 
+      location.pathname === '/' ||
+      location.pathname === '/terminal' ||
+      location.pathname.startsWith('/game') ||
+      location.pathname.startsWith('/hypervisor') ||
+      location.pathname.startsWith('/steamtools') ||
+      location.pathname.startsWith('/ps5') ||
+      location.pathname.startsWith('/tools') ||
+      location.pathname.startsWith('/architect') ||
+      location.pathname.startsWith('/savegame') ||
+      location.pathname.startsWith('/extra');
+
+    if (!isGameRoute) {
+      navigate('/');
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('randomPopularGame'));
+      }, 120);
+    } else {
+      window.dispatchEvent(new CustomEvent('randomPopularGame'));
+    }
+  };
+
   return (
-    <div 
-      className="relative w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 group shadow-md cursor-pointer transition-transform hover:scale-110 active:scale-95" 
-      title={t("Discover a random game")}
-      onClick={() => window.dispatchEvent(new CustomEvent('randomPopularGame'))}
-    >
-      <div className="absolute inset-0 bg-[conic-gradient(from_0deg,#ff0000,#ff8000,#ffff00,#00ff00,#00ffff,#0000ff,#8000ff,#ff00ff,#ff0000)] animate-[spin_4s_linear_infinite] group-hover:animate-[spin_1s_linear_infinite]" />
-      <div className="absolute inset-[2px] rounded-full bg-slate-900 flex items-center justify-center z-10 overflow-hidden transition-colors duration-300 group-hover:bg-slate-800">
-        <div className="absolute top-1/2 start-1/2 w-full h-full origin-top-start -ms-0 -mt-0 bg-gradient-to-br from-indigo-500/50 to-transparent animate-[spin_2s_linear_infinite] group-hover:from-indigo-400/80 group-hover:animate-[spin_0.5s_linear_infinite]" />
-        <div className="absolute w-[60%] h-[60%] rounded-full border border-indigo-500/60 border-dashed animate-[spin_10s_linear_infinite] group-hover:border-indigo-400 group-hover:animate-[spin_3s_linear_infinite_reverse] group-hover:scale-110 transition-transform" />
-        <div className="absolute w-[30%] h-[30%] rounded-full border border-indigo-500/60 group-hover:border-indigo-400 group-hover:scale-125 transition-transform" />
-        <div className="absolute w-full h-[1px] bg-indigo-500/60 group-hover:bg-indigo-400" />
-        <div className="absolute h-full w-[1px] bg-indigo-500/60 group-hover:bg-indigo-400" />
-        <div className="absolute w-1.5 h-1.5 bg-amber-400 rounded-full top-[25%] start-[25%] animate-pulse shadow-[0_0_5px_#fbbf24] group-hover:bg-yellow-300" />
-        <div className="absolute w-1.5 h-1.5 bg-teal-400 rounded-full bottom-[25%] end-[25%] animate-pulse shadow-[0_0_5px_#2dd4bf] group-hover:bg-cyan-300" style={{ animationDelay: '1s' }} />
+    <div className="relative group flex items-center justify-center">
+      <button
+        type="button"
+        className="relative flex items-center justify-center shrink-0 p-1 sm:p-1.5 rounded-full bg-slate-200/90 hover:bg-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700 border border-slate-300 dark:border-white/10 shadow-xs cursor-pointer transition-all duration-300 hover:scale-115 active:scale-90 focus:outline-hidden"
+        title={t("Discover a random game")}
+        aria-label={t("Discover a random game")}
+        onClick={handleDiscover}
+      >
+        <SpinWheelIcon size="md" />
+      </button>
+
+      {/* Floating Animated Tooltip on Hover */}
+      <div className="absolute -bottom-8 start-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 z-50 whitespace-nowrap">
+        <div className="px-2 py-0.5 rounded-full bg-slate-900/95 dark:bg-black/95 text-[10px] font-black tracking-wider text-amber-300 uppercase shadow-lg border border-amber-400/40 backdrop-blur-md flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+          {t('Spin to Play')}
+        </div>
       </div>
     </div>
   );

@@ -19,7 +19,8 @@ import {
   TbCurrencyBitcoin, TbCurrencyEthereum, TbCurrencyMonero, TbCoin, TbWallet, TbStar,
   TbShare, TbBrandAdobe, TbBrandOpenai, TbMagnet, TbSettings, TbAdjustments,
   TbEdit, TbPencil, TbUpload, TbCloudUpload, TbCrown, TbShieldCheck,
-  TbPackage, TbArchive, TbDisc, TbBox
+  TbPackage, TbArchive, TbDisc, TbBox,
+  TbVolume, TbVolume2, TbVolumeOff, TbArrowsShuffle, TbRotateClockwise, TbRotate
 } from 'react-icons/tb';
 
 import {
@@ -288,6 +289,14 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Settings: TbSettings,
   Settings2: TbAdjustments,
   Gear: TbSettings,
+  Volume: TbVolume,
+  Volume2: TbVolume2,
+  VolumeX: TbVolumeOff,
+  VolumeOff: TbVolumeOff,
+  Shuffle: TbArrowsShuffle,
+  RotateCcw: TbRotateClockwise,
+  RotateCw: TbRotateClockwise,
+  Rotate: TbRotate,
 };
 
 const Icon: React.FC<IconProps> = ({ name, size = 24, className, style }) => {
