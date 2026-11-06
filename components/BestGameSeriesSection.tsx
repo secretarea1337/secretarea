@@ -41,7 +41,7 @@ export const BestGameSeriesSection: React.FC<BestGameSeriesSectionProps> = ({ se
   const paddedSeries = [...currentSeries, ...Array(Math.max(0, SERIES_PER_PAGE - currentSeries.length)).fill(null)];
 
   return (
-    <div className="mt-0 mb-16 w-full relative" dir={dir}>
+    <div className="mt-16 sm:mt-20 md:mt-24 mb-16 sm:mb-20 w-full relative pt-2 sm:pt-4" dir={dir}>
       <div className="flex items-center gap-3 mb-6 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="p-2 bg-slate-200/50 dark:bg-white/10 rounded-xl border border-slate-300 dark:border-white/20 shrink-0">
           <img 

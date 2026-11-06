@@ -33,6 +33,8 @@ import HeroSlider from '../components/HeroSlider';
 import AnimatedGenreHero from '../components/AnimatedGenreHero';
 import PartnersSection from '../components/PartnersSection';
 import UpcomingTrailersSection from '../components/UpcomingTrailersSection';
+import TwoPlayersSection from '../components/TwoPlayersSection';
+import MostPopularRepacksSection from '../components/MostPopularRepacksSection';
 
 import { CommentsSection } from '../components/CommentsSection';
 import { BestGameSeriesSection } from '../components/BestGameSeriesSection';
@@ -2253,7 +2255,7 @@ const GenreDetailView: React.FC<{
                             ) {
                                 return (
                                     <button
-                                        key={page}
+                                        key={`games-grid-page-${page}`}
                                         onClick={() => handlePageChange(page)}
                                         className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl font-bold transition-colors border ${
                                             currentPage === page
@@ -2268,7 +2270,7 @@ const GenreDetailView: React.FC<{
                                 page === currentPage - 3 ||
                                 page === currentPage + 3
                             ) {
-                                return <span key={page} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-500">...</span>;
+                                return <span key={`games-grid-dots-${page}`} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-500">...</span>;
                             }
                             return null;
                         })}
@@ -2354,12 +2356,12 @@ const AboutSecretAreaSection: React.FC = () => {
                             <div className="flex justify-between items-center text-xs font-bold tracking-wide">
                                 <span className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
                                     <img src="https://consumersiteimages.trustpilot.net/business-units/612663f3a458ff001df5503b-198x149-1x.jpg" alt="SteamRIP" className="w-4 h-4 rounded-sm object-contain" />
-                                    <span>SteamRIP <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Files') || 'Files'})</span></span>
+                                    <span>SteamRIP <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
                                 </span>
-                                <span className="font-mono font-black text-sky-600 dark:text-sky-400">40%</span>
+                                <span className="font-mono font-black text-sky-600 dark:text-sky-400">15%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
-                                <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.3s]" style={{ '--target-width': '40%', width: '40%' } as React.CSSProperties}></div>
+                                <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.3s]" style={{ '--target-width': '15%', width: '15%' } as React.CSSProperties}></div>
                             </div>
                         </div>
 
@@ -2368,7 +2370,7 @@ const AboutSecretAreaSection: React.FC = () => {
                             <div className="flex justify-between items-center text-xs font-bold tracking-wide">
                                 <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                                     <img src="https://art.pixilart.com/50c0d16b052ad81.gif" alt="Skidrow" className="w-4 h-4 rounded-sm object-contain" />
-                                    <span>Skidrow <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File + Files') || 'Utorrent File + Files'})</span></span>
+                                    <span>Skidrow <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
                                 </span>
                                 <span className="font-mono font-black text-amber-600 dark:text-amber-400">40%</span>
                             </div>
@@ -3088,6 +3090,7 @@ const SystemChecker: React.FC<{ reqs: {label: string, value: string}[] }> = ({ r
       <AnimatePresence>
         {isOpen && (
           <motion.div 
+            key="can-i-run-it-dropdown"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -4583,6 +4586,7 @@ export const ResourceDetailModal: React.FC<{
                   <AnimatePresence>
                     {liveStatusToast && (
                       <motion.div
+                        key="live-status-toast-notification"
                         dir={dir}
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -5769,6 +5773,7 @@ export const ResourceDetailModal: React.FC<{
     <AnimatePresence>
       {showHypervisorGuide && (
           <motion.div 
+              key="hypervisor-guide-modal-overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -6176,155 +6181,7 @@ const DownloadButton: React.FC<{
 
 
 
-const MostPopularRepacksModal: React.FC<{
-    isOpen: boolean,
-    games: ResourceItem[],
-    onClose: () => void,
-    onSelect: (item: ResourceItem) => void
-}> = ({ isOpen, games, onClose, onSelect }) => {
-    const { dir, t } = useLanguage();
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(20);
 
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 640) setItemsPerPage(12);
-            else if (window.innerWidth < 768) setItemsPerPage(12);
-            else if (window.innerWidth < 1024) setItemsPerPage(16);
-            else setItemsPerPage(18);
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const totalPages = Math.ceil(games.length / itemsPerPage);
-    const validCurrentPage = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
-    const paginatedGames = games.slice((validCurrentPage - 1) * itemsPerPage, validCurrentPage * itemsPerPage);
-
-    return createPortal(
-        <AnimatePresence>
-        {isOpen && (
-            <motion.div 
-            key="most-popular-repacks-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-0 bg-slate-900/90 backdrop-blur-md"
-        >
-            <motion.div 
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-slate-900 w-full h-full max-w-none max-h-none rounded-none shadow-2xl flex flex-col overflow-hidden border-none"
-            >
-                <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950 shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                            <Icon name="Trophy" className="text-yellow-600 dark:text-yellow-500" size={20} />
-                        </div>
-                        <div>
-                            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t('Most Popular Repacks')}</h2>
-                            <p className="text-xs text-slate-600 dark:text-slate-300">{t('All Top')} {games.length} {t('Games')}</p>
-                        </div>
-                    </div>
-                    <button 
-                        onClick={onClose}
-                        className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
-                    >
-                        <Icon name="X" size={20} />
-                    </button>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100/50 dark:bg-slate-950/50">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-                        {paginatedGames.map((game, index) => {
-                            const globalIndex = (validCurrentPage - 1) * itemsPerPage + index;
-                            const isHypervisor = game.category?.toLowerCase() === 'hypervisor';
-                            return (
-                                <motion.div 
-                                    key={`${game.id}-${globalIndex}`}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="relative group cursor-pointer"
-                                    onClick={() => onSelect(game)}
-                                >
-                                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-blue-500/20 group-hover:border-blue-500/50">
-                                        <img 
-                                            src={game.image || game.coverImage || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED'} 
-                                            alt={game.name} 
-                                            className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-110 saturate-100 group-hover:saturate-150"
-                                            onError={(e) => {
-                                                e.currentTarget.src = 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED';
-                                            }}
-                                        />
-                                        
-                                        
-
-                                        {isHypervisor && (
-                                            <div className="absolute top-2 end-2 z-10 bg-red-600/90 backdrop-blur-md text-white font-black text-[10px] sm:text-xs px-2 py-1 rounded-lg shadow-lg border border-red-400/30 group-hover:scale-110 transition-transform">
-                                                HV
-                                            </div>
-                                        )}
-                                        
-                                        
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {totalPages > 1 && (
-                    <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-center items-center shrink-0">
-                        <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
-                            <button
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={validCurrentPage === 1}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
-                            >
-                                <Icon name="ChevronLeft" size={16} className="rtl:rotate-180" />
-                            </button>
-                            {(() => {
-                                const maxVisible = Math.min(5, totalPages);
-                                let startPage = Math.max(1, validCurrentPage - Math.floor(maxVisible / 2));
-                                if (startPage + maxVisible - 1 > totalPages) {
-                                    startPage = Math.max(1, totalPages - maxVisible + 1);
-                                }
-                                return Array.from({ length: maxVisible }, (_, i) => startPage + i).map(pageNum => (
-                                    <button
-                                        key={pageNum}
-                                        onClick={() => setCurrentPage(pageNum)}
-                                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-colors ${
-                                            validCurrentPage === pageNum 
-                                                ? 'bg-blue-600 text-white shadow-md' 
-                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                                        }`}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                ));
-                            })()}
-                            <button
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={validCurrentPage === totalPages}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
-                            >
-                                <Icon name="ChevronRight" size={16} className="rtl:rotate-180" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </motion.div>
-        </motion.div>
-        )}
-        </AnimatePresence>,
-        document.body
-    );
-};
 
 
 const GameOfTheDaySection: React.FC<{
@@ -6500,116 +6357,7 @@ const SupportUsBanner: React.FC = () => {
 };
 
 
-const MostPopularRepacksSection: React.FC<{ 
-    gameIds: string[], 
-    allResources: Record<string, ResourceItem[]>,
-    onSelect: (item: ResourceItem) => void
-}> = ({ gameIds, allResources, onSelect }) => {
-    const { dir, t } = useLanguage();
-    
-    const [displayCount, setDisplayCount] = useState(20);
-    const [showAllModal, setShowAllModal] = useState(false);
 
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 640) setDisplayCount(8);
-            else if (window.innerWidth < 768) setDisplayCount(12);
-            else if (window.innerWidth < 1024) setDisplayCount(16);
-            else setDisplayCount(18);
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    // Find games based on IDs
-    const games = useMemo(() => {
-        const allItems = Object.values(allResources).flat();
-        return gameIds.map(id => allItems.find(i => String(i.id).toLowerCase() === String(id).toLowerCase())).filter(Boolean) as ResourceItem[];
-    }, [gameIds, allResources]);
-
-    if (!games || games.length === 0) return null;
-
-    const displayedGames = games.slice(0, displayCount);
-
-    return (
-        <>
-        <div id="popular-repacks-section" className="mt-12 relative z-10 w-full overflow-hidden scroll-mt-24">
-            
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10 relative z-10">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-yellow-500/20 shrink-0 transform -rotate-3 hover:rotate-0 transition-transform">
-                        <Icon name="Trophy" size={28} />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight">
-                            {t('Most Popular Repacks')}</h2>
-                        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{t('Top community favorites this year')}</p>
-                    </div>
-                </div>
-                
-                {games.length > displayCount && (
-                    <button 
-                        onClick={() => setShowAllModal(true)}
-                        className="w-full sm:w-auto group relative px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-sm uppercase tracking-widest rounded-xl transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] flex items-center justify-center gap-2 overflow-hidden shrink-0"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <span className="relative z-10 flex items-center gap-2 group-hover:text-white transition-colors duration-300">
-                            {t('SEE MORE GAMES')}
-                            <Icon name="ArrowRight" size={20} className="transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
-                        </span>
-                    </button>
-                )}
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-5 relative z-10">
-                {displayedGames.map((game, index) => {
-                    const isHypervisor = game.category?.toLowerCase() === 'hypervisor';
-                    return (
-                        <motion.div 
-                            key={`${game.id}-${index}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.05 }}
-                            className="relative group cursor-pointer"
-                            onClick={() => onSelect(game)}
-                        >
-                            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 shadow-sm transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-blue-500/20 group-hover:border-blue-500/50">
-                                <img 
-                                    src={game.image || game.coverImage || 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED'} 
-                                    alt={game.name} 
-                                    className="w-full h-full object-cover transition-all duration-700 group-hover:brightness-110 saturate-100 group-hover:saturate-150"
-                                    onError={(e) => {
-                                        e.currentTarget.src = 'https://placehold.co/600x800/0f172a/334155?text=ENCRYPTED';
-                                    }}
-                                />
-                                
-                                
-                                {isHypervisor && (
-                                    <div className="absolute top-2 end-2 z-10 bg-red-500/90 backdrop-blur-md text-white font-black text-[9px] sm:text-[10px] px-2 py-1 rounded-lg shadow-lg border border-red-400/30 group-hover:scale-110 transition-transform tracking-widest">
-                                        HV
-                                    </div>
-                                )}
-                                
-                                </div>
-</motion.div>
-                    );
-                })}
-            </div>
-        </div>
-
-        <MostPopularRepacksModal             isOpen={showAllModal}
-            games={games} 
-            onClose={() => setShowAllModal(false)} 
-            onSelect={(game) => {
-                setShowAllModal(false);
-                onSelect(game);
-            }} 
-        />
-        </>
-    );
-};
 
 const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
     const { dir, t } = useLanguage();
@@ -7082,6 +6830,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [topGames, setTopGames] = useState<TopGame[]>([]);
   const [bestGameSeries, setBestGameSeries] = useState<BestGameSeries[]>([]);
   const [sheetUpcomingTrailers, setSheetUpcomingTrailers] = useState<any[]>([]);
+  const [sheetOnlineGames, setSheetOnlineGames] = useState<{ id: string; category?: string }[]>([]);
   const [openedViaRandom, setOpenedViaRandom] = useState(false);
   const [popularRepackIds, setPopularRepackIds] = useState<string[]>([]);
   const [isSpinModalOpen, setIsSpinModalOpen] = useState(false);
@@ -8076,10 +7825,6 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   useEffect(() => {
     const initial = Math.floor(Math.random() * (150000 - 30000 + 1)) + 30000;
     setVisitorCount(initial);
-    const interval = setInterval(() => {
-      setVisitorCount(prev => prev + Math.floor(Math.random() * 21) - 10);
-    }, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const processRawData = (data: any) => {
@@ -8378,6 +8123,64 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       setSheetUpcomingTrailers([]);
     }
 
+    // Handle 2-Player Online Games tab ("onlinegames") from Google Sheet
+    const onlineGamesKey = Object.keys(data).find(k => {
+      const norm = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return norm === 'onlinegames' || norm === 'onlinegame' || norm === 'twoplayer' || norm === 'twoplayers';
+    });
+    if (onlineGamesKey && Array.isArray(data[onlineGamesKey])) {
+      const entries: { id: string; category?: string }[] = [];
+      data[onlineGamesKey].forEach((row: any) => {
+        if (!row) return;
+        if (typeof row === 'string' || typeof row === 'number') {
+          const s = String(row).trim();
+          if (s) entries.push({ id: s });
+          return;
+        }
+        if (typeof row === 'object') {
+          const directKey = Object.keys(row).find(k => {
+            const c = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return c === 'id' || c === 'gameid' || c === 'gamesid' || c === 'game' || c === 'games';
+          });
+          const catKey = Object.keys(row).find(k => {
+            const c = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return c === 'category' || c === 'type' || c === 'mode' || c === 'genre' || c === 'tag' || c === 'section';
+          });
+          const customCat = catKey && row[catKey] ? String(row[catKey]).trim() : undefined;
+
+          if (directKey && row[directKey]) {
+            String(row[directKey]).split(/[,\n\|]/).forEach((v: string) => {
+              const t = v.trim();
+              if (t) entries.push({ id: t, category: customCat });
+            });
+          } else {
+            Object.values(row).forEach((val: any) => {
+              if (val && typeof val === 'string' && val.trim() !== '') {
+                val.split(/[,\n\|]/).forEach((v: string) => {
+                  const t = v.trim();
+                  if (t) entries.push({ id: t, category: customCat });
+                });
+              } else if (val && typeof val === 'number') {
+                entries.push({ id: String(val), category: customCat });
+              }
+            });
+          }
+        }
+      });
+      
+      // Deduplicate by ID while preserving category if present
+      const uniqueMap = new Map<string, { id: string; category?: string }>();
+      entries.forEach(e => {
+        const key = e.id.toLowerCase();
+        if (!uniqueMap.has(key) || (e.category && !uniqueMap.get(key)?.category)) {
+          uniqueMap.set(key, e);
+        }
+      });
+      setSheetOnlineGames(Array.from(uniqueMap.values()));
+    } else {
+      setSheetOnlineGames([]);
+    }
+
     const transformed: Record<string, ResourceItem[]> = { game: [], hypervisor: [], steamtools: [], ps5: [], architect: [], extra: [] };
     Object.keys(data).forEach(tabKey => {
       const normalizedKey = tabKey.toLowerCase();
@@ -8385,7 +8188,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       let idPrefix = '';
       
       if (normalizedKey.includes('hypervisor')) { targetKey = 'hypervisor'; idPrefix = 'H'; }
-      else if (normalizedKey.includes('upcoming') || normalizedKey.includes('steamaccounts') || normalizedKey.includes('mastergift') || normalizedKey.includes('profil') || normalizedKey.includes('topgames') || normalizedKey.includes('popularrepack') || normalizedKey.includes('bestgameseries')) { return; }
+      else if (normalizedKey.includes('upcoming') || normalizedKey.includes('steamaccounts') || normalizedKey.includes('mastergift') || normalizedKey.includes('profil') || normalizedKey.includes('topgames') || normalizedKey.includes('popularrepack') || normalizedKey.includes('bestgameseries') || normalizedKey.includes('onlinegame') || normalizedKey.includes('twoplayer')) { return; }
       else if (normalizedKey.includes('ps5') || normalizedKey.includes('playstation')) { targetKey = 'ps5'; idPrefix = 'P'; }
       else if (normalizedKey.includes('game') && !normalizedKey.includes('savegame')) { targetKey = 'game'; idPrefix = 'G'; }
       else if (normalizedKey.includes('steamtools')) { targetKey = 'steamtools'; idPrefix = 'S'; }
@@ -9654,15 +9457,7 @@ const paginatedData = useMemo(() => {
                             </div>
                             <div className="text-[10px] sm:text-xs font-semibold text-slate-300 lowercase tracking-tight sm:tracking-widest font-mono truncate">guest@SecretArea1337:~/root</div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => handleExitTerminal(true, true)}
-                          className="px-2.5 py-1 rounded-lg bg-slate-700/70 hover:bg-slate-600/90 text-slate-200 hover:text-white text-[10px] sm:text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                          title="Back to Home"
-                        >
-                          <Icon name="Home" size={13} />
-                          <span>Home</span>
-                        </button>
+                        <div className="w-10 sm:w-14"></div>
                       </div>
                       <div 
                         className="flex-1 min-h-0 p-3 sm:p-4 md:p-6 overflow-y-auto font-mono text-[11px] sm:text-[12px] md:text-[13px] custom-scrollbar relative z-10 text-[#D8DEE9]" 
@@ -10038,6 +9833,7 @@ const paginatedData = useMemo(() => {
       <AnimatePresence>
         {showHackerLoader && (
           <motion.div
+            key="hacker-loader-screen"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
             dir="ltr" className="fixed inset-0 z-[9999] bg-slate-50 dark:bg-[#020617] flex flex-col items-center justify-center p-4 overflow-hidden transition-colors duration-300"
@@ -10167,7 +9963,7 @@ const paginatedData = useMemo(() => {
 
       <AnimatePresence>
         {selectedResource && (
-          <>
+          <React.Fragment key={`resource-detail-wrapper-${selectedResource.id || 'res'}`}>
             <ResourceDetailModal 
               globalSpecs={globalSpecs}
               item={selectedResource} 
@@ -10204,6 +10000,7 @@ const paginatedData = useMemo(() => {
             />
             {openedViaRandom && (
               <motion.div
+                key={`random-spin-btn-${selectedResource.id || 'res'}`}
                 initial={{ opacity: 0, scale: 0.8, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: -20 }}
@@ -10223,13 +10020,14 @@ const paginatedData = useMemo(() => {
                 </button>
               </motion.div>
             )}
-          </>
+          </React.Fragment>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {selectedCompanyProfile && (
             <CompanyProfileModal
+                key={`company-profile-modal-${selectedCompanyProfile.id || 'comp'}`}
                 profile={selectedCompanyProfile}
                 resources={getCompanyResources(selectedCompanyProfile)}
                 onClose={() => setSelectedCompanyProfile(null)}
@@ -10241,10 +10039,10 @@ const paginatedData = useMemo(() => {
         )}
       </AnimatePresence>
 
-
       <AnimatePresence>
         {showSteamModal && (
             <SteamAccountsModal 
+                key="steam-accounts-modal-item"
                 open={showSteamModal} 
                 onClose={() => setShowSteamModal(false)} 
                 accounts={steamAccounts} 
@@ -10260,6 +10058,7 @@ const paginatedData = useMemo(() => {
       <AnimatePresence>
         {showMasterGiftModal && (
             <MasterGiftModal 
+                key="master-gift-modal-item"
                 open={showMasterGiftModal} 
                 onClose={() => setShowMasterGiftModal(false)} 
                 accounts={masterGifts} 
@@ -10275,6 +10074,7 @@ const paginatedData = useMemo(() => {
       <AnimatePresence>
         {rewardLoginModalTarget && (
             <RewardLoginModal
+                key="reward-login-modal-item"
                 open={Boolean(rewardLoginModalTarget)}
                 target={rewardLoginModalTarget}
                 onClose={() => setRewardLoginModalTarget(null)}
@@ -10290,6 +10090,7 @@ const paginatedData = useMemo(() => {
       <AnimatePresence>
         {showDonateModal && (
             <DonateModal 
+                key="donate-modal-item"
                 open={showDonateModal} 
                 onClose={() => setShowDonateModal(false)} 
             />
@@ -10882,14 +10683,14 @@ const paginatedData = useMemo(() => {
                           return pages.map((page, idx) => (
                             typeof page === 'number' ? (
                                 <button
-                                  key={idx}
+                                  key={`studio-page-${page}-${idx}`}
                                   onClick={() => setCurrentPage(page)}
                                   className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-bold text-[10px] sm:text-xs transition-all shrink-0 ${currentPage === page ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' : 'bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}
                                 >
                                   {page}
                                 </button>
                             ) : (
-                                <span key={idx} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 text-xs font-bold select-none shrink-0">...</span>
+                                <span key={`studio-dots-${idx}`} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 text-xs font-bold select-none shrink-0">...</span>
                             )
                           ));
                       })()}
@@ -10936,6 +10737,17 @@ const paginatedData = useMemo(() => {
                     onSeeAll={() => setShowAllProfiles(true)}
                     categoryType="games"
                 />
+                {/* TWO PLAYERS. ENDLESS FUN. SECTION - MOVED BETWEEN TOP STUDIOS AND OPEN WORLD GAMES */}
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+                    <TwoPlayersSection 
+                        allGames={Object.values(allResources).flat()}
+                        sheetOnlineGames={sheetOnlineGames}
+                        onSelectGame={(game, action) => {
+                            setSelectedResource(game);
+                            if (action) setSelectedResourceAction(action);
+                        }}
+                    />
+                </div>
                 <TopGamesSection games={topGames} />
             </>
         )}
@@ -10963,7 +10775,6 @@ const paginatedData = useMemo(() => {
       
       
       
-
 
       {/* Featured Genres Full Width Section */}
       <div id="featured-genres" className="w-full relative mt-2 mb-24">
@@ -10993,6 +10804,7 @@ const paginatedData = useMemo(() => {
       <AnimatePresence>
         {showScrollTop && !selectedResource && !selectedCompanyProfile && !showAllProfiles && !showDonateModal && !showSteamModal && !showMasterGiftModal && !showDisclaimer && !showIntelPanel && (
           <motion.button 
+            key="secret-area-scroll-top-btn"
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -11063,6 +10875,7 @@ const AllProfilesModal: React.FC<{
         <AnimatePresence>
         {isOpen && (
             <motion.div 
+                key="all-profiles-modal-wrapper"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -11113,9 +10926,9 @@ const AllProfilesModal: React.FC<{
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100/50 dark:bg-slate-950/50">
                     {paginatedProfiles.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-                            {paginatedProfiles.map((profile) => (
+                            {paginatedProfiles.map((profile, pIdx) => (
                                 <div 
-                                    key={profile.id}
+                                    key={`modal-profile-${profile.id || profile.name || pIdx}`}
                                     onClick={() => onSelect(profile as CompanyProfile)}
                                     className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center gap-4 cursor-pointer hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10 transition-all h-full group/studio"
                                 >
@@ -11157,7 +10970,7 @@ const AllProfilesModal: React.FC<{
                             
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                                 <button
-                                    key={page}
+                                    key={`profile-page-num-${page}`}
                                     onClick={() => setCurrentPage(page)}
                                     className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${
                                         currentPage === page 

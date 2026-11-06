@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { jsPDF } from "jspdf";
 import Icon from '../components/Icon';
+import ModernEWallet from '../components/ModernEWallet';
+import { auth, signInWithGoogle } from '../src/firebase';
+import { isUserAdmin } from '../src/services/userService';
 import {
   LineChart,
   Line,
@@ -69,18 +72,6 @@ interface Note {
   text: string;
   date: string;
   color: string;
-}
-
-interface WishItem {
-  id: number;
-  name: string;
-  price: number;
-  type: 'waiting' | 'bought';
-  icon: string;
-  priority: 'High' | 'Medium' | 'Low';
-  fundSource: 'personal' | 'safe' | 'invest';
-  url?: string;
-  dateAdded: string;
 }
 
 interface ExpenseItem {
@@ -219,33 +210,39 @@ const NOTE_COLORS = [
   'bg-purple-100 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700/50',
 ];
 
-// --- HELPER: AUTO ICON ---
-const getSmartIcon = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('car') || n.includes('bmw') || n.includes('mercedes') || n.includes('audi') || n.includes('peugeot') || n.includes('volkswagen') || n.includes('vw')) return 'Car';
-    if (n.includes('house') || n.includes('home') || n.includes('apartment') || n.includes('villa')) return 'Home';
-    if (n.includes('macbook') || n.includes('laptop') || n.includes('pc') || n.includes('computer') || n.includes('desktop') || n.includes('msi')) return 'DeviceDesktop';
-    if (n.includes('phone') || n.includes('iphone') || n.includes('samsung') || n.includes('android') || n.includes('redmi')) return 'DeviceMobile';
-    if (n.includes('camera') || n.includes('sony') || n.includes('canon')) return 'Camera';
-    if (n.includes('watch') || n.includes('rolex')) return 'Clock';
-    if (n.includes('bike') || n.includes('motor') || n.includes('honda') || n.includes('suzuki') || n.includes('yamaha') || n.includes('helmet') || n.includes('jacket') || n.includes('gloves')) return 'Bike';
-    if (n.includes('shoe') || n.includes('nike') || n.includes('clothes') || n.includes('mask') || n.includes('bag')) return 'ShoppingBag';
-    if (n.includes('playstation') || n.includes('ps4') || n.includes('ps5') || n.includes('xbox') || n.includes('game') || n.includes('steering')) return 'Gamepad';
-    if (n.includes('tv') || n.includes('monitor') || n.includes('screen')) return 'Monitor';
-    if (n.includes('license') || n.includes('permis')) return 'FileText';
-    if (n.includes('headphone') || n.includes('chair')) return 'ShoppingBag';
-    return 'ShoppingBag'; // Default
-};
-
 // --- COMPONENT ---
 const PersonalFinance: React.FC = () => {
-  const { t } = useLanguage();
-  const [locked, setLocked] = useState(() => sessionStorage.getItem('admin_unlocked') !== 'true');
+  const { t, dir } = useLanguage();
+  const [currentUser, setCurrentUser] = useState<any>(() => auth.currentUser);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authError, setAuthError] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'finance' | 'mind' | 'market'>('finance');
-  const [pendingTab, setPendingTab] = useState<'finance' | 'mind' | 'market' | null>(null);
+  const [activeTab, setActiveTab] = useState<'finance' | 'mind'>('finance');
+
+  // Admin status check (only verified admin emails can access MIND)
+  const isAdmin = useMemo(() => {
+    return Boolean(currentUser?.email && isUserAdmin(currentUser.email, currentUser?.role));
+  }, [currentUser]);
+
+  // Track Firebase Auth state and enforce security
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      if (user?.email && isUserAdmin(user.email, (user as any)?.role)) {
+        setAuthError('');
+      } else {
+        setActiveTab('finance');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Strict security guard: if user is not admin, activeTab CANNOT be 'mind'
+  useEffect(() => {
+    if (!isAdmin && activeTab === 'mind') {
+      setActiveTab('finance');
+    }
+  }, [isAdmin, activeTab]);
 
   // --- FINANCE STATE ---
   const [salary, setSalary] = useState(3000);
@@ -361,86 +358,57 @@ const PersonalFinance: React.FC = () => {
   });
   const [newGoalInputs, setNewGoalInputs] = useState<Record<string, string>>({});
 
-  // --- WISHLIST STATE ---
-  const [wishlist, setWishlist] = useState<WishItem[]>(() => {
-    const saved = localStorage.getItem('nexa_admin_wishlist');
-    return saved ? JSON.parse(saved) : [
-        // WAITING LIST - BIKES
-        { id: 1, name: 'Suzuki GSXR 750', price: 90000, type: 'waiting', icon: 'Bike', priority: 'High', fundSource: 'safe', url: 'https://biker.ma', dateAdded: '02/03/2026' },
-        { id: 2, name: 'Honda CBR 600 RR', price: 60000, type: 'waiting', icon: 'Bike', priority: 'High', fundSource: 'safe', url: 'https://biker.ma', dateAdded: '02/03/2026' },
-        { id: 3, name: 'Honda Hornet', price: 49000, type: 'waiting', icon: 'Bike', priority: 'Medium', fundSource: 'safe', url: 'https://biker.ma', dateAdded: '02/03/2026' },
-        
-        // WAITING LIST - VEHICLES
-        { id: 4, name: 'Peugeot 308 CC / VW EOS', price: 100000, type: 'waiting', icon: 'Car', priority: 'High', fundSource: 'safe', dateAdded: '02/03/2026' },
-        
-        // WAITING LIST - GAMING & TECH
-        { id: 5, name: 'Gaming Desktop Setup', price: 35000, type: 'waiting', icon: 'DeviceDesktop', priority: 'High', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 6, name: 'iPhone 15 Pro Max (256GB)', price: 17500, type: 'waiting', icon: 'DeviceMobile', priority: 'High', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 7, name: 'PlayStation 5 Pro', price: 8000, type: 'waiting', icon: 'Gamepad', priority: 'High', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 8, name: 'Xbox Series X', price: 7500, type: 'waiting', icon: 'Gamepad', priority: 'Medium', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 9, name: 'TCL C745 TV', price: 6200, type: 'waiting', icon: 'Monitor', priority: 'Medium', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 10, name: 'Xtrmlab RSC1-500 Chair', price: 5000, type: 'waiting', icon: 'ShoppingBag', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 11, name: 'Gaming Steering Wheel', price: 4000, type: 'waiting', icon: 'Gamepad', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 12, name: 'PS4 Pro Flashi 1TB (v7216)', price: 3200, type: 'waiting', icon: 'Gamepad', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 13, name: 'PC Monitor', price: 2500, type: 'waiting', icon: 'Monitor', priority: 'Medium', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 14, name: 'Gaming Headphone', price: 1000, type: 'waiting', icon: 'ShoppingBag', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-
-        // WAITING LIST - BIKER GEAR
-        { id: 15, name: 'Biker Helmet (Agv/Shoei)', price: 4000, type: 'waiting', icon: 'Bike', priority: 'Medium', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 16, name: 'Biker Jacket', price: 2500, type: 'waiting', icon: 'Bike', priority: 'Medium', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 17, name: 'Biker Backpack', price: 2000, type: 'waiting', icon: 'ShoppingBag', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 18, name: 'Leg Bag Moto', price: 350, type: 'waiting', icon: 'ShoppingBag', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 19, name: 'Mask Cagoule', price: 250, type: 'waiting', icon: 'ShoppingBag', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-        { id: 20, name: 'Super Moto Gloves', price: 250, type: 'waiting', icon: 'ShoppingBag', priority: 'Low', fundSource: 'personal', dateAdded: '02/03/2026' },
-
-        // PURCHASED LIST
-        { id: 21, name: 'MSI Thin GF63', price: 15000, type: 'bought', icon: 'DeviceDesktop', priority: 'High', fundSource: 'personal', dateAdded: '01/01/2024' },
-        { id: 22, name: 'Car License (Permis B)', price: 3000, type: 'bought', icon: 'FileText', priority: 'High', fundSource: 'personal', dateAdded: '01/06/2023' },
-        { id: 23, name: 'Sport Bike License (Permis A)', price: 2500, type: 'bought', icon: 'FileText', priority: 'High', fundSource: 'personal', dateAdded: '01/06/2023' },
-        { id: 24, name: 'Redmi 12', price: 1800, type: 'bought', icon: 'DeviceMobile', priority: 'Medium', fundSource: 'personal', dateAdded: '01/01/2024' }
-    ];
-  });
-  const [newItem, setNewItem] = useState<{name: string, price: string, priority: string, fundSource: 'personal'|'safe'|'invest', url: string}>({ 
-      name: '', 
-      price: '', 
-      priority: 'Medium', 
-      fundSource: 'personal', // Default to personal fund
-      url: '' 
-  });
-  const [marketFilter, setMarketFilter] = useState<'all' | 'high' | 'waiting' | 'bought'>('all');
-
   // --- EFFECTS ---
   useEffect(() => localStorage.setItem('nexa_admin_notes', JSON.stringify(notes)), [notes]);
-  useEffect(() => localStorage.setItem('nexa_admin_wishlist', JSON.stringify(wishlist)), [wishlist]);
   useEffect(() => localStorage.setItem('nexa_admin_vision', JSON.stringify(vision)), [vision]);
 
   // --- AUTH HANDLERS ---
-  const handleTabClick = (tab: 'finance' | 'mind' | 'market') => {
+  const handleTabClick = (tab: 'finance' | 'mind') => {
     if (tab === 'finance') {
-        setActiveTab(tab);
-        return;
+      setActiveTab('finance');
+      return;
     }
-    if (locked) {
-        setPendingTab(tab);
-        setShowAuthModal(true);
-    } else {
-        setActiveTab(tab);
+    if (tab === 'mind') {
+      if (isAdmin) {
+        setActiveTab('mind');
+      } else {
+        // Strict security: non-admins cannot open MIND tab
+        setActiveTab('finance');
+      }
     }
   };
 
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === 'Marouan.anouar1') {
-      setLocked(false);
-      sessionStorage.setItem('admin_unlocked', 'true');
-      setShowAuthModal(false);
-      if (pendingTab) {
-          setActiveTab(pendingTab);
-          setPendingTab(null);
+  const handleGoogleAdminLogin = async () => {
+    setIsLoggingIn(true);
+    setAuthError('');
+    try {
+      const result = await signInWithGoogle();
+      const signedInEmail = result.user?.email || '';
+      if (isUserAdmin(signedInEmail, (result.user as any)?.role)) {
+        setCurrentUser(result.user);
+        setShowAuthModal(false);
+        setActiveTab('mind');
+      } else {
+        setAuthError(`Access restricted: '${signedInEmail}' is not registered as an authorized administrator. Only admin Gmail accounts can view the MIND section.`);
+        setActiveTab('finance');
       }
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 500);
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        setAuthError(err?.message || 'Failed to authenticate with Google. Please try again.');
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleAdminSignOut = async () => {
+    try {
+      await auth.signOut();
+      setCurrentUser(null);
+      setActiveTab('finance');
+      setShowAuthModal(false);
+    } catch (e) {
+      console.error('Sign out error', e);
     }
   };
 
@@ -555,30 +523,6 @@ const PersonalFinance: React.FC = () => {
 
   const deleteNote = (id: number) => setNotes(notes.filter(n => n.id !== id));
 
-  const addWishItem = () => {
-    if (!newItem.name) return;
-    setWishlist([...wishlist, { 
-      id: Date.now(), 
-      name: newItem.name, 
-      price: Number(newItem.price) || 0, 
-      type: 'waiting', 
-      icon: getSmartIcon(newItem.name), // Auto icon
-      priority: newItem.priority as any,
-      fundSource: newItem.fundSource, // Added Fund Link
-      url: newItem.url,
-      dateAdded: new Date().toLocaleDateString()
-    }]);
-    setNewItem({ name: '', price: '', priority: 'Medium', fundSource: 'personal', url: '' });
-  };
-
-  const toggleWishItem = (id: number) => {
-    setWishlist(wishlist.map(item => 
-      item.id === id ? { ...item, type: item.type === 'waiting' ? 'bought' : 'waiting' } : item
-    ));
-  };
-
-  const deleteWishItem = (id: number) => setWishlist(wishlist.filter(item => item.id !== id));
-
   // --- CALCULATIONS & LOGIC ---
   const getDistribution = (amount: number) => {
     if (amount <= 4000) {
@@ -600,31 +544,6 @@ const PersonalFinance: React.FC = () => {
   const currentStrategy = useMemo(() => {
     return STRATEGIES.find(s => salary <= s.max) || STRATEGIES[STRATEGIES.length - 1];
   }, [salary]);
-
-  const marketStats = useMemo(() => {
-    const totalNeeded = wishlist.filter(w => w.type === 'waiting').reduce((acc, curr) => acc + curr.price, 0);
-    const totalAssetValue = wishlist.filter(w => w.type === 'bought').reduce((acc, curr) => acc + curr.price, 0);
-    const totalItems = wishlist.length;
-    const boughtItems = wishlist.filter(w => w.type === 'bought').length;
-    const progress = totalItems === 0 ? 0 : (boughtItems / totalItems) * 100;
-    return { totalNeeded, totalAssetValue, progress, boughtItems };
-  }, [wishlist]);
-
-  const filteredMarketItems = useMemo(() => {
-      let items = [...wishlist];
-      if (marketFilter === 'high') items = items.filter(i => i.priority === 'High' && i.type === 'waiting');
-      else if (marketFilter === 'waiting') items = items.filter(i => i.type === 'waiting');
-      else if (marketFilter === 'bought') items = items.filter(i => i.type === 'bought');
-      
-      // Sort: High priority first, then expensive items first
-      return items.sort((a, b) => {
-          const prioMap: Record<string, number> = { 'High': 3, 'Medium': 2, 'Low': 1 };
-          const pA = prioMap[a.priority] || 0;
-          const pB = prioMap[b.priority] || 0;
-          if (pA !== pB) return pB - pA;
-          return b.price - a.price;
-      });
-  }, [wishlist, marketFilter]);
 
   // Vision Stats
   const visionStats = useMemo(() => {
@@ -723,7 +642,7 @@ const PersonalFinance: React.FC = () => {
           id: 'q2',
           label: 'Asset Accumulation',
           target: assetTarget,
-          current: marketStats.totalAssetValue,
+          current: Math.round(totalSaved * 0.5),
           unit: 'DH',
           color: 'emerald',
           icon: 'Building',
@@ -745,7 +664,7 @@ const PersonalFinance: React.FC = () => {
       });
 
       return quests;
-  }, [totalExpensesCost, totalSaved, salary, marketStats.totalAssetValue, dist]);
+  }, [totalExpensesCost, totalSaved, salary, dist]);
 
   // --- MOROCCAN BOOK ADVISOR ---
   const dailyTip = useMemo(() => {
@@ -902,14 +821,14 @@ const PersonalFinance: React.FC = () => {
 
   // --- MAIN DASHBOARD ---
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pt-24 pb-32 transition-colors duration-300 relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pt-24 pb-32 transition-colors duration-300 relative" dir={dir}>
       <Helmet>
         <title>Personal Space - Secret Area</title>
         <meta name="robots" content="noindex, nofollow, noarchive" />
         <meta name="googlebot" content="noindex, nofollow, noarchive" />
       </Helmet>
       
-      {/* AUTH OVERLAY MODAL */}
+      {/* ADMIN GMAIL AUTH OVERLAY MODAL */}
       <AnimatePresence>
         {showAuthModal && (
             <motion.div 
@@ -924,344 +843,165 @@ const PersonalFinance: React.FC = () => {
                     exit={{ scale: 0.9, opacity: 0 }}
                     className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-amber-500/30 p-8 rounded-3xl max-w-md w-full relative z-10 shadow-xl dark:shadow-2xl dark:shadow-amber-900/40"
                 >
-                    <button onClick={() => { setShowAuthModal(false); setPendingTab(null); }} className="absolute top-4 end-4 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <button onClick={() => setShowAuthModal(false)} className="absolute top-4 end-4 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
                         <Icon name="X" size={24} />
                     </button>
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-6">
                         <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl mx-auto flex items-center justify-center text-amber-500 mb-4 border border-amber-200 dark:border-amber-500/30 shadow-sm dark:shadow-[0_0_30px_rgba(245,158,11,0.2)]">
                             <Icon name="Lock" size={32} />
                         </div>
-                        <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Restricted Area</h1>
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">MIND Admin Access</h1>
                         <p className="text-slate-500 dark:text-slate-400 text-xs mt-3 leading-relaxed">
-                            Only the <strong className="text-slate-900 dark:text-white">E-Wallet</strong> is free to view.<br/>
-                            To access <strong>MIND</strong> or <strong>MARKET</strong>, please enter the admin secret key.
-                            
+                            The <strong className="text-slate-900 dark:text-white">E-Wallet</strong> is open and free to all visitors.<br/>
+                            The <strong className="text-amber-500">MIND section</strong> is strictly reserved for verified administrators and connects with your Admin Gmail account.
                         </p>
                     </div>
-                    <form onSubmit={handleUnlock} className="space-y-4">
-                        <div className="relative">
-                            <input 
-                                type="password" 
-                                value={password} 
-                                onChange={(e) => setPassword(e.target.value)} 
-                                placeholder="SECRET KEY" 
-                                className={`w-full bg-slate-50 dark:bg-slate-900/50 border ${error ? 'border-red-500 animate-shake' : 'border-slate-200 dark:border-amber-900/50'} rounded-xl px-4 py-4 text-center text-slate-900 dark:text-white font-mono tracking-[0.2em] focus:outline-none focus:border-amber-500 dark:focus:border-amber-500 transition-colors`} 
-                            />
+
+                    {authError && (
+                        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs leading-relaxed flex items-start gap-3">
+                            <Icon name="AlertTriangle" size={18} className="shrink-0 mt-0.5 text-red-500" />
+                            <div>{authError}</div>
                         </div>
-                        <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500 text-white dark:text-black font-bold py-4 rounded-xl uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20 dark:shadow-amber-600/20">
-                            Unlock Access
+                    )}
+
+                    {currentUser && !isAdmin && (
+                        <div className="mb-6 p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs flex items-center gap-3">
+                            {currentUser.photoURL ? (
+                                <img src={currentUser.photoURL} alt="" className="w-8 h-8 rounded-full border border-slate-300 dark:border-slate-700" />
+                            ) : (
+                                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500"><Icon name="User" size={16} /></div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <div className="font-bold text-slate-900 dark:text-white truncate">{currentUser.displayName || 'Connected User'}</div>
+                                <div className="text-[10px] text-slate-400 truncate">{currentUser.email}</div>
+                            </div>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">Not Admin</span>
+                        </div>
+                    )}
+
+                    <div className="space-y-3">
+                        <button 
+                            type="button"
+                            onClick={handleGoogleAdminLogin} 
+                            disabled={isLoggingIn}
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold py-4 rounded-xl text-sm transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+                        >
+                            {isLoggingIn ? (
+                                <>
+                                    <Icon name="RefreshCw" size={18} className="animate-spin text-amber-500" />
+                                    <span>Verifying Admin Credentials...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                                    </svg>
+                                    <span>{currentUser ? 'Switch to Admin Gmail' : 'Sign in with Admin Gmail'}</span>
+                                </>
+                            )}
                         </button>
-                    </form>
+
+                        <button 
+                            type="button" 
+                            onClick={() => { setShowAuthModal(false); setActiveTab('finance'); }}
+                            className="w-full text-slate-500 hover:text-slate-900 dark:hover:text-white py-2 text-xs font-semibold uppercase tracking-wider transition-colors"
+                        >
+                            Continue as Visitor (E-Wallet)
+                        </button>
+                    </div>
                 </motion.div>
             </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        <div className="mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors text-sm font-bold uppercase tracking-widest">
-             <Icon name="ArrowLeft" size={16} />
+        <div className="mb-6 sm:mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors text-xs sm:text-sm font-bold uppercase tracking-widest min-h-[36px]">
+             <Icon name={dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft'} size={16} />
              {t('Back to Dashboard')}
           </Link>
         </div>
 
         {/* HEADER */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
-          <div className="mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 sm:mb-10 pb-5 sm:pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
+          <div className="mb-2 lg:mb-0">
             <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-slate-900 dark:bg-white rounded-lg text-white dark:text-slate-900"><Icon name="User" size={24} /></div>
+                <div className="p-2 sm:p-2.5 bg-slate-900 dark:bg-white rounded-xl text-white dark:text-slate-900 shrink-0"><Icon name="User" size={24} /></div>
                 <div>
-                    <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Admin <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">Space</span></h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-mono text-[10px] md:text-xs">ID: Admin | Access: <span className={locked ? "text-orange-500 font-bold" : "text-emerald-500 font-bold"}>{locked ? "Partial" : "Full"}</span></p>
+                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{t('Personal')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">{t('Space')}</span></h1>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <p className="text-slate-500 dark:text-slate-400 font-mono text-[10px] sm:text-xs">
+                        {t('Access')}: <span className={isAdmin ? "text-emerald-500 font-bold" : "text-amber-500 font-bold"}>{isAdmin ? `${t('Admin Verified')} (${currentUser?.email})` : `${t('Public Visitor')} (${t('E-Wallet')})`}</span>
+                      </p>
+                      {isAdmin ? (
+                        <button 
+                          onClick={handleAdminSignOut} 
+                          title="Sign Out Admin"
+                          className="text-[10px] sm:text-xs font-bold text-red-500 hover:text-red-400 underline uppercase tracking-wider ms-2 cursor-pointer min-h-[30px]"
+                        >
+                          {t('Lock / Sign Out')}
+                        </button>
+                      ) : (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setAuthError('');
+                            setShowAuthModal(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[32px] sm:min-h-[34px] rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all active:scale-95 cursor-pointer ms-1.5"
+                          title="Admin Sign In"
+                        >
+                          <Icon name="Lock" size={12} className="text-amber-500" />
+                          <span>{t('Admin Login')}</span>
+                        </button>
+                      )}
+                    </div>
                 </div>
             </div>
           </div>
+          
+          {/* TABS: STRICTLY ONLY SHOW MIND WHEN LOGGED IN AS ADMIN. FOR GUESTS & NON-ADMINS, MIND BUTTON IS 100% HIDDEN */}
           <div className="flex bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm w-full lg:w-auto overflow-x-auto no-scrollbar">
-            {[ { id: 'finance', icon: 'Briefcase', label: 'E-Wallet' }, { id: 'mind', icon: 'BookOpen', label: 'Mind' }, { id: 'market', icon: 'ShoppingBag', label: 'Market' } ].map((tab) => {
-                const isRestricted = tab.id !== 'finance' && locked;
-                return (
-                    <button key={tab.id} onClick={() => handleTabClick(tab.id as any)} className={`flex-1 lg:flex-none px-4 sm:px-6 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md scale-105 ring-2 ring-slate-900/10 dark:ring-white/10 z-10' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95'}`}>
-                        {isRestricted ? <Icon name="Lock" size={14} className="text-amber-500" /> : <Icon name={tab.icon} size={16} />}
-                        {tab.label}
-                    </button>
-                );
-            })}
+            {isAdmin ? (
+              [ 
+                { id: 'finance', icon: 'Briefcase', label: t('E-Wallet') }, 
+                { id: 'mind', icon: 'BookOpen', label: t('Mind') } 
+              ].map((tab) => (
+                <button 
+                  key={tab.id} 
+                  onClick={() => handleTabClick(tab.id as any)} 
+                  className={`flex-1 lg:flex-none px-4 sm:px-6 py-2.5 sm:py-3 min-h-[42px] sm:min-h-[46px] rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer ${
+                    activeTab === tab.id 
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md scale-102 ring-2 ring-slate-900/10 dark:ring-white/10 z-10' 
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95'
+                  }`}
+                >
+                  <Icon name={tab.icon} size={16} />
+                  <span>{tab.label}</span>
+                </button>
+              ))
+            ) : (
+              <div className="px-4 sm:px-6 py-2.5 sm:py-3 min-h-[42px] sm:min-h-[46px] rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md flex items-center justify-center gap-2 whitespace-nowrap select-none">
+                <Icon name="Briefcase" size={16} />
+                <span>{t('E-Wallet')}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* TAB: FINANCE */}
+        {/* TAB: FINANCE (E-WALLET) */}
         {activeTab === 'finance' && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-            
-            {/* 1. PHASE SYSTEM BANNER */}
-            <div className={`w-full p-4 rounded-3xl border relative overflow-hidden shadow-lg ${phase.bg} bg-opacity-10 border-${phase.color}-500/30`}>
-                <div className={`absolute top-0 end-0 p-6 opacity-20 ${phase.text}`}><Icon name={phase.icon} size={80} /></div>
-                <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-3 py-1 rounded-full bg-${phase.color}-500 text-white text-[10px] font-black uppercase tracking-widest`}>Current Phase</span>
-                        <div className="h-2 flex-1 bg-slate-200 dark:bg-black/20 rounded-full overflow-hidden">
-                            <div className={`h-full bg-${phase.color}-500`} style={{ width: `${Math.min((salary/phase.limit)*100, 100)}%` }}></div>
-                        </div>
-                    </div>
-                    <h2 className={`text-3xl font-black ${phase.text} uppercase italic tracking-tighter`}>{phase.name}</h2>
-                    <p className="text-slate-600 dark:text-slate-300 text-xs font-medium max-w-md">{phase.desc}</p>
-                </div>
-            </div>
-
-            {/* 2. SMART ALLOCATOR */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Icon name="Database" className="text-amber-500" /> Smart Allocator (Morocco)</h2>
-                <button 
-                  onClick={handleDownloadPDF} 
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-transform shadow-lg shadow-slate-900/10 dark:shadow-white/10"
-                >
-                  <Icon name="Download" size={16} /> Save Roadmap
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                  <div className="space-y-4">
-                      <div><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Minimum Salary (Entry Level)</span>
-                          <div className="flex flex-wrap gap-2">{SALARY_RANGES.min.map(val => (<button key={val} onClick={() => setSalary(val)} className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${salary === val ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border-orange-500' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-300'}`}>{val} DH</button>))}</div></div>
-                      <div><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Average Salary (Skilled)</span>
-                          <div className="flex flex-wrap gap-2">{SALARY_RANGES.avg.map(val => (<button key={val} onClick={() => setSalary(val)} className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${salary === val ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-500' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-300'}`}>{val} DH</button>))}</div></div>
-                      <div><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">High Income (Elite)</span>
-                          <div className="flex flex-wrap gap-2">{SALARY_RANGES.high.map(val => (<button key={val} onClick={() => setSalary(val)} className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${salary === val ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-purple-500' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-300'}`}>{val} DH</button>))}</div></div>
-                  </div>
-                  <div className="h-px bg-slate-200 dark:bg-slate-800 my-4"></div>
-                  <div className="flex flex-col lg:flex-row gap-8 items-center">
-                      <div className="w-full lg:w-1/3">
-                          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">Custom Amount</label>
-                          <div className="relative"><input type="number" value={salary} onChange={(e) => setSalary(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-2xl px-6 py-4 text-3xl font-black text-slate-900 dark:text-white focus:border-amber-500 outline-none transition-colors font-mono"/><span className="absolute end-6 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">MAD</span></div>
-                      </div>
-                      <div className="w-full lg:w-2/3 space-y-4">
-                          <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
-                              <div style={{ width: `${dist.personal}%` }} className="bg-blue-500 h-full"></div>
-                              <div style={{ width: `${dist.invest}%` }} className="bg-amber-500 h-full"></div>
-                              <div style={{ width: `${dist.safe}%` }} className="bg-emerald-500 h-full"></div>
-                              <div style={{ width: `${dist.emergency}%` }} className="bg-red-500 h-full"></div>
-                              <div style={{ width: `${dist.parents}%` }} className="bg-pink-500 h-full"></div>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                            <FundCard label="Personal" percent={dist.personal} total={salary} expenses={totalExpensesCost} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-900/10" border="border-blue-200 dark:border-blue-900/30" icon="User" />
-                            <FundCard label="Invest" percent={dist.invest} total={salary} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-900/10" border="border-amber-200 dark:border-amber-900/30" icon="TrendingUp" />
-                            <FundCard label="Savings" percent={dist.safe} total={salary} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-900/10" border="border-emerald-200 dark:border-emerald-900/30" icon="Lock" />
-                            <FundCard label="Emergency" percent={dist.emergency} total={salary} color="text-red-500" bg="bg-red-50 dark:bg-red-900/10" border="border-red-200 dark:border-red-900/30" icon="AlertTriangle" />
-                            <FundCard label="Parents" percent={dist.parents} total={salary} color="text-pink-500" bg="bg-pink-50 dark:bg-pink-900/10" border="border-pink-200 dark:border-pink-900/30" icon="Heart" />
-                          </div>
-                      </div>
-                  </div>
-                  
-                  {/* Current Liquid Assets Input for Emergency Calc */}
-                  <div className="flex items-center gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                      <div className="text-xs font-bold text-slate-500 uppercase">Current Emergency Savings:</div>
-                      <div className="relative w-32">
-                          <input type="number" value={totalSaved} onChange={(e) => setTotalSaved(Number(e.target.value))} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 text-xs font-mono font-bold" />
-                          <span className="absolute end-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">DH</span>
-                      </div>
-                  </div>
-              </div>
-            </div>
-
-            {/* 2.5 SMART BUYING CALCULATOR */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                        <Icon name="Calculator" size={24} />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Smart Buying Calculator</h2>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Plan your future purchases accurately</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    {/* Inputs */}
-                    <div className="space-y-6">
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">Target Object Cost</label>
-                            <div className="relative flex items-center">
-                                <input 
-                                    type="number" 
-                                    value={calcCost} 
-                                    onChange={(e) => setCalcCost(e.target.value === '' ? '' : Number(e.target.value))} 
-                                    placeholder="e.g. 90000"
-                                    className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-2xl ps-4 pe-24 py-4 text-2xl font-black text-slate-900 dark:text-white focus:border-indigo-500 outline-none transition-colors font-mono"
-                                />
-                                <div className="absolute end-2 top-1/2 -translate-y-1/2 flex bg-white dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
-                                    {['MAD', 'USD', 'EUR'].map(c => (
-                                        <button 
-                                            key={c}
-                                            onClick={() => setCalcCurrency(c as any)}
-                                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${calcCurrency === c ? 'bg-indigo-500 text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
-                                        >
-                                            {c}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">Monthly Savings Capacity</label>
-                            <div className="relative">
-                                <input 
-                                    type="number" 
-                                    value={calcSavings} 
-                                    onChange={(e) => setCalcSavings(e.target.value === '' ? '' : Number(e.target.value))} 
-                                    placeholder="e.g. 2000"
-                                    className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-4 text-2xl font-black text-slate-900 dark:text-white focus:border-indigo-500 outline-none transition-colors font-mono"
-                                />
-                                <span className="absolute end-6 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{calcCurrency} / Month</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Results */}
-                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-6 border border-slate-200 dark:border-slate-700/50 h-full flex flex-col justify-center">
-                        {calculatorResult ? (
-                            <div className="text-center">
-                                <div className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Estimated Time</div>
-                                <div className="flex items-baseline justify-center gap-2 mb-2">
-                                    <span className="text-6xl font-black text-indigo-600 dark:text-indigo-400">{calculatorResult.months}</span>
-                                    <span className="text-xl font-bold text-slate-400">Months</span>
-                                </div>
-                                <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">
-                                    ({calculatorResult.years} Years)
-                                </div>
-                                
-                                <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-indigo-100 dark:border-indigo-900/30 text-start relative overflow-hidden space-y-3">
-                                    <div className="absolute top-0 start-0 w-1 h-full bg-indigo-500"></div>
-                                    
-                                    {/* Standard Advice */}
-                                    <div className="flex gap-3">
-                                        <Icon name="Zap" className="text-indigo-500 shrink-0 mt-0.5" size={18} />
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">Current Plan</h4>
-                                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                                                {calculatorAdvice && calculatorAdvice[0]}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Fast Track Advice */}
-                                    {calculatorAdvice && calculatorAdvice[1] && (
-                                        <div className="flex gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                            <Icon name="Rocket" className="text-emerald-500 shrink-0 mt-0.5" size={18} />
-                                            <div>
-                                                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">Fast Track 🚀</h4>
-                                                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                                                    {calculatorAdvice[1].replace('💡 Pro Tip: ', '')}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-center text-slate-400 opacity-50">
-                                <Icon name="Calculator" size={48} className="mx-auto mb-4" />
-                                <p className="text-sm font-bold">Enter values to calculate</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* 3. SMART WARNINGS & ALERTS */}
-            <div className="space-y-2">
-                {smartWarnings.map((warn, idx) => (
-                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border ${
-                        warn.type === 'red' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-400' :
-                        warn.type === 'yellow' ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-900/30 text-amber-700 dark:text-amber-400' :
-                        warn.type === 'blue' ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30 text-blue-700 dark:text-blue-400' :
-                        'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                    }`}>
-                        <Icon name={warn.icon} size={20} className="shrink-0" />
-                        <span className="text-xs font-bold">{warn.msg}</span>
-                    </div>
-                ))}
-            </div>
-
-            {/* 4. EXPENSES & STRATEGY */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
-                <div className="flex items-center justify-between mb-4"><h3 className="text-slate-900 dark:text-white font-bold flex items-center gap-2"><Icon name="CreditCard" className="text-emerald-500"/> Expenses & Subs</h3><div className="text-end"><span className="block text-[10px] font-bold text-slate-400 uppercase">Monthly Cost</span><span className="text-lg font-black text-slate-900 dark:text-white">{totalExpensesCost} DH</span></div></div>
-                <div className="space-y-3">{expenses.map((exp) => (<div key={exp.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${exp.paid ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700'}`}><div className="flex items-center gap-3 flex-1"><button onClick={() => updateExpense(exp.id, 'paid', !exp.paid)} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0 ${exp.paid ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-300 hover:border-emerald-500 hover:text-emerald-500'}`}><Icon name={exp.paid ? "Check" : exp.icon} size={16} /></button><div className="flex flex-col min-w-0"><span className={`font-bold text-xs sm:text-sm truncate ${exp.paid ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-300'}`}>{exp.label}</span><span className="text-[10px] text-slate-400 uppercase tracking-wider">{exp.category}</span></div></div><div className="flex items-center gap-2 ms-2"><div className="relative"><input type="number" value={exp.cost} onChange={(e) => updateExpense(exp.id, 'cost', Number(e.target.value))} className={`w-20 bg-white dark:bg-slate-900 border rounded-lg px-2 py-1 text-end text-xs font-mono font-bold outline-none focus:border-blue-500 transition-all ${exp.paid ? 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' : 'text-slate-900 dark:text-white border-slate-200 dark:border-slate-700'}`} /></div></div></div>))}</div>
-                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs"><span className="text-slate-500 dark:text-slate-400 font-medium">{paidExpensesCost} DH Paid</span><span className={`font-bold ${totalExpensesCost > (salary * (dist.personal/100)) ? 'text-red-500' : 'text-emerald-500'}`}>{Math.round((totalExpensesCost / (salary * (dist.personal/100))) * 100)}% of Personal Fund</span></div>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden flex flex-col">
-                <div className="flex items-center gap-2 mb-4"><Icon name="Zap" className={`${currentStrategy.color}`} /><div><h3 className="text-slate-900 dark:text-white font-bold text-lg leading-none">Smart Strategy</h3><span className={`text-[10px] font-bold uppercase tracking-widest ${currentStrategy.color}`}>{currentStrategy.phase}</span></div></div>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6 font-medium">{currentStrategy.description}</p>
-                <div className="space-y-4 flex-1"><div><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Action Plan</span><ul className="space-y-2">{currentStrategy.actions.map((action, idx) => (<li key={idx} className="flex items-start gap-2 text-xs md:text-sm text-slate-700 dark:text-slate-200"><Icon name="ArrowRight" size={14} className={`mt-0.5 shrink-0 ${currentStrategy.color}`} /><span>{action}</span></li>))}</ul></div><div><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Recommended Tools</span><div className="flex flex-wrap gap-2">{currentStrategy.tools.map((tool, idx) => (<span key={idx} className="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[10px] font-bold text-slate-600 dark:text-slate-300">{tool}</span>))}</div></div></div>
-              </div>
-            </div>
-
-            {/* 5. FINANCIAL GOALS & ADVICE */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                {/* Auto-Quests */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
-                    <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Icon name="Trophy" className="text-yellow-500" /> Quest Log</h3>
-                    <div className="space-y-3 mb-4">
-                        {smartQuests.map(q => (
-                            <div key={q.id} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 group hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
-                                <div className="flex justify-between items-center mb-1">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`p-1 rounded bg-${q.color}-100 dark:bg-${q.color}-900/30 text-${q.color}-600 dark:text-${q.color}-400`}>
-                                            <Icon name={q.icon} size={14} />
-                                        </div>
-                                        <span className="text-xs font-bold text-slate-900 dark:text-white">{q.label}</span>
-                                    </div>
-                                    <span className={`text-[10px] font-mono font-bold ${q.current >= q.target ? 'text-emerald-500' : 'text-slate-500'}`}>
-                                        {q.current.toLocaleString()} / {q.target.toLocaleString()} {q.unit}
-                                    </span>
-                                </div>
-                                <div className="text-[10px] text-slate-400 mb-2 leading-tight">{q.desc}</div>
-                                <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                    <div 
-                                        className={`h-full bg-${q.color}-500 transition-all duration-1000`} 
-                                        style={{ width: `${Math.min((q.current/q.target)*100, 100)}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Moroccan Advisor */}
-                <div className="bg-amber-50 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-center border border-amber-200 dark:border-slate-700 shadow-sm">
-                    <div className="absolute top-0 end-0 p-4 opacity-10 text-amber-500 dark:text-white"><Icon name="Bot" size={64} /></div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-white dark:bg-white/10 rounded-full flex items-center justify-center text-xl shadow-md border border-amber-100 dark:border-transparent text-amber-500">
-                                <Icon name="Bulb" size={20} />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-lg text-slate-900 dark:text-white">Moroccan Advisor</h4>
-                                <span className="text-[10px] uppercase tracking-widest opacity-60 font-bold text-slate-500 dark:text-slate-400">Book Wisdom • Moroccan Context</span>
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-white/10 md:backdrop-blur-sm p-4 rounded-xl border border-amber-100 dark:border-white/10 mb-4 relative shadow-sm">
-                            <Icon name="Quote" size={24} className="absolute -top-3 -start-2 text-amber-500 dark:text-amber-400 bg-amber-50 dark:bg-slate-900 rounded-full p-1 border border-amber-100 dark:border-slate-700" />
-                            <p className="text-sm font-medium italic leading-relaxed pt-2 text-slate-700 dark:text-slate-200">"{dailyTip.text}"</p>
-                        </div>
-                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                            <span>Source: <span className="font-bold text-slate-900 dark:text-white">{dailyTip.source}</span></span>
-                            <span>Phase: <span className="uppercase text-amber-600 dark:text-amber-400 font-bold">{phase.name}</span></span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+            <ModernEWallet />
           </motion.div>
         )}
 
-        {/* TAB: MIND (MINDMAP) */}
-        {activeTab === 'mind' && (
+        {/* TAB: MIND (MINDMAP) - STRICTLY ACCESSIBLE ONLY TO VERIFIED ADMIN */}
+        {isAdmin && activeTab === 'mind' && (
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-7xl mx-auto space-y-10">
             
             {/* MASTER MIND VISUALIZATION */}
@@ -1763,151 +1503,6 @@ const PersonalFinance: React.FC = () => {
           </motion.div>
         )}
 
-        {/* TAB: MARKET (SMART UPGRADE) */}
-        {activeTab === 'market' && (
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-            
-            {/* 1. Smart Market Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-emerald-900 to-slate-900 p-6 rounded-3xl border border-emerald-500/30 relative overflow-hidden">
-                    <div className="absolute end-0 top-0 p-4 opacity-10"><Icon name="Wallet" size={64} /></div>
-                    <h3 className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Total Assets (Bought)</h3>
-                    <div className="text-3xl font-black text-white">{marketStats.totalAssetValue.toLocaleString()} <span className="text-xs font-normal opacity-50">DH</span></div>
-                    <div className="mt-2 text-[10px] text-slate-400 font-medium">{marketStats.boughtItems} Items Acquired</div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
-                    <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Target Cap (Waiting)</h3>
-                    <div className="text-3xl font-black text-slate-900 dark:text-white">{marketStats.totalNeeded.toLocaleString()} <span className="text-xs font-normal opacity-50">DH</span></div>
-                    <div className="mt-2 h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div style={{ width: `${marketStats.progress}%` }} className="h-full bg-emerald-500"></div>
-                    </div>
-                    <div className="mt-1 flex justify-between text-[9px] font-bold text-slate-400 uppercase">
-                        <span>Progress</span>
-                        <span>{Math.round(marketStats.progress)}%</span>
-                    </div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-center">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg"><Icon name="Lock" size={18} /></div>
-                        <div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Allocated Strategy</span>
-                            <div className="flex gap-2 mt-1">
-                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <p className="text-[10px] text-slate-500 leading-tight">
-                        Items are now linked to <span className="text-slate-900 dark:text-white font-bold">specific funds</span>. Affordability is calculated based on the monthly allocation of that fund.
-                    </p>
-                </div>
-            </div>
-
-            {/* 2. Smart Input */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><Icon name="Plus" size={16} /> Add Acquisition</h3>
-                <div className="flex flex-col gap-4">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-[2]">
-                            <input 
-                                placeholder="Item Name (e.g. MacBook Pro M3)" 
-                                value={newItem.name}
-                                onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 text-sm font-bold"
-                            />
-                        </div>
-                        <div className="flex-1 relative">
-                            <input 
-                                type="number"
-                                placeholder="Price" 
-                                value={newItem.price}
-                                onChange={(e) => setNewItem({...newItem, price: e.target.value})}
-                                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 text-sm font-bold ps-8"
-                            />
-                            <span className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">DH</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-1">
-                            <select 
-                                value={newItem.priority}
-                                onChange={(e) => setNewItem({...newItem, priority: e.target.value})}
-                                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 text-sm font-bold appearance-none cursor-pointer"
-                            >
-                                <option value="High">High Priority</option>
-                                <option value="Medium">Medium Priority</option>
-                                <option value="Low">Low Priority</option>
-                            </select>
-                        </div>
-                        <div className="flex-1">
-                            <select 
-                                value={newItem.fundSource}
-                                onChange={(e) => setNewItem({...newItem, fundSource: e.target.value as any})}
-                                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 text-sm font-bold appearance-none cursor-pointer"
-                            >
-                                <option value="personal">Personal Fund (Spending)</option>
-                                <option value="safe">Savings Fund (Goals)</option>
-                                <option value="invest">Investment Fund (Assets)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="flex gap-4">
-                        <input 
-                            placeholder="Link URL (Optional)..." 
-                            value={newItem.url}
-                            onChange={(e) => setNewItem({...newItem, url: e.target.value})}
-                            className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 text-sm"
-                        />
-                        <button onClick={addWishItem} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-emerald-500/20 active:scale-95 text-sm uppercase tracking-wider">
-                            Add Item
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* 3. Filter Controls */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                {[
-                    { id: 'all', label: 'All Items' },
-                    { id: 'waiting', label: 'Waiting List' },
-                    { id: 'high', label: 'High Priority' },
-                    { id: 'bought', label: 'Purchased' }
-                ].map((f) => (
-                    <button 
-                        key={f.id}
-                        onClick={() => setMarketFilter(f.id as any)}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${marketFilter === f.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
-                    >
-                        {f.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* 4. Smart Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <AnimatePresence>
-                    {filteredMarketItems.map(item => (
-                        <WishCard 
-                            key={item.id} 
-                            item={item} 
-                            onToggle={() => toggleWishItem(item.id)} 
-                            onDelete={() => deleteWishItem(item.id)}
-                            monthlySavings={salary * (dist[item.fundSource] / 100)} // Pass specific fund allocation
-                        />
-                    ))}
-                </AnimatePresence>
-                {filteredMarketItems.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-slate-400">
-                        <Icon name="Ghost" size={32} className="mx-auto mb-2 opacity-50"/>
-                        <p className="text-sm">No items found in this category.</p>
-                    </div>
-                )}
-            </div>
-
-          </motion.div>
-        )}
-
       </div>
     </div>
   );
@@ -1953,92 +1548,6 @@ const FundCard = ({ label, percent, total, color, bg, border, icon, expenses }: 
       <div className="mt-1.5 text-[10px] text-end text-slate-500 dark:text-slate-400 font-mono">{percent}%</div>
     </div>
   );
-};
-
-interface WishCardProps {
-  item: WishItem;
-  onToggle: () => void;
-  onDelete: () => void;
-  monthlySavings: number;
-}
-
-const WishCard: React.FC<WishCardProps> = ({ item, onToggle, onDelete, monthlySavings }) => {
-    const isBought = item.type === 'bought';
-    const monthsToBuy = item.price > 0 && monthlySavings > 0 ? (item.price / monthlySavings).toFixed(1) : '∞';
-    
-    // Priority Colors
-    const pColor = {
-        'High': 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30',
-        'Medium': 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30',
-        'Low': 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30'
-    }[item.priority] || 'text-slate-600 bg-slate-100';
-
-    // Fund Colors
-    const fColor = {
-        'personal': 'text-blue-500 border-blue-500/30',
-        'safe': 'text-emerald-500 border-emerald-500/30',
-        'invest': 'text-amber-500 border-amber-500/30'
-    }[item.fundSource] || 'text-slate-500';
-
-    const fLabel = {
-        'personal': 'Personal Fund',
-        'safe': 'Savings Fund',
-        'invest': 'Investment Fund'
-    }[item.fundSource];
-
-    return (
-        <motion.div 
-            layout
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className={`p-4 rounded-2xl border transition-all relative group overflow-hidden ${isBought ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-500/20' : `bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 shadow-sm hover:shadow-md`}`}
-        >
-            {/* Fund Source Indicator Strip */}
-            {!isBought && <div className={`absolute top-0 start-4 end-4 h-0.5 bg-current opacity-30 ${fColor}`}></div>}
-
-            <div className="flex justify-between items-start mb-3 relative z-10 pt-2">
-                <div className="flex items-center gap-3">
-                    <button onClick={onToggle} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0 ${isBought ? 'bg-emerald-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-300 hover:border-emerald-500 hover:text-emerald-500'}`}>
-                        <Icon name={isBought ? "Check" : item.icon} size={16} />
-                    </button>
-                    <div>
-                        <div className={`font-bold text-sm md:text-base leading-tight ${isBought ? 'text-slate-500 line-through' : 'text-slate-900 dark:text-white'}`}>{item.name}</div>
-                        {!isBought && (
-                            <div className="flex gap-1 mt-1">
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${pColor}`}>{item.priority}</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border ${fColor} bg-transparent opacity-80`}>{fLabel}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="text-end">
-                    <div className="font-mono font-black text-sm text-slate-900 dark:text-white">{item.price > 0 ? `${item.price.toLocaleString()} DH` : 'TBD'}</div>
-                    {!isBought && item.price > 0 && (
-                        <div className="text-[10px] font-bold text-slate-400 mt-0.5" title={`Based on ${fLabel} allocation`}>
-                            ~{monthsToBuy} Mo.
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800 relative z-10">
-                <div className="flex gap-2">
-                    {item.url && (
-                        <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                            <Icon name="ExternalLink" size={14} />
-                        </a>
-                    )}
-                    <span className="text-[10px] text-slate-400 font-mono mt-1.5">{item.dateAdded || 'Unknown Date'}</span>
-                </div>
-                <button onClick={onDelete} className="text-slate-400 hover:text-red-500 transition-colors p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md opacity-0 group-hover:opacity-100">
-                    <Icon name="Trash" size={16} />
-                </button>
-            </div>
-            
-            {isBought && <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-5 pointer-events-none"></div>}
-        </motion.div>
-    );
 };
 
 export default PersonalFinance;

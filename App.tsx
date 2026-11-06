@@ -91,7 +91,7 @@ const MainContent = () => {
           <Route path="/extra/*" element={<div />} />
           <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
           <Route path="/roadmap/:id" element={<ProtectedRoute><CategoryDetail /></ProtectedRoute>} />
-          <Route path="/personal-space" element={<ProtectedRoute><PersonalFinance /></ProtectedRoute>} />
+          <Route path="/personal-space" element={<PersonalFinance />} />
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Profile defaultTab="Reports & Fixes" />} />
