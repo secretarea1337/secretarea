@@ -135,7 +135,7 @@ export const GTA6Logo: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: string 
         src={logoSources[srcIndex]}
         alt="GTA 6 Animated Logo"
         referrerPolicy="no-referrer"
-        className={`${heightClasses} w-auto object-contain drop-shadow-[0_4px_18px_rgba(236,72,153,0.6)] hover:scale-105 transition-transform duration-300`}
+        className={`${heightClasses} w-auto object-contain hover:scale-105 transition-transform duration-300`}
         onError={() => setSrcIndex(prev => prev + 1)}
       />
     </div>
@@ -155,7 +155,6 @@ export const GTA6CountdownAndCrewShowcase: React.FC = () => {
     seconds: number;
     isPast: boolean;
   }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: false });
-  const [showLightbox, setShowLightbox] = useState(false);
 
   useEffect(() => {
     // Release Date: November 19, 2026 (00:00:00 UTC)
@@ -184,194 +183,104 @@ export const GTA6CountdownAndCrewShowcase: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <div className="mb-7 rounded-2xl p-4 sm:p-6 bg-slate-900/80 dark:bg-slate-950/85 backdrop-blur-md border border-pink-500/35 dark:border-pink-500/40 shadow-xl shadow-pink-500/10 text-white relative overflow-hidden">
-        {/* Ambient Top Glow Line */}
-        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 via-cyan-400 to-amber-400" />
-        <div className="absolute -top-16 -end-16 w-52 h-52 bg-pink-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -start-16 w-52 h-52 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="mb-7 rounded-2xl p-4 sm:p-6 bg-slate-900/80 dark:bg-slate-950/85 backdrop-blur-md border border-pink-500/35 dark:border-pink-500/40 shadow-xl shadow-pink-500/10 text-white relative overflow-hidden">
+      {/* Ambient Top Glow Line */}
+      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 via-cyan-400 to-amber-400" />
+      <div className="absolute -top-16 -end-16 w-52 h-52 bg-pink-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-16 -start-16 w-52 h-52 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        
+        {/* USER IMAGE SHOWCASE: FULL LEFT SIDE */}
+        <div className="lg:col-span-5 rounded-xl overflow-hidden border border-pink-500/35 bg-slate-950/70 shadow-lg shadow-pink-500/10 relative group min-h-[220px] sm:min-h-[260px] flex items-center justify-center">
+          <img
+            src="/images/gta6.png"
+            alt="GTA 6 Artwork"
+            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+            onError={(e) => {
+              e.currentTarget.src = 'public/images/gta6.png';
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent pointer-events-none" />
+        </div>
+
+        {/* COUNTDOWN & PLATFORM INTEL: FULL RIGHT SIDE */}
+        <div className="lg:col-span-7 flex flex-col justify-between gap-4 py-0.5">
           
-          {/* USER IMAGE SHOWCASE: public/images/gta6.png */}
-          <div className="lg:col-span-5 flex flex-col sm:flex-row items-center gap-4 bg-slate-950/60 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-xl border border-pink-500/30">
-            <div 
-              className="relative w-full sm:w-44 aspect-[4/3] rounded-lg overflow-hidden shrink-0 group cursor-pointer border border-pink-500/40 shadow-md shadow-pink-500/20"
-              onClick={() => {
-                gtaAudio.playBlip(750, 0.08);
-                setShowLightbox(true);
-              }}
-              title="Click to view full crew artwork"
-            >
-              <img
-                src="/images/gta6.png"
-                alt="GTA 6 Crew Artwork"
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  e.currentTarget.src = 'public/images/gta6.png';
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-pink-300 flex items-center gap-1 bg-black/70 px-2 py-0.5 rounded backdrop-blur-xs">
-                  <Maximize2 size={11} /> {t('View Details')}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex-1 text-center sm:text-start min-w-0">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[10px] font-black uppercase tracking-wider mb-1.5">
-                <Zap size={11} className="text-amber-400" />
-                <span>{t('Special Squad Edition')}</span>
-              </div>
-              <h4 className="text-base sm:text-lg font-black text-white uppercase tracking-tight truncate">
-                {t('Vice City Crew')}
-              </h4>
-              <p className="text-xs text-slate-300 mt-1 line-clamp-2">
-                Official tribute squad artwork featuring Jason, Lucia & the Royal Leonida syndicate.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  gtaAudio.playBlip(750, 0.08);
-                  setShowLightbox(true);
-                }}
-                className="mt-2 text-xs font-bold text-pink-400 hover:text-pink-300 inline-flex items-center gap-1 transition-colors"
-              >
-                <span>Full Artwork (HD)</span>
-                <ArrowRight size={13} className="rtl:rotate-180" />
-              </button>
-            </div>
-          </div>
-
-          {/* COUNTDOWN & PLATFORM INTEL */}
-          <div className="lg:col-span-7 flex flex-col justify-between gap-4">
-            
-            {/* Header row with Target Date */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Clock size={16} className="text-pink-400 animate-pulse" />
-                <span className="text-xs sm:text-sm font-black uppercase tracking-wider bg-gradient-to-r from-pink-400 via-rose-300 to-amber-300 bg-clip-text text-transparent">
-                  {t('Release Countdown')} · {t('PS5 / Xbox Series X|S')}
-                </span>
-              </div>
-              <span className="text-xs font-black text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-md border border-amber-500/30">
-                {t('November 19, 2026')}
+          {/* Header row with Target Date */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-pink-400 animate-pulse" />
+              <span className="text-xs sm:text-sm font-black uppercase tracking-wider bg-gradient-to-r from-pink-400 via-rose-300 to-amber-300 bg-clip-text text-transparent">
+                {t('Release Countdown')} · {t('PS5 / Xbox Series X|S')}
               </span>
             </div>
+            <span className="text-xs font-black text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-md border border-amber-500/30">
+              {t('November 19, 2026')}
+            </span>
+          </div>
 
-            {/* Live Ticking Digits Grid */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-3">
-              {[
-                { val: timeLeft.days, label: t('Days') },
-                { val: timeLeft.hours, label: t('Hours') },
-                { val: timeLeft.minutes, label: t('Minutes') },
-                { val: timeLeft.seconds, label: t('Seconds') }
-              ].map((slot, idx) => (
-                <div
-                  key={`countdown-digit-${idx}`}
-                  className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl bg-slate-950/75 border border-pink-500/35 shadow-inner text-center group hover:border-pink-500/60 transition-colors"
-                >
-                  <span className="text-xl sm:text-3xl font-black font-mono tracking-tight bg-gradient-to-b from-white via-pink-100 to-pink-400 bg-clip-text text-transparent">
-                    {slot.val < 10 ? `0${slot.val}` : slot.val}
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-slate-400 group-hover:text-pink-300 mt-0.5">
-                    {slot.label}
-                  </span>
+          {/* Live Ticking Digits Grid */}
+          <div className="grid grid-cols-4 gap-2 sm:gap-3">
+            {[
+              { val: timeLeft.days, label: t('Days') },
+              { val: timeLeft.hours, label: t('Hours') },
+              { val: timeLeft.minutes, label: t('Minutes') },
+              { val: timeLeft.seconds, label: t('Seconds') }
+            ].map((slot, idx) => (
+              <div
+                key={`countdown-digit-${idx}`}
+                className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl bg-slate-950/75 border border-pink-500/35 shadow-inner text-center group hover:border-pink-500/60 transition-colors"
+              >
+                <span className="text-xl sm:text-3xl font-black font-mono tracking-tight bg-gradient-to-b from-white via-pink-100 to-pink-400 bg-clip-text text-transparent">
+                  {slot.val < 10 ? `0${slot.val}` : slot.val}
+                </span>
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-slate-400 group-hover:text-pink-300 mt-0.5">
+                  {slot.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Platform Intel Badges Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 border-t border-white/10">
+            
+            {/* Pre-Load Milestone */}
+            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/50 border border-cyan-500/30">
+              <div className="w-7 h-7 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                <Calendar size={14} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase font-bold text-slate-400">
+                  {t('Pre-Load Start Date')}
                 </div>
-              ))}
+                <div className="text-xs font-black text-cyan-300 truncate">
+                  {t('November 10, 2026')}
+                </div>
+              </div>
             </div>
 
-            {/* Platform Intel Badges Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 border-t border-white/10">
-              
-              {/* Pre-Load Milestone */}
-              <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/50 border border-cyan-500/30">
-                <div className="w-7 h-7 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                  <Calendar size={14} />
+            {/* PC Official Status */}
+            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/50 border border-amber-500/30">
+              <div className="w-7 h-7 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <Monitor size={14} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase font-bold text-slate-400">
+                  {t('PC Official Date')}
                 </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">
-                    {t('Pre-Load Start Date')}
-                  </div>
-                  <div className="text-xs font-black text-cyan-300 truncate">
-                    {t('November 10, 2026')}
-                  </div>
+                <div className="text-xs font-black text-amber-300 truncate" title={t('Not officially confirmed by Rockstar Games yet')}>
+                  {t('Not officially confirmed by Rockstar Games yet')}
                 </div>
               </div>
-
-              {/* PC Official Status */}
-              <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/50 border border-amber-500/30">
-                <div className="w-7 h-7 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                  <Monitor size={14} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">
-                    {t('PC Official Date')}
-                  </div>
-                  <div className="text-xs font-black text-amber-300 truncate" title={t('Not officially confirmed by Rockstar Games yet')}>
-                    {t('Not officially confirmed by Rockstar Games yet')}
-                  </div>
-                </div>
-              </div>
-
             </div>
 
           </div>
 
         </div>
-      </div>
 
-      {/* LIGHTBOX MODAL FOR CREW ARTWORK */}
-      {createPortal(
-        <AnimatePresence>
-          {showLightbox && (
-            <motion.div
-              key="gta6-crew-artwork-lightbox"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowLightbox(false)}
-              className="fixed inset-0 z-[10001] bg-black/90 backdrop-blur-md p-4 sm:p-8 flex items-center justify-center"
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={e => e.stopPropagation()}
-                className="relative max-w-5xl max-h-[90vh] bg-slate-950 rounded-2xl overflow-hidden border border-pink-500/40 shadow-2xl flex flex-col"
-              >
-                <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-800 bg-slate-900">
-                  <div className="flex items-center gap-2">
-                    <GTA6Logo size="sm" />
-                    <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-                      {t('Vice City Crew')} · {t('Special Squad Edition')}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowLightbox(false)}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-pink-600 text-white transition-colors"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-                <div className="p-2 sm:p-4 overflow-auto flex items-center justify-center bg-black">
-                  <img
-                    src="/images/gta6.png"
-                    alt="GTA 6 Crew Artwork Full Resolution"
-                    className="max-h-[75vh] w-auto object-contain rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.src = 'public/images/gta6.png';
-                    }}
-                  />
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
-    </>
+      </div>
+    </div>
   );
 };
 
@@ -461,7 +370,7 @@ const QuickPeekModal: React.FC<QuickPeekModalProps> = ({
   };
 
   return createPortal(
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {game && (
         <motion.div 
           key={`quick-peek-overlay-${game.id || 'game'}`}
@@ -897,29 +806,47 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
     return getPageNumbers(validCurrentPage, totalPages, 5);
   }, [validCurrentPage, totalPages]);
 
-  return createPortal(
-    <AnimatePresence mode="wait">
-      {isOpen && (
+  return (
+    <>
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
         <motion.div 
           key="gta6-fullscreen-modal-portal"
           dir={dir}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] w-screen h-screen flex flex-col bg-white dark:bg-slate-950 overflow-hidden"
+          className="fixed inset-0 z-[9999] w-screen h-screen flex flex-col bg-slate-950 overflow-hidden text-white"
         >
+          {/* FIXED FULL-SCREEN GTA 6 BACKGROUND - 100% visible across ALL scroll positions */}
+          <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none w-screen h-screen">
+            <img
+              src="https://4kwallpapers.com/images/wallpapers/gta-6-teaser-3840x2160-13559.png"
+              alt="GTA 6 Background"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover object-center opacity-70 dark:opacity-75 saturate-125"
+              onError={(e) => {
+                e.currentTarget.src = '/images/gta6_bg.jpg';
+              }}
+            />
+            {/* Scrim ensuring cards are perfectly crisp while background artwork remains 100% visible */}
+            <div className="absolute inset-0 w-full h-full bg-slate-950/75 pointer-events-none" />
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/85 pointer-events-none" />
+          </div>
+
           {/* GTA 6 Vice Header Stripe */}
-          <div className="h-2 bg-gradient-to-r from-pink-500 via-rose-500 via-purple-600 to-cyan-400 shrink-0" />
+          <div className="relative z-10 h-2 bg-gradient-to-r from-pink-500 via-rose-500 via-purple-600 to-cyan-400 shrink-0" />
 
           {/* Full Screen Modal Header */}
-          <div className="px-4 sm:px-8 py-3.5 sm:py-4 border-b border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-50 dark:bg-slate-900/80 shrink-0">
+          <div className="relative z-10 px-4 sm:px-8 py-3.5 sm:py-4 border-b border-pink-500/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900/80 dark:bg-slate-950/85 backdrop-blur-md shrink-0">
             <div className="flex items-center gap-3.5">
               <GTA6Logo size="sm" />
               <div>
-                <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                <h2 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2">
                   <span>{t('Most Popular Repacks')}</span>
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <p className="text-xs text-slate-300 font-medium">
                   {filteredGames.length} {t('Games')} {t('All Repacks in Vault')}
                 </p>
               </div>
@@ -934,13 +861,13 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder={t('Search popular repacks...')}
-                  className="w-full ps-9 pe-8 py-2 text-xs sm:text-sm rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-pink-500 transition-colors"
+                  className="w-full ps-9 pe-8 py-2 text-xs sm:text-sm rounded-xl bg-slate-900/80 text-white placeholder:text-slate-400 border border-pink-500/30 focus:outline-none focus:border-pink-500 transition-colors"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                    className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                   >
                     <X size={15} />
                   </button>
@@ -954,7 +881,7 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
                   gtaAudio.playBlip(440, 0.06);
                   onClose();
                 }}
-                className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-colors shrink-0 shadow-sm"
+                className="w-10 h-10 rounded-xl bg-slate-800/90 text-slate-200 border border-pink-500/25 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-colors shrink-0 shadow-sm"
                 title={t('Close Vault')}
               >
                 <X size={20} />
@@ -963,7 +890,7 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
           </div>
 
           {/* Filters Bar: ONLY All Repackers & Favorites */}
-          <div className="px-4 sm:px-8 py-2.5 bg-slate-100/70 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
+          <div className="relative z-10 px-4 sm:px-8 py-2.5 bg-slate-900/70 dark:bg-slate-950/75 backdrop-blur-md border-b border-pink-500/20 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
             {[
               { id: 'all', label: t('All Repackers') },
               { id: 'favorites', label: `${t('Favorites')} (${favorites.length})` }
@@ -978,7 +905,7 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                   selectedFilter === tab.id
                     ? 'bg-pink-600 text-white shadow-md shadow-pink-600/30'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-pink-500 border border-slate-200 dark:border-slate-700/60'
+                    : 'bg-slate-800/80 text-slate-300 hover:text-pink-400 border border-slate-700/60'
                 }`}
               >
                 {tab.label}
@@ -986,22 +913,9 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
             ))}
           </div>
 
-          {/* Games Grid Container with GTA 6 Vice City Sunset Background */}
-          <div className="relative flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/50 dark:bg-slate-950/70">
-            {/* Modal GTA 6 Background Art - 100% visible and unblocked */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 dark:opacity-55 saturate-125">
-              <img
-                src="/images/gta6_bg.jpg"
-                alt="GTA 6 Vice City Background"
-                className="w-full h-full object-cover object-center"
-                onError={(e) => {
-                  e.currentTarget.src = '/images/gta6.png';
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/60 to-white/70 dark:from-slate-950/92 dark:via-slate-950/65 dark:to-slate-950/75" />
-            </div>
-
-            <div className="relative z-10">
+          {/* Games Grid Container - Transparent so background is 100% visible across all scroll positions */}
+          <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-8 bg-transparent">
+            <div>
             {paginatedGames.length === 0 ? (
               <div className="h-64 flex flex-col items-center justify-center text-center p-6">
                 <div className="w-12 h-12 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center mb-3">
@@ -1048,7 +962,7 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
 
           {/* Pagination Footer with safe page keys */}
           {totalPages > 1 && (
-            <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-center items-center shrink-0">
+            <div className="relative z-10 p-3 sm:p-4 border-t border-pink-500/20 bg-slate-900/85 dark:bg-slate-950/90 backdrop-blur-md flex justify-center items-center shrink-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
@@ -1057,7 +971,7 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
                     setCurrentPage(p => Math.max(p - 1, 1));
                   }}
                   disabled={validCurrentPage === 1}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-pink-600 hover:text-white disabled:opacity-40 transition-colors"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800 text-slate-200 hover:bg-pink-600 hover:text-white disabled:opacity-30 transition-colors border border-pink-500/20"
                 >
                   <ChevronLeft size={16} className="rtl:rotate-180" />
                 </button>
@@ -1070,10 +984,10 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
                       gtaAudio.playBlip(560, 0.05);
                       setCurrentPage(pageNum);
                     }}
-                    className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
+                    className={`w-9 h-9 rounded-lg text-xs font-bold transition-all border ${
                       validCurrentPage === pageNum
-                        ? 'bg-pink-600 text-white shadow-md shadow-pink-600/30'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        ? 'bg-pink-600 text-white shadow-md shadow-pink-600/40 border-pink-400'
+                        : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border-slate-700/60'
                     }`}
                   >
                     {pageNum}
@@ -1087,7 +1001,7 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
                     setCurrentPage(p => Math.min(p + 1, totalPages));
                   }}
                   disabled={validCurrentPage === totalPages}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-pink-600 hover:text-white disabled:opacity-40 transition-colors"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800 text-slate-200 hover:bg-pink-600 hover:text-white disabled:opacity-30 transition-colors border border-pink-500/20"
                 >
                   <ChevronRight size={16} className="rtl:rotate-180" />
                 </button>
@@ -1096,20 +1010,22 @@ export const MostPopularRepacksModal: React.FC<MostPopularRepacksModalProps> = (
           )}
         </motion.div>
       )}
-
-      {/* Quick Peek Drawer if active */}
-      <QuickPeekModal
-        game={previewGame}
-        onClose={() => setPreviewGame(null)}
-        onSelect={item => {
-          setPreviewGame(null);
-          onSelect(item);
-        }}
-        isFavorite={previewGame ? favorites.includes(previewGame.id) : false}
-        onToggleFavorite={onToggleFavorite}
-      />
     </AnimatePresence>,
     document.body
+  )}
+
+  {/* Quick Peek Drawer if active */}
+  <QuickPeekModal
+    game={previewGame}
+    onClose={() => setPreviewGame(null)}
+    onSelect={item => {
+      setPreviewGame(null);
+      onSelect(item);
+    }}
+    isFavorite={previewGame ? favorites.includes(previewGame.id) : false}
+    onToggleFavorite={onToggleFavorite}
+  />
+</>
   );
 };
 
@@ -1255,20 +1171,21 @@ export const MostPopularRepacksSection: React.FC<MostPopularRepacksSectionProps>
         dir={dir}
         className="mt-14 mb-10 relative z-10 w-full overflow-hidden scroll-mt-24"
       >
-        {/* GTA 6 High-Res Vice City Sunset Background Artwork - 100% visible and unblocked */}
-        <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+        {/* GTA 6 Teaser Background Artwork - 100% Width & 100% Height */}
+        <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl w-full h-full">
           <img
-            src="/images/gta6_bg.jpg"
-            alt="GTA 6 Vice City Sunset Background"
-            className="w-full h-full object-cover object-center opacity-45 dark:opacity-60 saturate-125"
+            src="https://4kwallpapers.com/images/wallpapers/gta-6-teaser-3840x2160-13559.png"
+            alt="GTA 6 Background"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-center opacity-65 dark:opacity-75 saturate-125"
             onError={(e) => {
-              e.currentTarget.src = '/images/gta6.png';
+              e.currentTarget.src = '/images/gta6_bg.jpg';
             }}
           />
-          {/* Rich Vice City Contrast Scrim */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/60 to-white/70 dark:from-slate-950/90 dark:via-slate-950/65 dark:to-slate-950/75" />
+          {/* Balanced Contrast Scrim - Keeps Background 100% Visible */}
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-white/85 via-white/40 to-white/60 dark:from-slate-950/85 dark:via-slate-950/40 dark:to-slate-950/60 pointer-events-none" />
           {/* Subtle Retro Grid Lines */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(236,72,153,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(6,182,212,0.06)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-80" />
+          <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,rgba(236,72,153,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(6,182,212,0.06)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-80 pointer-events-none" />
         </div>
 
         {/* CONTAINER SHELL */}

@@ -456,6 +456,11 @@ export const translations: Translations = {
     'Information / Instructions': { en: 'Information / Instructions', fr: 'Informations / Instructions', es: 'Información / Instrucciones', ar: 'معلومات / تعليمات' },
     'Any specific version or details?': { en: 'Any specific version or details?', fr: 'Une version ou des détails spécifiques ?', es: '¿Alguna versión o detalles específicos?', ar: 'أي إصدار أو تفاصيل محددة؟' },
     'Keep the servers alive': { en: 'Keep the servers alive', fr: 'Gardez les serveurs en vie', es: 'Mantenga los servidores vivos', ar: 'أبقِ الخوادم تعمل' },
+    'Support SecretArea': { en: 'Support SecretArea', fr: 'Soutenez SecretArea', es: 'Apoya a SecretArea', ar: 'ادعم منصة SecretArea' },
+    'Supporter Hub': { en: 'Supporter Hub', fr: 'Espace Donateur', es: 'Zona de Apoyo', ar: 'مركز الدعم والتبرع' },
+    'Instant Gateway': { en: 'Instant Gateway', fr: 'Passerelle Instantanée', es: 'Pasarela Rápida', ar: 'بوابة الدفع الفوري' },
+    'Direct Monero (XMR)': { en: 'Direct Monero (XMR)', fr: 'Monero Direct (XMR)', es: 'Monero Directo (XMR)', ar: 'تحويل مونيرو المباشر' },
+    'Wallets & Guide': { en: 'Wallets & Guide', fr: 'Portefeuilles & Guide', es: 'Billeteras y Guía', ar: 'المحافظ وكيفية الدفع' },
     'Updated Daily': { en: 'Updated Daily', fr: 'Mis à jour quotidiennement', es: 'Actualizado a diario', ar: 'يتم التحديث يومياً' },
     'No accounts available right now. Check back later!': { en: 'No accounts available right now. Check back later!', fr: 'Aucun compte disponible pour le moment. Revenez plus tard !', es: 'No hay cuentas disponibles en este momento. ¡Vuelva a consultar más tarde!', ar: 'لا توجد حسابات متاحة الآن. تحقق مرة أخرى لاحقاً!' },
     'Exclusive Premium Accounts': { en: 'Exclusive Premium Accounts', fr: 'Comptes Premium Exclusifs', es: 'Cuentas Premium Exclusivas', ar: 'حسابات مدفوعة حصرية' },
@@ -770,6 +775,127 @@ export const translations: Translations = {
     'SAVEGAME': { en: 'SAVEGAME', fr: 'SAUVEGARDE', es: 'PARTIDA GUARDADA', ar: 'ملفات الحفظ' },
     'Top Studios': {"en":"Top Studios","fr":"Meilleurs Studios","es":"Mejores Estudios","ar":"أفضل الاستوديوهات"},
     'Top Tech Companies': {"en":"Top Tech Companies","fr":"Meilleures Entreprises Tech","es":"Mejores Empresas Tech","ar":"أفضل شركات التقنية"},
+    'Leading developers & creators shaping gaming worlds': {
+        en: 'Leading developers & creators shaping gaming worlds',
+        fr: 'Développeurs et créateurs majeurs façonnant les mondes du jeu vidéo',
+        es: 'Desarrolladores líderes que crean mundos de videojuegos',
+        ar: 'أبرز المطورين وصنّاع عوالم الألعاب حول العالم'
+    },
+    'Leading software developers & creative suites': {
+        en: 'Leading software developers & creative suites',
+        fr: 'Développeurs de logiciels majeurs et suites de création',
+        es: 'Principales desarrolladores de software y suites creativas',
+        ar: 'أبرز مطوري البرمجيات المتقدمة والحزم الإبداعية'
+    },
+    'View Full Directory': {
+        en: 'View Full Directory',
+        fr: 'Répertoire complet',
+        es: 'Ver directorio completo',
+        ar: 'دليل الاستوديوهات بالكامل'
+    },
+    'Studios in Vault': {
+        en: 'Studios in Vault',
+        fr: 'Studios en coffre',
+        es: 'Estudios en bóveda',
+        ar: 'استوديو بالخزينة'
+    },
+    'Flagship Ecosystem Showcase': {
+        en: 'Flagship Ecosystem Showcase',
+        fr: 'Vitrine des écosystèmes majeurs',
+        es: 'Ecosistemas de estudios líderes',
+        ar: 'منظومات الاستوديوهات الرائدة'
+    },
+    'Verified Games': {
+        en: 'Verified Games',
+        fr: 'Jeux vérifiés',
+        es: 'Juegos verificados',
+        ar: 'لعبة موثقة'
+    },
+    'Search studios or franchises...': {
+        en: 'Search studios or franchises...',
+        fr: 'Rechercher des studios ou franchises...',
+        es: 'Buscar estudios o franquicias...',
+        ar: 'ابحث عن استوديو أو عنوان لعبة...'
+    },
+    'Search software companies...': {
+        en: 'Search software companies...',
+        fr: 'Rechercher des entreprises...',
+        es: 'Buscar empresas...',
+        ar: 'ابحث عن شركات البرمجيات...'
+    },
+    'No studios found': {
+        en: 'No studios found',
+        fr: 'Aucun studio trouvé',
+        es: 'No se encontraron estudios',
+        ar: 'لم يتم العثور على استوديوهات'
+    },
+    'Try adjusting your search query or choosing another ecosystem.': {
+        en: 'Try adjusting your search query or choosing another ecosystem.',
+        fr: 'Essayez d\'ajuster votre recherche ou choisissez un autre écosystème.',
+        es: 'Intenta ajustar tu búsqueda o elige otro ecosistema.',
+        ar: 'جرّب تعديل كلمة البحث أو اختيار منظومة استوديوهات أخرى.'
+    },
+    'Explore Catalog': {
+        en: 'Explore Catalog',
+        fr: 'Explorer le catalogue',
+        es: 'Explorar catálogo',
+        ar: 'استكشف ألعاب الاستوديو'
+    },
+    'Show More Studios': {
+        en: 'Show More Studios',
+        fr: 'Afficher plus de studios',
+        es: 'Mostrar más estudios',
+        ar: 'عرض المزيد من الاستوديوهات'
+    },
+    'Remaining': {
+        en: 'Remaining',
+        fr: 'Restants',
+        es: 'Restantes',
+        ar: 'متبقية'
+    },
+    'Studio Ecosystem': {
+        en: 'Studio Ecosystem',
+        fr: 'Écosystème des studios',
+        es: 'Ecosistema de estudios',
+        ar: 'منظومة الاستوديوهات'
+    },
+    'Game Studios': {
+        en: 'Game Studios',
+        fr: 'Studios de Jeux',
+        es: 'Estudios de Juegos',
+        ar: 'استوديوهات الألعاب'
+    },
+    'Enterprise Software': {
+        en: 'Enterprise Software',
+        fr: 'Logiciels professionnels',
+        es: 'Software profesional',
+        ar: 'برمجيات احترافية'
+    },
+    'Game': { en: 'Game', fr: 'Jeu', es: 'Juego', ar: 'لعبة' },
+    'Top Studios Directory': {
+        en: 'Top Studios Directory',
+        fr: 'Répertoire des Meilleurs Studios',
+        es: 'Directorio de Mejores Estudios',
+        ar: 'دليل أفضل الاستوديوهات'
+    },
+    'Explore All Studios': {
+        en: 'Explore All Studios',
+        fr: 'Explorer tous les studios',
+        es: 'Explorar todos los estudios',
+        ar: 'استكشف كافة الاستوديوهات'
+    },
+    'Most Games': {
+        en: 'Most Games',
+        fr: 'Plus de jeux',
+        es: 'Más juegos',
+        ar: 'الأكثر ألعاباً'
+    },
+    'Name (A-Z)': {
+        en: 'Name (A-Z)',
+        fr: 'Nom (A-Z)',
+        es: 'Nombre (A-Z)',
+        ar: 'الاسم (أ-ي)'
+    },
     'Visitor Profile': { en: 'Visitor Profile', fr: 'Profil Visiteur', es: 'Perfil de Visitante', ar: 'الملف الشخصي للزائر' },
     'Liked': { en: 'Liked', fr: 'Aimés', es: 'Me gusta', ar: 'الإعجابات' },
     'Library': { en: 'Library', fr: 'Bibliothèque', es: 'Biblioteca', ar: 'المكتبة' },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
@@ -179,15 +180,16 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ open, onClose 
   const currentContent = DISCLAIMER_LOCALES[activeLang] || DISCLAIMER_LOCALES.EN;
   const isRTL = currentContent.dir === 'rtl';
 
-  return (
+  if (!open || typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
-      {open && (
-        <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-opacity"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="disclaimer-title"
-        >
+      <div 
+        className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-opacity"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="disclaimer-title"
+      >
         {/* Backdrop click dismiss */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -339,8 +341,8 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ open, onClose 
           </div>
         </motion.div>
       </div>
-      )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

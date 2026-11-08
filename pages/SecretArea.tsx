@@ -35,6 +35,7 @@ import PartnersSection from '../components/PartnersSection';
 import UpcomingTrailersSection from '../components/UpcomingTrailersSection';
 import TwoPlayersSection from '../components/TwoPlayersSection';
 import MostPopularRepacksSection from '../components/MostPopularRepacksSection';
+import TopStudiosSection from '../components/TopStudiosSection';
 
 import { CommentsSection } from '../components/CommentsSection';
 import { BestGameSeriesSection } from '../components/BestGameSeriesSection';
@@ -6544,96 +6545,7 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
     );
 };
 
-const BestStudiosCarousel: React.FC<{ 
-    profiles: CompanyProfile[], 
-    onSelect: (profile: CompanyProfile) => void,
-    onSeeAll: () => void,
-    categoryType: 'games' | 'tools'
-}> = ({ profiles, onSelect, onSeeAll, categoryType }) => {
-    const { dir, t } = useLanguage();
-    const sortedProfiles = useMemo(() => {
-        return [...profiles]
-            .map(p => {
-                let count = 0;
-                if (categoryType === 'games') {
-                    count = (p.gameIds?.length || 0) + (p.hypervisorIds?.length || 0) + (p.steamtoolsIds?.length || 0) + (p.ps5Ids?.length || 0);
-                } else {
-                    count = (p.architectIds?.length || 0) + (p.extraIds?.length || 0);
-                }
-                return {
-                    ...p,
-                    totalGames: count
-                };
-            })
-            .filter(p => p.totalGames > 0)
-            .sort((a, b) => b.totalGames - a.totalGames);
-    }, [profiles, categoryType]);
-
-    const displayProfiles = sortedProfiles.slice(0, 6);
-    
-    if (displayProfiles.length === 0) return null;
-
-    return (
-        <div className="mt-16 w-full relative z-10">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 px-2">
-                <div>
-                    <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center border border-blue-200 dark:border-blue-500/30">
-                            <Icon name="Briefcase" size={20} className="text-blue-600 dark:text-blue-400" />
-                        </div>
-                        {categoryType === 'games' ? t('Top Studios') : t('Top Tech Companies')}
-                    </h2>
-                    <p className="text-sm text-slate-700 dark:text-slate-300 mt-2 font-medium">{t('Leading developers by released items')}</p>
-                </div>
-                <button 
-                    onClick={onSeeAll}
-                    className="cursor-pointer shrink-0 group text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200 flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                    {t('View Directory')} <Icon name="ArrowRight" size={16} className="group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
-                </button>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                {displayProfiles.map((profile, i) => (
-                    <div 
-                        key={profile.id}
-                        onClick={() => onSelect(profile)}
-                        className="group relative bg-white dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800/60 rounded-3xl p-5 md:p-6 overflow-hidden cursor-pointer hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300"
-                    >
-                        <div className="absolute top-0 end-0 w-32 h-32 bg-gradient-to-bl from-blue-500/5 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-0 group-hover:opacity-100" />
-                        
-                        <div className="flex items-start justify-between mb-6">
-                            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 dark:bg-slate-900/80 flex items-center justify-center p-3 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                                {profile.logoUrl ? (
-                                    <img src={profile.logoUrl} alt={profile.name} className="w-full h-full object-contain filter group-hover:brightness-110 transition-all cursor-pointer" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.innerHTML = '<span class="font-black text-xl text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors cursor-pointer">' + profile.name.substring(0, 2).toUpperCase() + '</span>'; }} />
-                                ) : (
-                                    <span className="font-black text-xl text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors cursor-pointer">{profile.name.substring(0, 2).toUpperCase()}</span>
-                                )}
-                            </div>
-                            <div className="flex flex-col items-end">
-                                <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
-                                    {profile.totalGames}
-                                </span>
-                                <span className="text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest">
-                                    {profile.totalGames === 1 ? t('Item') : t('Items')}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h3 className="font-bold text-base md:text-lg text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-500 transition-colors">
-                                {profile.name}
-                            </h3>
-                            <div className="flex items-center gap-1.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-blue-500 text-xs font-semibold">
-                                {t('View Profile')} <Icon name="ArrowRight" size={12} className="rtl:rotate-180" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
+const BestStudiosCarousel = TopStudiosSection;
 
 // --- MAIN PAGE COMPONENT ---
 
@@ -7309,7 +7221,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             <div>[-] <a href="https://wa.me/212723242286" target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">WhatsApp</a></div>
             <div>[-] <a href="https://www.instagram.com/nexa1337" target="_blank" rel="noreferrer" className="text-pink-400 hover:text-pink-300 underline underline-offset-2">Instagram</a></div>
             <div>[-] <a href="mailto:support@nexa1337.com" className="text-purple-400 hover:text-purple-300 underline underline-offset-2">Email (support@nexa1337.com)</a></div>
-            <div>[-] <a href="mailto:nexa1337agency@gmail.com" className="text-red-400 hover:text-red-300 underline underline-offset-2">Gmail (nexa1337agency@gmail.com)</a></div>
+            <div>[-] <a href="mailto:admin.secretarea1337@proton.me" className="text-red-400 hover:text-red-300 underline underline-offset-2">Email (admin.secretarea1337@proton.me)</a></div>
             <div>[-] <a href="https://linktr.ee/nexa1337" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-300 underline underline-offset-2">SecretArea</a></div>
           </div>
         ) 
