@@ -18,7 +18,8 @@ interface DonateModalProps {
 type TabType = 'gateway' | 'direct';
 
 const MONERO_ADDRESS = '48UqVGkdrErEXVUKWZ9dCkRFxG4qFyzorS2h77K96nG8fdHShgv95k4cPPYWGMoM267PdajjEoLUwG1kyvgSd8vX8VK8RkS';
-const TROCADOR_URL = 'https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&address=48UqVGkdrErEXVUKWZ9dCkRFxG4qFyzorS2h77K96nG8fdHShgv95k4cPPYWGMoM267PdajjEoLUwG1kyvgSd8vX8VK8RkS&donation=True&simple_mode=False&description=Support+our+mission+and+help+us+grow.+Every+contribution+makes+a+difference.&email=secretarea1337@gmail.com&buttonbgcolor=e11d48&textcolor=000000&bgcolor=00000000&direct=True';
+const TROCADOR_URL = 'https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&address=48UqVGkdrErEXVUKWZ9dCkRFxG4qFyzorS2h77K96nG8fdHShgv95k4cPPYWGMoM267PdajjEoLUwG1kyvgSd8vX8VK8RkS&donation=True&simple_mode=True&name=SecretArea&description=Support+our+mission+and+help+us+grow.+Every+contribution+makes+a+difference.&email=secretarea1337@gmail.com&buttonbgcolor=e11d48&textcolor=000000&bgcolor=00000000&direct=True';
+const WIDGET_FRAME_URL = '/api/crypto-frame';
 const CONTACT_EMAIL = 'admin.secretarea1337@proton.me';
 
 // Localized strings dictionary covering en, fr, es, ar
@@ -178,6 +179,54 @@ const I18N = {
     fr: 'Merci d\'aider SecretArea à rester libre pour tous !',
     es: '¡Gracias por mantener SecretArea libre para todos!',
     ar: 'شكراً لك على دعمك لاستمرار SecretArea حرة للجميع!'
+  },
+  adblockBadge: {
+    en: 'Shield / AdBlocker Active',
+    fr: 'Bloqueur / Bouclier Détecté',
+    es: 'Escudo / Bloqueador Activo',
+    ar: 'مانع الإعلانات أو حظر الإطارات مفعل'
+  },
+  adblockHeadline: {
+    en: 'Embedded Gateway Restricted',
+    fr: 'Passerelle Intégrée Restreinte',
+    es: 'Pasarela Integrada Bloqueada',
+    ar: 'تعذر تشغيل الإطار المدمج للعملات'
+  },
+  adblockDescription: {
+    en: 'Browser shields (Brave, uBlock, AdGuard) block third-party crypto iframes. Open the standalone secure checkout or pay via direct Monero.',
+    fr: 'Votre navigateur ou bloqueur bloque les widgets crypto tiers. Ouvrez la page sécurisée ou payez via Monero direct.',
+    es: 'Los escudos del navegador bloquean los iframes de criptomonedas. Abre el pago seguro directo o usa la dirección Monero.',
+    ar: 'تقوم حماية المتصفح أو مانع الإعلانات بحظر إطارات الدفع. يرجى فتح صفحة الدفع المباشرة أو استخدام محفظة مونيرو مباشرة.'
+  },
+  adblockOpenBtn: {
+    en: 'Open Crypto Checkout (Trocador)',
+    fr: 'Ouvrir le Paiement Crypto (Trocador)',
+    es: 'Abrir Pasarela Crypto (Trocador)',
+    ar: 'فتح بوابة الدفع الفوري (Trocador)'
+  },
+  adblockDirectBtn: {
+    en: 'Switch to Direct Monero (XMR)',
+    fr: 'Passer au Monero Direct (XMR)',
+    es: 'Cambiar a Monero Directo (XMR)',
+    ar: 'التحويل المباشر عبر مونيرو (XMR)'
+  },
+  adblockRetryBtn: {
+    en: 'Retry Loading Widget',
+    fr: 'Réessayer le widget',
+    es: 'Reintentar cargar widget',
+    ar: 'إعادة محاولة التحميل'
+  },
+  adblockNotice: {
+    en: 'Having issues with AdBlocker?',
+    fr: 'Problème avec le bloqueur ?',
+    es: '¿Problemas con el bloqueador?',
+    ar: 'هل تواجه مشكلة مع مانع الإعلانات؟'
+  },
+  openDirectCheckout: {
+    en: 'Open Direct Checkout ↗',
+    fr: 'Ouvrir le paiement direct ↗',
+    es: 'Abrir pago directo ↗',
+    ar: 'فتح الدفع المباشر ↗'
   }
 };
 
@@ -185,6 +234,7 @@ const DonateModal: React.FC<DonateModalProps> = ({ open, onClose }) => {
   const { language, dir } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabType>('gateway');
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [widgetBlocked, setWidgetBlocked] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
@@ -268,8 +318,28 @@ const DonateModal: React.FC<DonateModalProps> = ({ open, onClose }) => {
     }
   };
 
+  // Monitor loading of iframe to detect adblocker blocks or timeout
+  useEffect(() => {
+    if (!open || activeTab !== 'gateway') return;
+    setIframeLoaded(false);
+    setWidgetBlocked(false);
+
+    const timer = setTimeout(() => {
+      // If after 4500ms the frame hasn't loaded, trigger adblocker/shield solution
+      setIframeLoaded((prevLoaded) => {
+        if (!prevLoaded) {
+          setWidgetBlocked(true);
+        }
+        return prevLoaded;
+      });
+    }, 4500);
+
+    return () => clearTimeout(timer);
+  }, [open, activeTab, iframeKey]);
+
   const handleReloadIframe = () => {
     setIframeLoaded(false);
+    setWidgetBlocked(false);
     setIframeKey((prev) => prev + 1);
   };
 
@@ -498,7 +568,7 @@ const DonateModal: React.FC<DonateModalProps> = ({ open, onClose }) => {
 
                     {/* Styled Widget Container */}
                     <div className="relative flex-1 min-h-[370px] w-full bg-slate-50 dark:bg-[#080d1a] rounded-2xl border border-slate-200 dark:border-slate-800/90 shadow-inner flex flex-col items-center justify-center p-2 sm:p-3 overflow-hidden">
-                      {!iframeLoaded && (
+                      {!iframeLoaded && !widgetBlocked && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center z-10 bg-slate-50/90 dark:bg-[#080d1a]/90 backdrop-blur-xs">
                           <motion.div
                             animate={{ rotate: 360 }}
@@ -513,27 +583,94 @@ const DonateModal: React.FC<DonateModalProps> = ({ open, onClose }) => {
                         </div>
                       )}
 
-                      {/* Responsive Styled Iframe Widget */}
-                      <div className="w-full max-w-[340px] flex items-center justify-center overflow-hidden rounded-xl shadow-lg border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-950/80">
-                        <iframe
-                          key={iframeKey}
-                          src={TROCADOR_URL}
-                          width="310"
-                          height="350"
-                          title="Trocador AnonPay Support Widget"
-                          className="w-[310px] h-[350px] dark:opacity-95 rounded-lg"
-                          style={{
-                            border: 0,
-                            opacity: iframeLoaded ? 1 : 0,
-                            transition: 'opacity 0.4s ease-in-out'
-                          }}
-                          scrolling="no"
-                          onLoad={() => setIframeLoaded(true)}
-                        />
+                      {/* Responsive Styled Iframe Widget or Anti-Adblock Resolution */}
+                      <div className="w-full max-w-[340px] flex items-center justify-center overflow-hidden rounded-xl shadow-lg border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-950/80 min-h-[350px]">
+                        {widgetBlocked ? (
+                          <div className="w-[310px] h-[350px] p-5 flex flex-col items-center justify-between text-center bg-slate-900/95 text-white rounded-xl border border-amber-500/25 shadow-inner">
+                            <div className="flex flex-col items-center pt-1">
+                              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center mb-2.5">
+                                <TbShieldCheck className="w-6 h-6 text-amber-400" />
+                              </div>
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 mb-1.5">
+                                {text('adblockBadge')}
+                              </span>
+                              <h4 className="text-sm font-bold text-white mb-1">
+                                {text('adblockHeadline')}
+                              </h4>
+                              <p className="text-[11px] text-slate-400 leading-snug max-w-[260px]">
+                                {text('adblockDescription')}
+                              </p>
+                            </div>
+
+                            <div className="w-full space-y-2 pb-1">
+                              <a
+                                href={TROCADOR_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer"
+                              >
+                                <TbExternalLink className="w-4 h-4" />
+                                <span>{text('adblockOpenBtn')}</span>
+                              </a>
+
+                              <button
+                                type="button"
+                                onClick={() => setActiveTab('direct')}
+                                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer"
+                              >
+                                <TbQrcode className="w-3.5 h-3.5 text-amber-400" />
+                                <span>{text('adblockDirectBtn')}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={handleReloadIframe}
+                                className="text-[11px] text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1 mx-auto pt-0.5 cursor-pointer"
+                              >
+                                <TbRefresh className="w-3 h-3" />
+                                <span>{text('adblockRetryBtn')}</span>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <iframe
+                            key={iframeKey}
+                            src={WIDGET_FRAME_URL}
+                            width="310"
+                            height="350"
+                            title="Trocador AnonPay Support Widget"
+                            className="w-[310px] h-[350px] dark:opacity-95 rounded-lg border-0"
+                            style={{
+                              border: 0,
+                              opacity: iframeLoaded ? 1 : 0,
+                              transition: 'opacity 0.4s ease-in-out'
+                            }}
+                            scrolling="no"
+                            onLoad={() => {
+                              setIframeLoaded(true);
+                              setWidgetBlocked(false);
+                            }}
+                            onError={() => {
+                              setWidgetBlocked(true);
+                            }}
+                          />
+                        )}
                       </div>
                       
-                      <div className="mt-2 text-[10px] text-slate-400 dark:text-slate-500 text-center font-mono">
-                        Powered by Trocador AnonPay · Instant Swap to Monero (XMR)
+                      {/* Responsive single-line footer text */}
+                      <div className="mt-2.5 w-full flex items-center justify-center text-center px-1">
+                        <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-sans tracking-tight">
+                          <span className="whitespace-nowrap">Powered by Trocador AnonPay · Instant Swap to Monero</span>
+                          <span className="text-slate-400 dark:text-slate-600">·</span>
+                          <a
+                            href={TROCADOR_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="whitespace-nowrap text-amber-600 dark:text-amber-400/90 hover:text-amber-500 dark:hover:text-amber-300 transition-colors underline decoration-dotted font-medium inline-flex items-center gap-0.5"
+                          >
+                            <span>{text('adblockNotice')} {text('openDirectCheckout')}</span>
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </motion.div>

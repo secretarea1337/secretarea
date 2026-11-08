@@ -249,6 +249,77 @@ async function startServer() {
     }
   });
 
+  // Crypto Gateway Widget Proxy (Bypasses third-party iframe blocks and X-Frame-Options)
+  let cachedFrameHtml: string | null = null;
+  let cachedFrameTime = 0;
+  const TROCADOR_TARGET_URL =
+    "https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&address=48UqVGkdrErEXVUKWZ9dCkRFxG4qFyzorS2h77K96nG8fdHShgv95k4cPPYWGMoM267PdajjEoLUwG1kyvgSd8vX8VK8RkS&donation=True&simple_mode=True&name=SecretArea&description=Support+our+mission+and+help+us+grow.+Every+contribution+makes+a+difference.&email=secretarea1337@gmail.com&buttonbgcolor=e11d48&textcolor=000000&bgcolor=00000000&direct=True";
+
+  app.get(["/api/crypto-frame", "/api/crypto-frame/"], async (req, res) => {
+    try {
+      const now = Date.now();
+      if (cachedFrameHtml && now - cachedFrameTime < 60 * 1000) {
+        res.removeHeader("X-Frame-Options");
+        res.setHeader("X-Frame-Options", "ALLOWALL");
+        res.setHeader("Content-Security-Policy", "frame-ancestors 'self' *;");
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.send(cachedFrameHtml);
+      }
+
+      const response = await fetch(TROCADOR_TARGET_URL, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upstream status ${response.status}`);
+      }
+
+      let html = await response.text();
+
+      // Inject base tag so relative static assets load directly from trocador.app
+      if (html.includes("<head>")) {
+        html = html.replace(
+          "<head>",
+          `<head><base href="https://trocador.app/" target="_blank">`
+        );
+      } else {
+        html = `<base href="https://trocador.app/" target="_blank">` + html;
+      }
+
+      // Ensure form submissions open in a clean new window to preserve session/cookies
+      html = html.replace(/<form\b([^>]*)>/gi, (match, attrs) => {
+        if (/target=/i.test(attrs)) {
+          return `<form ${attrs.replace(/target=["'][^"']*["']/i, 'target="_blank"')}>`;
+        }
+        return `<form target="_blank" ${attrs}>`;
+      });
+
+      cachedFrameHtml = html;
+      cachedFrameTime = now;
+
+      res.removeHeader("X-Frame-Options");
+      res.setHeader("X-Frame-Options", "ALLOWALL");
+      res.setHeader("Content-Security-Policy", "frame-ancestors 'self' *;");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=60");
+      res.send(html);
+    } catch (err: any) {
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+          <body style="font-family:sans-serif;background:#090d16;color:#94a3b8;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;padding:16px;">
+            <p style="font-size:13px;margin-bottom:12px;">Instant Crypto Gateway</p>
+            <a href="${TROCADOR_TARGET_URL}" target="_blank" style="background:#e11d48;color:white;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:13px;">Open Crypto Checkout</a>
+          </body>
+        </html>
+      `);
+    }
+  });
+
   // Speed test upload endpoint with upload limiter and 15MB maximum safety threshold
   app.post("/upload", uploadLimiter, (req, res) => {
     let receivedBytes = 0;
