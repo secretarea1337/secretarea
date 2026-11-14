@@ -69,7 +69,59 @@ export const BestGameSeriesSection: React.FC<BestGameSeriesSectionProps> = ({ se
         </div>
       </div>
 
-      <div className="w-full relative overflow-hidden group/slider max-w-[1920px] mx-auto">
+      {/* Mobile & Tablet Horizontal Touch Carousel (< 1024px) */}
+      <div className="lg:hidden w-full relative max-w-[1920px] mx-auto">
+        <div
+          className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory px-4 sm:px-6 py-2 scroll-smooth"
+        >
+          {series.map((item, index) => (
+            <motion.div
+              key={`mobile-series-${item.id}-${index}`}
+              onClick={() => {
+                setSelectedSeries(item);
+                setShowGamesList(false);
+                setGamePage(0);
+              }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3) }}
+              className="group relative shrink-0 snap-start w-[44vw] max-w-[185px] sm:w-[210px] md:w-[230px] aspect-[2/3] rounded-2xl overflow-hidden cursor-pointer border border-slate-300/80 dark:border-white/15 bg-slate-900 shadow-lg active:scale-[0.97] transition-all"
+            >
+              <img
+                src={item.images[0] || 'https://placehold.co/300x450/1e293b/334155'}
+                alt={item.title}
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 p-3 text-start">
+                {item.category && (
+                  <span className="inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-indigo-300 line-clamp-1 mb-0.5">
+                    {item.category}
+                  </span>
+                )}
+                <h3 className="text-xs sm:text-sm font-black text-white leading-tight line-clamp-2 drop-shadow-sm">
+                  {item.title}
+                </h3>
+                {item.games && item.games.length > 0 && (
+                  <span className="inline-block mt-1 text-[10px] font-mono font-semibold text-slate-300">
+                    {item.games.length} {t('Games')}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="flex sm:hidden justify-center items-center gap-1.5 mt-2">
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+            ← {t('Swipe for more')} →
+          </span>
+        </div>
+      </div>
+
+      {/* Laptop & Desktop Expanding Accordion Strips (>= 1024px) */}
+      <div className="hidden lg:block w-full relative overflow-hidden group/slider max-w-[1920px] mx-auto">
         <AnimatePresence mode="wait">
           <motion.div 
             key={seriesPage}
@@ -77,11 +129,11 @@ export const BestGameSeriesSection: React.FC<BestGameSeriesSectionProps> = ({ se
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="flex w-full h-[300px] sm:h-[400px] lg:h-[500px]"
+            className="flex w-full h-[440px] xl:h-[500px]"
           >
             {paddedSeries.map((item, index) => {
               if (!item) {
-                return <div key={`empty-${index}`} className="flex-[1] min-w-0 border-e border-slate-900/20 dark:border-white/10 last:border-none opacity-0 pointer-events-none max-w-[200px] sm:max-w-[266px] lg:max-w-[333px]" />;
+                return <div key={`empty-${index}`} className="flex-[1] min-w-0 border-e border-slate-900/20 dark:border-white/10 last:border-none opacity-0 pointer-events-none max-w-[333px]" />;
               }
               return (
               <motion.div
@@ -91,16 +143,20 @@ export const BestGameSeriesSection: React.FC<BestGameSeriesSectionProps> = ({ se
                   setShowGamesList(false);
                   setGamePage(0);
                 }}
-                className="relative overflow-hidden cursor-pointer border-e border-slate-900/20 dark:border-white/10 last:border-none flex-[1] min-w-0 transition-[flex] duration-500 ease-out hover:flex-[20] max-w-[200px] sm:max-w-[266px] lg:max-w-[333px]"
+                className="group/strip relative overflow-hidden cursor-pointer border-e border-slate-900/20 dark:border-white/10 last:border-none flex-[1] min-w-0 transition-[flex] duration-500 ease-out hover:flex-[20] max-w-[333px]"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
               >
                 <div 
-                  className="absolute inset-0 bg-cover bg-center transition-all duration-300 hover:brightness-110"
+                  className="absolute inset-0 bg-cover bg-center transition-all duration-300 group-hover/strip:brightness-110"
                   style={{ backgroundImage: `url(${item.images[0] || 'https://placehold.co/300x800/1e293b/334155'})` }}
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent opacity-0 group-hover/strip:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-start pointer-events-none">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300 truncate">{item.category}</span>
+                  <h3 className="text-lg font-black text-white leading-tight truncate">{item.title}</h3>
+                </div>
               </motion.div>
             )})}
           </motion.div>
@@ -108,23 +164,25 @@ export const BestGameSeriesSection: React.FC<BestGameSeriesSectionProps> = ({ se
       </div>
 
       {totalSeriesPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-6 px-4">
+        <div className="hidden lg:flex items-center justify-center gap-4 mt-6 px-4">
           <button 
             onClick={() => setSeriesPage(p => Math.max(0, p - 1))}
             disabled={seriesPage === 0}
+            aria-label={t('Previous Page')}
             className="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
           >
-            <Icon name="ChevronLeft" size={24} />
+            <Icon name="ChevronLeft" size={24} className="rtl:rotate-180" />
           </button>
-          <div className="text-sm font-bold text-slate-700 dark:text-slate-500 dark:text-slate-400">
+          <div className="text-sm font-bold text-slate-700 dark:text-slate-400">
             {seriesPage + 1} / {totalSeriesPages}
           </div>
           <button 
             onClick={() => setSeriesPage(p => Math.min(totalSeriesPages - 1, p + 1))}
             disabled={seriesPage === totalSeriesPages - 1}
+            aria-label={t('Next Page')}
             className="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
           >
-            <Icon name="ChevronRight" size={24} />
+            <Icon name="ChevronRight" size={24} className="rtl:rotate-180" />
           </button>
         </div>
       )}
@@ -219,20 +277,20 @@ export const BestGameSeriesSection: React.FC<BestGameSeriesSectionProps> = ({ se
                                     {t('PAGE')} {gamePage + 1} {t('OF')} {totalPages}
                                   </div>
                                   <div className="flex gap-2">
-                                    <button 
-                                      onClick={(e) => { e.stopPropagation(); setGamePage(p => Math.max(0, p - 1)); }}
-                                      disabled={gamePage === 0}
-                                      className="p-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 disabled:opacity-30 hover:bg-slate-300 dark:hover:bg-white/10 transition-colors"
-                                    >
-                                      <Icon name="ChevronLeft" size={16} />
-                                    </button>
-                                    <button 
-                                      onClick={(e) => { e.stopPropagation(); setGamePage(p => Math.min(totalPages - 1, p + 1)); }}
-                                      disabled={gamePage === totalPages - 1}
-                                      className="p-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 disabled:opacity-30 hover:bg-slate-300 dark:hover:bg-white/10 transition-colors"
-                                    >
-                                      <Icon name="ChevronRight" size={16} />
-                                    </button>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); setGamePage(p => Math.max(0, p - 1)); }}
+                                        disabled={gamePage === 0}
+                                        className="p-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 disabled:opacity-30 hover:bg-slate-300 dark:hover:bg-white/10 transition-colors"
+                                      >
+                                        <Icon name="ChevronLeft" size={16} className="rtl:rotate-180" />
+                                      </button>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); setGamePage(p => Math.min(totalPages - 1, p + 1)); }}
+                                        disabled={gamePage === totalPages - 1}
+                                        className="p-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 disabled:opacity-30 hover:bg-slate-300 dark:hover:bg-white/10 transition-colors"
+                                      >
+                                        <Icon name="ChevronRight" size={16} className="rtl:rotate-180" />
+                                      </button>
                                   </div>
                                 </div>
                               )}

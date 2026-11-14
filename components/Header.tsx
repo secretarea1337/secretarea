@@ -73,7 +73,7 @@ const DiscoverGameButton = () => {
     <div className="relative group flex items-center justify-center">
       <button
         type="button"
-        className="relative flex items-center justify-center shrink-0 p-1 sm:p-1.5 rounded-full bg-slate-200/90 hover:bg-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700 border border-slate-300 dark:border-white/10 shadow-xs cursor-pointer transition-all duration-300 hover:scale-115 active:scale-90 focus:outline-hidden"
+        className="relative flex items-center justify-center shrink-0 p-0.5 sm:p-1.5 rounded-full bg-slate-200/90 hover:bg-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700 border border-slate-300 dark:border-white/10 shadow-xs cursor-pointer transition-all duration-300 hover:scale-115 active:scale-90 focus:outline-hidden"
         title={t("Discover a random game")}
         aria-label={t("Discover a random game")}
         onClick={handleDiscover}
@@ -117,7 +117,7 @@ const ScrollToLibraryButton = () => {
   return (
     <button
       onClick={handleScrollToLibrary}
-      className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 font-bold text-xs uppercase tracking-wider transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
+      className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 font-bold text-xs uppercase tracking-wider transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
       title={t('SecretArea Library')}
       aria-label={t('SecretArea Library')}
     >
@@ -1133,11 +1133,11 @@ const Header: React.FC = () => {
 
   return (
     <header dir={dir} className="fixed top-0 w-full z-50 bg-white/75 dark:bg-slate-950/75 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 gap-1 sm:gap-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 gap-1.5 sm:gap-2">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0 min-w-0">
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink min-w-0">
             <div className="relative text-slate-900 dark:text-white shrink-0 w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11">
               <div className="relative z-10 flex items-center justify-center w-full h-full">
                  <Icon name="Wolf" className="w-full h-full" />

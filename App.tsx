@@ -1,5 +1,5 @@
 
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useEffect, useRef, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 
@@ -16,33 +16,6 @@ const PersonalFinance = lazy(() => import('./pages/PersonalFinance'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
-
-// Logic to handle initial redirect and scrolling
-const AppBehavior = () => {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-};
-
-// Protected routes logic
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  let isUnlocked =
-    localStorage.getItem('secret_area_unlocked') === 'true' ||
-    localStorage.getItem('secret_area_unlocked') === 'guest' ||
-    localStorage.getItem('nexa_guest_mode') === 'true';
-  if (!isUnlocked) {
-    localStorage.setItem('secret_area_unlocked', 'guest');
-    localStorage.setItem('nexa_guest_mode', 'true');
-    isUnlocked = true;
-  }
-  return <>{children}</>;
-};
 
 const isGameSectionRoute = (pathname: string): boolean => {
   return (
@@ -65,6 +38,45 @@ const isGameSectionRoute = (pathname: string): boolean => {
     pathname.startsWith('/extra/') ||
     pathname === '/extra'
   );
+};
+
+// Logic to handle initial redirect and scrolling
+const AppBehavior = () => {
+  const { pathname } = useLocation();
+  const prevPathnameRef = useRef(pathname);
+
+  // Scroll to top on page-level route changes, preserving scroll when opening/closing game modals
+  useEffect(() => {
+    const prev = prevPathnameRef.current;
+    prevPathnameRef.current = pathname;
+
+    const isIntraDashboardSwitch =
+      prev !== pathname &&
+      isGameSectionRoute(prev) &&
+      isGameSectionRoute(pathname) &&
+      prev !== '/terminal' &&
+      pathname !== '/terminal';
+
+    if (!isIntraDashboardSwitch) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
+
+  return null;
+};
+
+// Protected routes logic
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  let isUnlocked =
+    localStorage.getItem('secret_area_unlocked') === 'true' ||
+    localStorage.getItem('secret_area_unlocked') === 'guest' ||
+    localStorage.getItem('nexa_guest_mode') === 'true';
+  if (!isUnlocked) {
+    localStorage.setItem('secret_area_unlocked', 'guest');
+    localStorage.setItem('nexa_guest_mode', 'true');
+    isUnlocked = true;
+  }
+  return <>{children}</>;
 };
 
 const MainContent = () => {

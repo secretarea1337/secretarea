@@ -531,38 +531,38 @@ export const PartnersSection: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-8 px-1">
           <div className="space-y-2">
             {/* Top Pill Status Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
-              <span className="relative flex h-2 w-2">
+            <div className="inline-flex flex-wrap items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300">
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300">
                 {t('Network Status: Operational')}
               </span>
               <span className="text-slate-300 dark:text-slate-700">|</span>
-              <span className="text-[11px] font-mono font-bold text-cyan-600 dark:text-cyan-400">
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-cyan-600 dark:text-cyan-400">
                 10 {t('Active Partners')}
               </span>
             </div>
 
             {/* Main Title */}
-            <div className="flex items-center gap-3">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight italic">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight italic">
                 {t('Official Partners')}
               </h2>
-              <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                <ShieldCheck size={26} className="rtl:rotate-0" />
+              <div className="p-1.5 sm:p-2 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                <ShieldCheck size={22} className="sm:w-[26px] sm:h-[26px] rtl:rotate-0" />
               </div>
             </div>
 
-            <p className="text-slate-600 dark:text-slate-300 text-sm md:text-base max-w-2xl font-medium leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm md:text-base max-w-2xl font-medium leading-relaxed">
               {t('Access verified repacks, direct cloud archives, developer suites, and clean torrent indexes.')}
             </p>
           </div>
 
           {/* Search bar & Live animation label */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <div className="relative min-w-[240px]">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+            <div className="relative w-full sm:min-w-[240px] sm:w-auto">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                 type="text"
@@ -573,7 +573,7 @@ export const PartnersSection: React.FC = () => {
               />
             </div>
 
-            <div className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl backdrop-blur-md bg-white/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800/80 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl backdrop-blur-md bg-white/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800/80 text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
               <Activity size={14} className="text-emerald-500 animate-pulse" />
               <span>{t('Auto-scrolling ticker active')}</span>
             </div>
@@ -581,11 +581,11 @@ export const PartnersSection: React.FC = () => {
         </div>
 
         {/* --- AUTOMATIC ANIMATION: INFINITE GLASS MARQUEE TICKER --- */}
-        <div className="w-full relative overflow-hidden py-3 mb-8 rounded-2xl sm:rounded-3xl backdrop-blur-2xl bg-gradient-to-r from-slate-200/40 via-white/50 to-slate-200/40 dark:from-slate-900/50 dark:via-slate-950/70 dark:to-slate-900/50 border border-slate-200/80 dark:border-slate-800/80 shadow-inner group">
+        <div className="w-full relative overflow-hidden py-2.5 sm:py-3 mb-6 sm:mb-8 rounded-2xl sm:rounded-3xl backdrop-blur-2xl bg-gradient-to-r from-slate-200/40 via-white/50 to-slate-200/40 dark:from-slate-900/50 dark:via-slate-950/70 dark:to-slate-900/50 border border-slate-200/80 dark:border-slate-800/80 shadow-inner group">
           
           {/* Glass Fade Edges */}
-          <div className="pointer-events-none absolute inset-y-0 start-0 w-12 sm:w-20 bg-gradient-to-r from-gray-50 dark:from-slate-950 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 end-0 w-12 sm:w-20 bg-gradient-to-l from-gray-50 dark:from-slate-950 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 start-0 w-6 sm:w-14 md:w-20 bg-gradient-to-r from-gray-50 dark:from-slate-950 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 end-0 w-6 sm:w-14 md:w-20 bg-gradient-to-l from-gray-50 dark:from-slate-950 to-transparent z-10" />
 
           {/* Marquee Track with Pause-on-Hover */}
           <div className={`flex items-center gap-4 pause-on-hover ${dir === 'rtl' ? 'animate-partner-marquee-rtl' : 'animate-partner-marquee-ltr'}`}>
@@ -651,7 +651,7 @@ export const PartnersSection: React.FC = () => {
                   {PARTNERS_DATA.length} {t('Verified Sources')}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium line-clamp-2 sm:truncate">
                 {showCards ? t('Click to collapse partner cards') : t('Click to expand grid & filter categories')}
               </p>
             </div>
@@ -709,7 +709,7 @@ export const PartnersSection: React.FC = () => {
               </div>
 
               {/* --- RESPONSIVE PARTNERS GRID --- */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-5">
                 <AnimatePresence mode="popLayout">
                   {filteredPartners.map((partner) => {
                     const borderGlow = partner.themeColor.border;

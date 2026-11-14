@@ -100,6 +100,31 @@ const TIKTOK_LINK = 'https://www.tiktok.com/@secretarea1337';
 const YOUTUBE_LINK = 'https://www.youtube.com/@SecretArea1337';
 const ITEMS_PER_PAGE = 12; // Show 12 items per page for laptop grid (4x3)
 
+const getCategoryPathPrefix = (category?: string): string => {
+  const cat = (category || '').toLowerCase();
+  if (cat === 'ps5' || cat === 'playstation') return 'ps5';
+  if (cat === 'hypervisor') return 'hypervisor';
+  if (cat === 'steamtools') return 'steamtools';
+  if (cat === 'architect' || cat === 'tools') return 'tools';
+  if (cat === 'extra' || cat === 'savegame') return 'savegame';
+  return 'game';
+};
+
+const slugifyGameTitle = (name?: string, fallbackId?: string): string => {
+  const raw = (name || '').trim();
+  if (!raw) {
+    return encodeURIComponent((fallbackId || 'item').trim());
+  }
+  const normalized = raw
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/['’`]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06ff]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return normalized || encodeURIComponent((fallbackId || 'item').trim());
+};
+
 // --- ADVERTISEMENT CONFIGURATION ---
 const AD_CONFIG = {
   banner1: {
@@ -2296,42 +2321,42 @@ const AboutSecretAreaSection: React.FC = () => {
     const { dir, t } = useLanguage();
     
     return (
-        <div className="w-full relative mt-6 mb-16 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl dark:shadow-2xl transition-colors duration-300">
+        <div className="w-full relative mt-4 sm:mt-6 mb-10 sm:mb-16 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl dark:shadow-2xl transition-colors duration-300">
             {/* Background Base */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-white via-slate-50 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/20 transition-colors duration-300"></div>
-                <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl"></div>
+                <div className="absolute -top-24 -left-24 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/10 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-blue-900/10 dark:from-blue-900/20 via-transparent to-transparent opacity-50"></div>
             </div>
 
-            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-8 sm:p-12 lg:p-16 gap-12" dir={dir}>
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-5 sm:p-8 md:p-12 lg:p-16 gap-8 lg:gap-12" dir={dir}>
                 {/* Left Side: Content */}
-                <div className="w-full lg:w-1/2 flex flex-col text-start space-y-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest w-max mb-2 transition-colors duration-300">
+                <div className="w-full lg:w-1/2 flex flex-col text-start space-y-4 sm:space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[11px] sm:text-xs font-bold uppercase tracking-widest w-max mb-1 transition-colors duration-300">
                         <Icon name="Info" size={14} />
                         <span>{t("What's SecretArea?")}</span>
                     </div>
                     
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
+                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
                         {t('The idea behind')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">{t('SecretArea')}</span>
                     </h2>
                     
-                    <div className="space-y-4 text-sm sm:text-base text-black dark:text-white font-medium leading-relaxed transition-colors duration-300">
+                    <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-black dark:text-white font-medium leading-relaxed transition-colors duration-300">
                         <p>{t('SecretArea is all about bringing together the best and most popular games in one place — not every game, but only the ones that are worth your time and are actually good.')}</p>
                         <p>{t('We focus on games from trusted sources, with no annoying ads and no viruses. We’re also gamers ourselves, and we created SecretArea because we used to spend too much time searching for good games instead of actually playing them.')}</p>
                         <p>{t('Our goal is simple: bring the best games together in one place, so you can spend less time searching and more time playing.')}</p>
                     </div>
 
                     {/* Progress Bars */}
-                    <div className="mt-6 space-y-4 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/50 backdrop-blur-sm transition-colors duration-300">
+                    <div className="mt-4 sm:mt-6 space-y-3.5 sm:space-y-4 bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800/50 backdrop-blur-sm transition-colors duration-300">
                         {/* FitGirl */}
                         <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
-                                <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                                    <img src="https://fitgirl-repacks.site/wp-content/uploads/2016/08/icon.jpg" alt="FitGirl" className="w-4 h-4 rounded-sm object-contain" />
-                                    <span>Fitgirl Repack <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File + Parts File') || 'Utorrent File + Parts File'})</span></span>
+                            <div className="flex justify-between items-start sm:items-center gap-2 text-xs font-bold tracking-wide">
+                                <span className="flex items-start sm:items-center gap-2 text-emerald-600 dark:text-emerald-400 min-w-0">
+                                    <img src="https://fitgirl-repacks.site/wp-content/uploads/2016/08/icon.jpg" alt="FitGirl" className="w-4 h-4 rounded-sm object-contain shrink-0 mt-0.5 sm:mt-0" />
+                                    <span className="flex flex-wrap items-baseline gap-x-1.5 leading-snug">Fitgirl Repack <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File + Parts File') || 'Utorrent File + Parts File'})</span></span>
                                 </span>
-                                <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">100%</span>
+                                <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 shrink-0">100%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
                                 <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards]" style={{ '--target-width': '100%', width: '100%' } as React.CSSProperties}></div>
@@ -2340,12 +2365,12 @@ const AboutSecretAreaSection: React.FC = () => {
 
                         {/* Dodi Repacks */}
                         <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
-                                <span className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                                    <img src="https://avatars.githubusercontent.com/u/214397634?s=200&v=4" alt="DODI" className="w-4 h-4 rounded-sm object-contain" />
-                                    <span>Dodi Repacks <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
+                            <div className="flex justify-between items-start sm:items-center gap-2 text-xs font-bold tracking-wide">
+                                <span className="flex items-start sm:items-center gap-2 text-indigo-600 dark:text-indigo-400 min-w-0">
+                                    <img src="https://avatars.githubusercontent.com/u/214397634?s=200&v=4" alt="DODI" className="w-4 h-4 rounded-sm object-contain shrink-0 mt-0.5 sm:mt-0" />
+                                    <span className="flex flex-wrap items-baseline gap-x-1.5 leading-snug">Dodi Repacks <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
                                 </span>
-                                <span className="font-mono font-black text-indigo-600 dark:text-indigo-400">40%</span>
+                                <span className="font-mono font-black text-indigo-600 dark:text-indigo-400 shrink-0">40%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
                                 <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.2s]" style={{ '--target-width': '40%', width: '40%' } as React.CSSProperties}></div>
@@ -2354,12 +2379,12 @@ const AboutSecretAreaSection: React.FC = () => {
 
                         {/* SteamRIP */}
                         <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
-                                <span className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
-                                    <img src="https://consumersiteimages.trustpilot.net/business-units/612663f3a458ff001df5503b-198x149-1x.jpg" alt="SteamRIP" className="w-4 h-4 rounded-sm object-contain" />
-                                    <span>SteamRIP <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
+                            <div className="flex justify-between items-start sm:items-center gap-2 text-xs font-bold tracking-wide">
+                                <span className="flex items-start sm:items-center gap-2 text-sky-600 dark:text-sky-400 min-w-0">
+                                    <img src="https://consumersiteimages.trustpilot.net/business-units/612663f3a458ff001df5503b-198x149-1x.jpg" alt="SteamRIP" className="w-4 h-4 rounded-sm object-contain shrink-0 mt-0.5 sm:mt-0" />
+                                    <span className="flex flex-wrap items-baseline gap-x-1.5 leading-snug">SteamRIP <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
                                 </span>
-                                <span className="font-mono font-black text-sky-600 dark:text-sky-400">15%</span>
+                                <span className="font-mono font-black text-sky-600 dark:text-sky-400 shrink-0">15%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
                                 <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.3s]" style={{ '--target-width': '15%', width: '15%' } as React.CSSProperties}></div>
@@ -2368,12 +2393,12 @@ const AboutSecretAreaSection: React.FC = () => {
 
                         {/* Skidrow */}
                         <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
-                                <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                                    <img src="https://art.pixilart.com/50c0d16b052ad81.gif" alt="Skidrow" className="w-4 h-4 rounded-sm object-contain" />
-                                    <span>Skidrow <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
+                            <div className="flex justify-between items-start sm:items-center gap-2 text-xs font-bold tracking-wide">
+                                <span className="flex items-start sm:items-center gap-2 text-amber-600 dark:text-amber-400 min-w-0">
+                                    <img src="https://art.pixilart.com/50c0d16b052ad81.gif" alt="Skidrow" className="w-4 h-4 rounded-sm object-contain shrink-0 mt-0.5 sm:mt-0" />
+                                    <span className="flex flex-wrap items-baseline gap-x-1.5 leading-snug">Skidrow <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400">({t('Utorrent File') || 'Utorrent File'})</span></span>
                                 </span>
-                                <span className="font-mono font-black text-amber-600 dark:text-amber-400">40%</span>
+                                <span className="font-mono font-black text-amber-600 dark:text-amber-400 shrink-0">40%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
                                 <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full w-0 animate-[fillProgress_1.5s_ease-out_forwards_0.4s]" style={{ '--target-width': '40%', width: '40%' } as React.CSSProperties}></div>
@@ -2382,12 +2407,12 @@ const AboutSecretAreaSection: React.FC = () => {
 
                         {/* Ankergames */}
                         <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
-                                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYdQ_DlScM7nLh2AxH9ds27fTftrY9Jz1WhjBthb514jeSHnu2W6lT0Oo&s=10" alt="Ankergames" className="w-4 h-4 rounded-sm object-contain opacity-70" />
+                            <div className="flex justify-between items-center gap-2 text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400 min-w-0">
+                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYdQ_DlScM7nLh2AxH9ds27fTftrY9Jz1WhjBthb514jeSHnu2W6lT0Oo&s=10" alt="Ankergames" className="w-4 h-4 rounded-sm object-contain opacity-70 shrink-0" />
                                     <span>Ankergames</span>
                                 </span>
-                                <span className="font-mono font-bold text-slate-400 dark:text-slate-500">0%</span>
+                                <span className="font-mono font-bold text-slate-400 dark:text-slate-500 shrink-0">0%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
                                 <div className="h-full bg-slate-400/50 rounded-full w-0" style={{ width: '0%' }}></div>
@@ -2396,12 +2421,12 @@ const AboutSecretAreaSection: React.FC = () => {
 
                         {/* Steamunlocked */}
                         <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-xs font-bold tracking-wide">
-                                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                                    <img src="https://dka575ofm4ao0.cloudfront.net/pages-transactional_logos/retina/802345/unnamed-b4a32b8b-803c-454f-a411-5a9c33494c3c.jpg" alt="Steamunlocked" className="w-4 h-4 rounded-sm object-contain opacity-70" />
+                            <div className="flex justify-between items-center gap-2 text-xs font-bold tracking-wide">
+                                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400 min-w-0">
+                                    <img src="https://dka575ofm4ao0.cloudfront.net/pages-transactional_logos/retina/802345/unnamed-b4a32b8b-803c-454f-a411-5a9c33494c3c.jpg" alt="Steamunlocked" className="w-4 h-4 rounded-sm object-contain opacity-70 shrink-0" />
                                     <span>Steamunlocked</span>
                                 </span>
-                                <span className="font-mono font-bold text-slate-400 dark:text-slate-500">0%</span>
+                                <span className="font-mono font-bold text-slate-400 dark:text-slate-500 shrink-0">0%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden transition-colors duration-300">
                                 <div className="h-full bg-slate-400/50 rounded-full w-0" style={{ width: '0%' }}></div>
@@ -2409,7 +2434,7 @@ const AboutSecretAreaSection: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-2 sm:pt-4">
                         <button 
                             onClick={() => {
                                 const el = document.getElementById('popular-repacks-section');
@@ -2418,7 +2443,7 @@ const AboutSecretAreaSection: React.FC = () => {
                                     window.scrollTo({ top: y, behavior: 'smooth' });
                                 }
                             }}
-                            className="px-6 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black text-sm uppercase tracking-widest rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-3 w-full sm:w-auto justify-center"
+                            className="px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black text-xs sm:text-sm uppercase tracking-widest rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-center"
                         >
                             <Icon name="TrendingUp" size={18} />
                             {t('Most popular repacks')}
@@ -2431,8 +2456,7 @@ const AboutSecretAreaSection: React.FC = () => {
                     <img 
                         src="/images/banner 03.png" 
                         alt="SecretArea Idea" 
-                        className="w-full h-auto object-contain max-h-[500px] lg:max-h-[800px] drop-shadow-2xl hover:scale-105 transition-transform duration-700 ease-out"
-                        style={{ maxWidth: '1530px' }}
+                        className="w-full h-auto object-contain max-h-[260px] sm:max-h-[380px] md:max-h-[460px] lg:max-h-[650px] drop-shadow-2xl hover:scale-105 transition-transform duration-700 ease-out"
                     />
                 </div>
             </div>
@@ -4365,12 +4389,9 @@ export const ResourceDetailModal: React.FC<{
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         {(() => {
-          const secSlug = item.category === 'ps5' ? 'ps5' :
-                          item.category === 'hypervisor' ? 'hypervisor' :
-                          item.category === 'steamtools' ? 'steamtools' :
-                          item.category === 'architect' ? 'tools' :
-                          item.category === 'extra' ? 'savegame' : 'game';
-          const itemUrl = `https://nexa1337.com/${secSlug}/${encodeURIComponent(item.id)}`;
+          const secSlug = getCategoryPathPrefix(item.category);
+          const itemSlug = slugifyGameTitle(item.name, item.id);
+          const itemUrl = `https://nexa1337.com/${secSlug}/${encodeURIComponent(itemSlug)}`;
           return (
             <>
               <link rel="canonical" href={itemUrl} />
@@ -6208,8 +6229,8 @@ const GameOfTheDaySection: React.FC<{
                 <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r md:from-white md:via-white/90 dark:md:from-[#0a111a] dark:md:via-[#0a111a]/90 from-white/80 via-white/80 dark:from-[#0a111a]/80 dark:via-[#0a111a]/80 to-transparent"></div>
             </div>
 
-            <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row gap-8 lg:gap-12 w-full items-center md:items-start">
-                <div className="shrink-0 w-48 sm:w-56 md:w-64 flex flex-col items-center">
+            <div className="relative z-10 p-5 sm:p-6 md:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 lg:gap-12 w-full items-center md:items-start">
+                <div className="shrink-0 w-44 sm:w-56 md:w-64 flex flex-col items-center">
                     <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden cursor-pointer shadow-[0_0_20px_rgba(30,161,215,0.1)]" onClick={() => onSelect(game)}>
                         <div className="absolute top-0 start-0 w-4 h-4 border-t-2 border-s-2 border-[#1ea1d7] z-20"></div>
                         <div className="absolute top-0 end-0 w-4 h-4 border-t-2 border-e-2 border-[#1ea1d7] z-20"></div>
@@ -6229,7 +6250,7 @@ const GameOfTheDaySection: React.FC<{
                         )}
                     </div>
 
-                    <div className="flex justify-between w-full px-4 sm:px-6 mt-6 text-center">
+                    <div className="flex justify-between w-full px-4 sm:px-6 mt-4 sm:mt-6 text-center">
                         <div>
                             <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">{getFakeDownloads(game.id)}</div>
                             <div className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-wider mt-1 uppercase">{t('DOWNLOADS')}</div>
@@ -6241,9 +6262,9 @@ const GameOfTheDaySection: React.FC<{
                     </div>
                 </div>
 
-                <div className="flex-1 flex flex-col mt-4 md:mt-0 items-center md:items-start text-center md:text-start">
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 sm:gap-4 mb-4">
-                        <span className="bg-[#1ea1d7] text-white text-[10px] sm:text-[11px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded uppercase tracking-wider">{t('GAME OF THE DAY')}</span>
+                <div className="flex-1 flex flex-col mt-2 md:mt-0 items-center md:items-start text-center md:text-start">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-4 mb-3 sm:mb-4">
+                        <span className="bg-[#1ea1d7] text-white text-[10px] sm:text-[11px] font-black px-2.5 sm:px-3 py-1 sm:py-1.5 rounded uppercase tracking-wider">{t('GAME OF THE DAY')}</span>
                         {game.category?.toLowerCase() === 'hypervisor' && (
                             <span className="bg-purple-100 dark:bg-purple-500/20 border border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400 text-[10px] sm:text-[11px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded uppercase tracking-wider">
                                 {t('HYPERVISOR')}
@@ -6258,9 +6279,9 @@ const GameOfTheDaySection: React.FC<{
                         )}
                     </div>
 
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">{game.name}</h2>
+                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">{game.name}</h2>
                     
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium flex-wrap justify-center md:justify-start">
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-5 sm:mb-6 font-medium flex-wrap justify-center md:justify-start">
                         <span className="bg-slate-200 dark:bg-slate-800/80 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-slate-300 dark:border-slate-700/50">PC</span>
                         <span className="bg-slate-200 dark:bg-slate-800/80 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-slate-300 dark:border-slate-700/50">2026</span>
                         {game.developer && (
@@ -6285,11 +6306,11 @@ const GameOfTheDaySection: React.FC<{
                         <span>{game.genres?.split(',').slice(0, 3).join(', ')}</span>
                     </div>
 
-                    <p className="text-slate-700 dark:text-slate-300 text-sm md:text-[15px] leading-relaxed line-clamp-3 mb-6 sm:mb-8 max-w-2xl">
+                    <p className="text-slate-700 dark:text-slate-300 text-sm md:text-[15px] leading-relaxed line-clamp-3 mb-5 sm:mb-8 max-w-2xl">
                         {game.description}
                     </p>
 
-                    <div className="flex items-center gap-6 sm:gap-8 mb-6 sm:mb-8 text-xs sm:text-sm border-b border-slate-200 dark:border-slate-800/60 pb-6 w-full max-w-xl justify-center md:justify-start">
+                    <div className="flex flex-wrap items-center gap-5 sm:gap-8 mb-5 sm:mb-8 text-xs sm:text-sm border-b border-slate-200 dark:border-slate-800/60 pb-5 sm:pb-6 w-full max-w-xl justify-center md:justify-start">
                         <div><span className="text-slate-900 dark:text-white font-bold">{game.repackSize}</span> <span className="text-slate-500 mis-1">{t('size')}</span></div>
                         <div><span className="text-slate-900 dark:text-white font-bold">{getFakeDownloads(game.id)}</span> <span className="text-slate-500 mis-1">{t('views')}</span></div>
                         <div><span className="text-slate-900 dark:text-white font-bold">4.1</span> <span className="text-slate-500 mis-1">{t('score')}</span></div>
@@ -6297,7 +6318,7 @@ const GameOfTheDaySection: React.FC<{
 
                     <button 
                         onClick={() => onSelect(game)}
-                        className="bg-primary-500 text-white dark:bg-white dark:text-slate-900 font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-md flex items-center gap-2 hover:bg-primary-600 dark:hover:bg-slate-200 transition-colors w-fit"
+                        className="bg-primary-500 text-white dark:bg-white dark:text-slate-900 font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-md flex items-center justify-center gap-2 hover:bg-primary-600 dark:hover:bg-slate-200 transition-colors w-full sm:w-fit"
                     >
                         {t('View Details')}
                         <Icon name="ArrowRight" size={16} className="rtl:rotate-180" />
@@ -6314,7 +6335,7 @@ const SupportUsBanner: React.FC = () => {
     const [isDonateOpen, setIsDonateOpen] = useState(false);
 
     return (
-        <div className="mt-12 bg-white dark:bg-slate-950 rounded-3xl p-6 sm:p-10 lg:p-14 relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800 transition-colors duration-300">
+        <div className="mt-10 sm:mt-12 bg-white dark:bg-slate-950 rounded-2xl sm:rounded-3xl p-5 sm:p-10 lg:p-14 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800 transition-colors duration-300">
             {/* Background styling */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white to-slate-50 dark:from-indigo-900/40 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300"></div>
@@ -6322,12 +6343,12 @@ const SupportUsBanner: React.FC = () => {
             </div>
 
             {/* Left Side Content */}
-            <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-start mb-10 md:mb-0 space-y-5" dir={dir}>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 transition-colors duration-300">
+            <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-start space-y-4 sm:space-y-5" dir={dir}>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[11px] sm:text-xs font-bold uppercase tracking-widest mb-1 transition-colors duration-300">
                     <Icon name="Heart" size={14} className="animate-pulse" />
                     <span>{t('Support The Community')}</span>
                 </div>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
                     {t('Keep Us')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{t('Alive')}</span>
                 </h2>
                 <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 max-w-md font-medium leading-relaxed transition-colors duration-300">
@@ -6335,7 +6356,7 @@ const SupportUsBanner: React.FC = () => {
                 </p>
                 <button 
                     onClick={() => setIsDonateOpen(true)}
-                    className="mt-6 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-[0_0_30px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
+                    className="mt-2 sm:mt-4 w-full sm:w-auto justify-center px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs sm:text-sm uppercase tracking-widest rounded-2xl shadow-[0_0_30px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
                 >
                     <Icon name="Heart" size={20} className="fill-current" />
                     {t('Support Us')}
@@ -6347,8 +6368,7 @@ const SupportUsBanner: React.FC = () => {
                 <img 
                     src="/images/support_logo.png" 
                     alt="Support Logo" 
-                    className="w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" 
-                    style={{ maxWidth: '1024px', maxHeight: '500px' }}
+                    className="w-full h-auto max-h-[240px] sm:max-h-[360px] md:max-h-[460px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                 />
             </div>
 
@@ -6403,7 +6423,7 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
                 </div>
             )}
             {/* Header / Title Style */}
-            <div dir={dir} className="relative z-10 flex flex-col items-center justify-center py-16 px-4">
+            <div dir={dir} className="relative z-10 flex flex-col items-center justify-center py-10 sm:py-16 px-4">
                 <div 
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 dark:opacity-40 mix-blend-luminosity"
                     style={{ backgroundImage: `url('https://e1.pxfuel.com/desktop-wallpaper/123/929/desktop-wallpaper-we-loved-them-all-games-collage.jpg')` }}
@@ -6412,30 +6432,30 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
                 
                 <div className="relative z-20 text-center flex flex-col items-center">
                     <h2 className="flex flex-col md:flex-row items-center justify-center font-black tracking-tighter leading-none transition-colors duration-300">
-                        <span className="text-8xl md:text-[11rem] xl:text-[13rem] text-slate-900 dark:text-slate-100 font-['Anton'] md:pe-6 rtl:md:ps-6 leading-none">
+                        <span className="text-6xl sm:text-8xl md:text-[11rem] xl:text-[13rem] text-slate-900 dark:text-slate-100 font-['Anton'] md:pe-6 rtl:md:ps-6 leading-none">
                             {displayGames.length}
                         </span>
                         <div className="flex flex-col items-center md:items-start md:mt-2">
-                            <span className="text-5xl md:text-7xl xl:text-[6.5rem] font-['Bebas_Neue'] uppercase leading-[0.8] tracking-widest text-[#0b1b3d] dark:text-[#c4d4e2]">
+                            <span className="text-4xl sm:text-5xl md:text-7xl xl:text-[6.5rem] font-['Bebas_Neue'] uppercase leading-[0.85] tracking-widest text-[#0b1b3d] dark:text-[#c4d4e2]">
                                 {t('OPEN WORLD')}
                             </span>
-                            <span className="text-[5rem] md:text-[8rem] xl:text-[10rem] font-['Permanent_Marker'] md:-ms-2 rtl:md:-me-2 text-transparent bg-clip-text bg-gradient-to-br from-red-600 via-red-500 to-orange-600 leading-[0.8] -mt-2 md:-mt-6 text-stroke-2 text-stroke-white dark:text-stroke-black" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.1)' }}>
+                            <span className="text-5xl sm:text-[5rem] md:text-[8rem] xl:text-[10rem] font-['Permanent_Marker'] md:-ms-2 rtl:md:-me-2 text-transparent bg-clip-text bg-gradient-to-br from-red-600 via-red-500 to-orange-600 leading-[0.85] -mt-1 md:-mt-6 text-stroke-2 text-stroke-white dark:text-stroke-black" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.1)' }}>
                                 {t('GAMES')}
                             </span>
                         </div>
                     </h2>
-                    <div className="mt-4 md:mt-6 flex items-center gap-4 text-slate-800 dark:text-slate-200 font-['Inter'] font-black tracking-[0.3em] text-lg md:text-2xl uppercase transition-colors duration-300">
-                        <span className="h-[2px] w-12 md:w-24 bg-slate-800 dark:bg-slate-200 transition-colors duration-300 opacity-50"></span>
+                    <div className="mt-4 md:mt-6 flex items-center gap-3 sm:gap-4 text-slate-800 dark:text-slate-200 font-['Inter'] font-black tracking-[0.2em] sm:tracking-[0.3em] text-sm sm:text-lg md:text-2xl uppercase transition-colors duration-300">
+                        <span className="h-[2px] w-8 sm:w-12 md:w-24 bg-slate-800 dark:bg-slate-200 transition-colors duration-300 opacity-50"></span>
                         {t('YOU MUST PLAY')}
-                        <span className="h-[2px] w-12 md:w-24 bg-slate-800 dark:bg-slate-200 transition-colors duration-300 opacity-50"></span>
+                        <span className="h-[2px] w-8 sm:w-12 md:w-24 bg-slate-800 dark:bg-slate-200 transition-colors duration-300 opacity-50"></span>
                     </div>
-                    <p className="mt-4 text-[9px] md:text-xs text-slate-600 dark:text-slate-400 font-bold tracking-[0.25em] uppercase transition-colors duration-300">
+                    <p className="mt-3 sm:mt-4 text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 font-bold tracking-[0.18em] sm:tracking-[0.25em] uppercase transition-colors duration-300">
                         {t('From Fantasy Kingdoms to Chaotic Cities')}
                     </p>
                 </div>
             </div>
 
-            <div className="flex flex-col relative z-10 max-w-7xl mx-auto w-full px-4 mb-10">
+            <div className="flex flex-col relative z-10 max-w-7xl mx-auto w-full px-3 sm:px-4 mb-8 sm:mb-10">
                 <AnimatePresence mode="wait">
                     <motion.div 
                         key={currentPage}
@@ -6454,22 +6474,22 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
                             const c1 = neonColors[idx % neonColors.length];
                             
                             return (
-                                <div key={`${game.id}-${idx}`} className="relative group flex items-stretch border-b border-slate-300 dark:border-white/10 last:border-b-0 overflow-hidden min-h-[90px] sm:min-h-[110px] md:min-h-[130px] transition-all hover:brightness-105 dark:hover:brightness-125 bg-white sm:bg-transparent dark:bg-black/60 dark:md:backdrop-blur-md">
+                                <div key={`${game.id}-${idx}`} className="relative group flex items-stretch border-b border-slate-300 dark:border-white/10 last:border-b-0 overflow-hidden min-h-[82px] sm:min-h-[110px] md:min-h-[130px] transition-all hover:brightness-105 dark:hover:brightness-125 bg-white sm:bg-transparent dark:bg-black/60 dark:md:backdrop-blur-md">
                                     {/* Number Box on the left */}
-                                    <div className="w-[70px] md:w-[120px] shrink-0 flex items-center justify-center bg-slate-100 dark:bg-[#050505] relative z-20 border-e border-slate-300 dark:border-white/5 shadow-none dark:shadow-[5px_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300">
+                                    <div className="w-[56px] sm:w-[70px] md:w-[120px] shrink-0 flex items-center justify-center bg-slate-100 dark:bg-[#050505] relative z-20 border-e border-slate-300 dark:border-white/5 shadow-none dark:shadow-[5px_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300">
                                         <span 
                                             style={{ 
                                                 textShadow: `0 0 10px ${c1}66`,
                                                 color: c1
                                             }}
-                                            className="font-['Anton'] italic text-4xl md:text-6xl drop-shadow-md brightness-90 dark:brightness-125"
+                                            className="font-['Anton'] italic text-2xl sm:text-4xl md:text-6xl drop-shadow-md brightness-90 dark:brightness-125"
                                         >
                                             {rankNum}
                                         </span>
                                     </div>
                                     
                                     {/* Content Area with Banner Background */}
-                                    <div className="flex-1 relative flex items-center px-4 md:px-8 py-2 overflow-hidden bg-slate-200 dark:bg-slate-900 transition-colors duration-300">
+                                    <div className="flex-1 relative flex items-center px-3 sm:px-4 md:px-8 py-2 overflow-hidden bg-slate-200 dark:bg-slate-900 transition-colors duration-300 min-w-0">
                                         {/* Banner Background */}
                                         <div 
                                             className="absolute inset-0 bg-cover bg-[center_30%] transition-transform duration-[20s] group-hover:scale-110 opacity-80 dark:opacity-100"
@@ -6481,13 +6501,13 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
                                         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-black/90 hidden dark:block"></div>
                                         
                                         {/* Logo / Title Area */}
-                                        <div className="relative z-10 flex-1 flex items-center justify-start h-full">
+                                        <div className="relative z-10 flex-1 flex items-center justify-start h-full min-w-0">
                                             {game.logoUrl ? (
-                                                <div className="flex items-center justify-start w-[140px] sm:w-[220px] md:w-[350px] h-12 md:h-20 flex-shrink-0">
+                                                <div className="flex items-center justify-start w-[120px] sm:w-[220px] md:w-[350px] h-10 sm:h-12 md:h-20 flex-shrink-0">
                                                     <img src={game.logoUrl} alt={game.name} className="max-w-full max-h-full object-contain object-left drop-shadow-[0_2px_5px_rgba(0,0,0,0.2)] dark:drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)] transition-transform duration-300 group-hover:scale-105"  loading="lazy" />
                                                 </div>
                                             ) : (
-                                                <h3 className="font-black italic text-xl md:text-4xl text-slate-900 dark:text-white tracking-tight uppercase drop-shadow-[0_2px_5px_rgba(255,255,255,1)] dark:drop-shadow-[0_5px_15px_rgba(0,0,0,1)] transition-colors duration-300">
+                                                <h3 className="font-black italic text-base sm:text-xl md:text-4xl text-slate-900 dark:text-white tracking-tight uppercase drop-shadow-[0_2px_5px_rgba(255,255,255,1)] dark:drop-shadow-[0_5px_15px_rgba(0,0,0,1)] transition-colors duration-300 truncate">
                                                     {game.name}
                                                 </h3>
                                             )}
@@ -6495,7 +6515,7 @@ const TopGamesSection: React.FC<{ games: TopGame[] }> = ({ games }) => {
 
                                         {/* Symbol on the right */}
                                         {game.symbolUrl && (
-                                            <div className="relative z-10 shrink-0 ms-4 flex items-center justify-end w-[40px] md:w-[80px] h-10 md:h-20 me-2">
+                                            <div className="relative z-10 shrink-0 ms-3 sm:ms-4 flex items-center justify-end w-[36px] sm:w-[44px] md:w-[80px] h-9 sm:h-10 md:h-20 me-1 sm:me-2">
                                                 <img src={game.symbolUrl} alt="Symbol" className="max-w-full max-h-full object-contain object-right opacity-90 group-hover:opacity-100 transition-all duration-300 drop-shadow-md"  loading="lazy" />
                                             </div>
                                         )}
@@ -6968,22 +6988,42 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [selectedResourceAction, setSelectedResourceAction] = useState<string | undefined>(undefined);
 
   const routerLocation = useLocation();
+  const routerLocationRef = useRef(routerLocation);
+  routerLocationRef.current = routerLocation;
+
+  const openResourceDetail = (item: ResourceItem, action?: string, options?: { replace?: boolean }) => {
+    setSelectedResource(item);
+    setSelectedResourceAction(action);
+    const secSlug = getCategoryPathPrefix(item.category);
+    const titleSlug = slugifyGameTitle(item.name, item.id);
+    const targetPath = `/${secSlug}/${titleSlug}`;
+    const currentLoc = routerLocationRef.current;
+    const currentDecodedPath = (() => {
+      try {
+        return decodeURIComponent(currentLoc.pathname);
+      } catch {
+        return currentLoc.pathname;
+      }
+    })();
+    if (currentDecodedPath !== targetPath || currentLoc.search) {
+      navigate(targetPath, { replace: options?.replace ?? false });
+    }
+  };
 
   const handleCloseDetailModal = () => {
     setSelectedResource(null);
     setSelectedResourceAction(undefined);
     setOpenedViaRandom(false);
-    const p = routerLocation.pathname;
-    if (
-      p.startsWith('/game/') ||
-      p.startsWith('/hypervisor/') ||
-      p.startsWith('/steamtools/') ||
-      p.startsWith('/ps5/') ||
-      p.startsWith('/tools/') ||
-      p.startsWith('/architect/') ||
-      p.startsWith('/savegame/') ||
-      p.startsWith('/extra/')
-    ) {
+    const isDetailPath = (path: string) =>
+      path.startsWith('/game/') ||
+      path.startsWith('/hypervisor/') ||
+      path.startsWith('/steamtools/') ||
+      path.startsWith('/ps5/') ||
+      path.startsWith('/tools/') ||
+      path.startsWith('/architect/') ||
+      path.startsWith('/savegame/') ||
+      path.startsWith('/extra/');
+    if (isDetailPath(routerLocation.pathname) || isDetailPath(window.location.pathname)) {
       navigate('/', { replace: true });
     } else if (new URLSearchParams(window.location.search).get('item')) {
       const url = new URL(window.location.href);
@@ -6995,30 +7035,46 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   useEffect(() => {
     // If there's a state passed via history or router state
     const stateOpenId = (routerLocation.state as any)?.openGameId || window.history.state?.usr?.openGameId;
-    const searchParamId = new URLSearchParams(window.location.search).get('item');
-    const pathSectionMatch = routerLocation.pathname.match(/^\/(?:game|hypervisor|steamtools|ps5|tools|architect|savegame|extra)\/(.+)/i);
+    const searchParamId = new URLSearchParams(routerLocation.search || window.location.search).get('item');
+    const pathSectionMatch = routerLocation.pathname.match(/^\/(game|hypervisor|steamtools|ps5|tools|architect|savegame|extra)\/(.+)/i);
+    const sectionFromPath = pathSectionMatch ? pathSectionMatch[1].toLowerCase() : null;
+    const normalizedPathSection = sectionFromPath === 'architect' ? 'tools' : sectionFromPath === 'extra' ? 'savegame' : sectionFromPath;
     const pathGameId = pathSectionMatch
-      ? decodeURIComponent(pathSectionMatch[1])
-      : (routerLocation.pathname.startsWith('/game/') ? decodeURIComponent(routerLocation.pathname.replace(/^\/game\//, '')) : null);
+      ? decodeURIComponent(pathSectionMatch[2]).replace(/\/+$/, '')
+      : (routerLocation.pathname.startsWith('/game/') ? decodeURIComponent(routerLocation.pathname.replace(/^\/game\//, '')).replace(/\/+$/, '') : null);
     const targetId = stateOpenId || searchParamId || pathGameId;
+
+    const findMatchingGame = (items: any[], target: string) => {
+      const normTarget = String(target).trim();
+      const lowerTarget = normTarget.toLowerCase();
+      const targetSlug = slugifyGameTitle(normTarget, normTarget);
+      return (
+        items.find(g => String(g?.id) === normTarget || String(g?.id).toLowerCase() === lowerTarget) ||
+        items.find(g => g?.gameId && String(g.gameId).toLowerCase() === lowerTarget) ||
+        items.find(g => g?.name?.trim().toLowerCase() === lowerTarget) ||
+        (normalizedPathSection
+          ? items.find(
+              g =>
+                getCategoryPathPrefix(g?.category) === normalizedPathSection &&
+                slugifyGameTitle(g?.name, g?.id) === targetSlug
+            )
+          : undefined) ||
+        items.find(g => {
+          const s = slugifyGameTitle(g?.name, g?.id);
+          return s === targetSlug || s === lowerTarget;
+        })
+      );
+    };
 
     if (targetId) {
       const allItems = Object.values(allResources).flat();
-      let gameToOpen = allItems.find(g => 
-        String(g.id) === String(targetId) || 
-        String(g.gameId) === String(targetId) || 
-        g.name?.toLowerCase() === String(targetId).toLowerCase()
-      );
+      let gameToOpen = findMatchingGame(allItems, String(targetId));
 
       // Fallback: check bundled catalog
       if (!gameToOpen) {
         try {
           const flatCached = Object.values(backupData).flat() as any[];
-          gameToOpen = flatCached.find(g => 
-            String(g?.id) === String(targetId) || 
-            String(g?.gameId) === String(targetId) || 
-            g?.name?.toLowerCase() === String(targetId).toLowerCase()
-          );
+          gameToOpen = findMatchingGame(flatCached, String(targetId));
         } catch (e) {}
       }
 
@@ -7046,11 +7102,26 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       }
 
       if (gameToOpen) {
-        setSelectedResource(gameToOpen);
+        setSelectedResource(prev => (prev?.id === gameToOpen.id && prev === gameToOpen ? prev : gameToOpen));
         if (window.history.state?.usr?.openGameId) {
           window.history.replaceState({ usr: { ...window.history.state.usr, openGameId: null } }, '');
         }
+        const canonicalPath = `/${getCategoryPathPrefix(gameToOpen.category)}/${slugifyGameTitle(gameToOpen.name, gameToOpen.id)}`;
+        const currentDecodedPath = (() => {
+          try {
+            return decodeURIComponent(routerLocation.pathname);
+          } catch {
+            return routerLocation.pathname;
+          }
+        })();
+        if (currentDecodedPath !== canonicalPath || searchParamId || stateOpenId) {
+          navigate(canonicalPath, { replace: true });
+        }
       }
+    } else {
+      setSelectedResource(null);
+      setSelectedResourceAction(undefined);
+      setOpenedViaRandom(false);
     }
   }, [routerLocation.state, routerLocation.search, routerLocation.pathname, allResources]);
 
@@ -7058,7 +7129,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   useEffect(() => {
     const handleOpenCatalogItem = (e: any) => {
       if (e.detail) {
-        setSelectedResource(e.detail);
+        openResourceDetail(e.detail);
       }
     };
     window.addEventListener('open-catalog-item', handleOpenCatalogItem);
@@ -8911,13 +8982,10 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
               if (allItems.length > 0) {
                   const foundItem = allItems.find(i => i.id === itemId);
                   if (foundItem) {
-                      setSelectedResource(foundItem);
                       if (['game', 'hypervisor', 'steamtools', 'ps5', 'architect', 'extra'].includes(foundItem.category.toLowerCase())) {
                           setActiveTab(foundItem.category.toLowerCase() as any);
                       }
-                      // Remove the query param to prevent reopening on reload
-                      const newHash = hash.substring(0, qIndex);
-                      window.history.replaceState({}, document.title, window.location.pathname + window.location.search + newHash);
+                      openResourceDetail(foundItem, undefined, { replace: true });
                   }
               }
           }
@@ -9696,7 +9764,7 @@ const paginatedData = useMemo(() => {
                        }
                    }, 50);
                 }}
-                onSelect={setSelectedResource}
+                onSelect={(item) => openResourceDetail(item)}
                 stash={stash}
                 toggleStash={toggleStash}
              />
@@ -9708,7 +9776,7 @@ const paginatedData = useMemo(() => {
                   initialScrollTarget={selectedResourceAction}
                   onDonateClick={() => setShowDonateModal(true)}
                   allResources={allResources}
-                  onItemSelect={(rec) => { setSelectedResource(rec); setSelectedResourceAction(undefined); }}
+                  onItemSelect={(rec) => openResourceDetail(rec)}
                   currentGenreContext={selectedGenreView}
                   resolvedDev={getResolvedDeveloper(selectedResource)}
                   onCompanyClick={handleCompanyClick}
@@ -9727,7 +9795,7 @@ const paginatedData = useMemo(() => {
                   showGuestNotification={showGuestNotification}
                   onGenreClick={(genre) => {
                       setSelectedGenreView(genre);
-                      setSelectedResource(null);
+                      handleCloseDetailModal();
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                />
@@ -9841,9 +9909,9 @@ const paginatedData = useMemo(() => {
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full"
+          className="w-full overflow-x-clip"
         >
-          <div className="fixed top-24 end-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+          <div className="fixed top-20 sm:top-24 end-4 z-[9999] flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-2rem)]">
         <AnimatePresence>
             {notifications.map(n => (
                 <motion.div
@@ -9851,7 +9919,7 @@ const paginatedData = useMemo(() => {
                     initial={{ x: (dir === 'rtl' || n.isAr) ? -100 : 100, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: (dir === 'rtl' || n.isAr) ? -100 : 100, opacity: 0 }}
-                    className={`bg-white/80 dark:bg-slate-900/80 md:backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 rounded-2xl w-[300px] pointer-events-auto flex gap-3 items-start ${(dir === 'rtl' || n.isAr) ? 'rtl text-right' : 'ltr text-left'}`}
+                    className={`bg-white/80 dark:bg-slate-900/80 md:backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 rounded-2xl w-[calc(100vw-2rem)] sm:w-[300px] pointer-events-auto flex gap-3 items-start ${(dir === 'rtl' || n.isAr) ? 'rtl text-right' : 'ltr text-left'}`}
                     dir={(dir === 'rtl' || n.isAr) ? 'rtl' : 'ltr'}
                 >
                     <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-xl border border-slate-200 dark:border-slate-700">
@@ -9887,8 +9955,7 @@ const paginatedData = useMemo(() => {
               currentGenreContext={selectedGenreView}
               onGenreClick={(genre) => {
                 setSelectedGenreView(genre);
-                setSelectedResource(null);
-                setOpenedViaRandom(false);
+                handleCloseDetailModal();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               resolvedDev={getResolvedDeveloper(selectedResource)}
@@ -9908,7 +9975,7 @@ const paginatedData = useMemo(() => {
               initialScrollTarget={selectedResourceAction}
               onDonateClick={() => setShowDonateModal(true)}
               allResources={allResources}
-              onItemSelect={(rec) => { setSelectedResource(rec); setSelectedResourceAction(undefined); setOpenedViaRandom(false); }}
+              onItemSelect={(rec) => { setOpenedViaRandom(false); openResourceDetail(rec); }}
             />
             {openedViaRandom && (
               <motion.div
@@ -9945,7 +10012,7 @@ const paginatedData = useMemo(() => {
                 onClose={() => setSelectedCompanyProfile(null)}
                 onItemClick={(item) => {
                     setSelectedCompanyProfile(null);
-                    setSelectedResource(item);
+                    openResourceDetail(item);
                 }}
             />
         )}
@@ -10015,14 +10082,14 @@ const paginatedData = useMemo(() => {
         games={spinCandidates}
         onSelectGame={(game) => {
           setOpenedViaRandom(true);
-          setSelectedResource(game);
+          openResourceDetail(game);
           setIsSpinModalOpen(false);
         }}
       />
 
       <HeroSlider 
         games={allResources['game']?.slice(0, 8) || []}
-        onSelectGame={(game, action) => { setSelectedResource(game); setSelectedResourceAction(action); }}
+        onSelectGame={(game, action) => openResourceDetail(game, action)}
       />
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-4 md:pb-8 relative z-10">
         <PartnersSection />
@@ -10030,23 +10097,23 @@ const paginatedData = useMemo(() => {
         <UpcomingTrailersSection sheetTrailersData={sheetUpcomingTrailers} />
 
         {/* PROMO SECTION */}
-        <section className="mb-16 w-full">
-          <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl group">
+        <section className="mb-10 sm:mb-16 w-full">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl group">
             
             {/* Subtle Gradient Background for Light/Dark Mode */}
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"></div>
 
-            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-8 md:p-12 gap-8 w-full" dir={dir}>
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-5 sm:p-8 md:p-12 gap-6 sm:gap-8 w-full" dir={dir}>
                {/* Left Side: Content */}
-               <div className="flex-1 text-center lg:text-start space-y-6">
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter" style={{ fontFamily: "'Oswald', sans-serif" }}>
+               <div className="flex-1 text-center lg:text-start space-y-4 sm:space-y-6">
+                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter" style={{ fontFamily: "'Oswald', sans-serif" }}>
                      {t('Unlock Exclusive')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-400 dark:to-amber-500">{t('Rewards')}</span>
                   </h2>
                   <p className="text-slate-600 dark:text-slate-300 text-sm md:text-base max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
                      {t('Get access to premium mastergifts and free accounts. Elevate your gaming experience with our exclusive collection.')}
                   </p>
                   
-                    <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center lg:justify-start pt-1 sm:pt-2">
                      <button 
                         onClick={(e) => { 
                             e.preventDefault(); 
@@ -10056,7 +10123,7 @@ const paginatedData = useMemo(() => {
                             }
                             setShowSteamModal(true); 
                         }} 
-                        className="relative px-8 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                        className="relative w-full sm:w-auto justify-center px-6 py-3 sm:px-8 sm:py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center gap-2"
                      >
                         {steamAccounts && steamAccounts.length > 0 && (
                             <span className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center z-20">
@@ -10076,7 +10143,7 @@ const paginatedData = useMemo(() => {
                             }
                             setShowMasterGiftModal(true); 
                         }} 
-                        className="relative px-8 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                        className="relative w-full sm:w-auto justify-center px-6 py-3 sm:px-8 sm:py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center gap-2"
                      >
                         {masterGifts && masterGifts.length > 0 && (
                             <span className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center z-20">
@@ -10090,9 +10157,9 @@ const paginatedData = useMemo(() => {
                   </div>
                </div>
                {/* Right Side: Image */}
-               <div className="flex-1 flex justify-center lg:justify-end relative mt-8 lg:mt-0 p-4 lg:p-0">
-                  <div className="absolute inset-0 bg-amber-500/10 dark:bg-amber-500/20 blur-[100px] rounded-full w-[250px] h-[250px] lg:w-[350px] lg:h-[350px] mx-auto lg:mr-10 rtl:lg:ml-10 rtl:lg:mr-auto"></div>
-                  <img src="/images/free_gifts.png" alt="Free Gifts" className="relative z-10 w-full max-w-[280px] lg:max-w-[320px] xl:max-w-[380px] h-auto object-contain drop-shadow-2xl hover:scale-105 hover:-translate-y-2 transition-transform duration-500" />
+               <div className="flex-1 flex justify-center lg:justify-end relative mt-2 lg:mt-0 p-2 sm:p-4 lg:p-0">
+                  <div className="absolute inset-0 bg-amber-500/10 dark:bg-amber-500/20 blur-[100px] rounded-full w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] lg:w-[350px] lg:h-[350px] mx-auto lg:mr-10 rtl:lg:ml-10 rtl:lg:mr-auto"></div>
+                  <img src="/images/free_gifts.png" alt="Free Gifts" className="relative z-10 w-full max-w-[210px] sm:max-w-[280px] lg:max-w-[320px] xl:max-w-[380px] h-auto object-contain drop-shadow-2xl hover:scale-105 hover:-translate-y-2 transition-transform duration-500" />
                </div>
             </div>
           </div>
@@ -10163,7 +10230,7 @@ const paginatedData = useMemo(() => {
              <RecentProductsCarousel 
                 items={recentProducts} 
                 loading={loading}
-                onSelect={setSelectedResource}
+                onSelect={(item) => openResourceDetail(item)}
                 stash={stash}
                 toggleStash={toggleStash}
              />
@@ -10184,32 +10251,32 @@ const paginatedData = useMemo(() => {
         </section>
 
         {/* COMMUNITY SECTION */}
-        <section className="mb-16 w-full">
-          <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl group flex flex-col md:flex-row min-h-[400px]">
+        <section className="mb-10 sm:mb-16 w-full">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl group flex flex-col md:flex-row min-h-0 lg:min-h-[400px]">
             {/* Gradient background overlay */}
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800"></div>
 
             <div className="relative z-10 flex flex-col lg:flex-row items-stretch justify-between w-full h-full" dir={dir}>
                
                {/* Left Side: Content */}
-               <div className="flex-1 flex flex-col justify-center p-8 md:p-12 space-y-6 lg:max-w-xl xl:max-w-2xl text-center lg:text-start lg:rtl:text-right">
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter" style={{ fontFamily: "'Oswald', sans-serif" }}>
+               <div className="flex-1 flex flex-col justify-center p-5 sm:p-8 md:p-12 space-y-4 sm:space-y-6 lg:max-w-xl xl:max-w-2xl text-center lg:text-start lg:rtl:text-right">
+                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter" style={{ fontFamily: "'Oswald', sans-serif" }}>
                      {t('Join Our')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-cyan-400 dark:to-blue-500">{t('Community')}</span>
                   </h2>
                   <p className="text-slate-600 dark:text-slate-300 text-sm md:text-base font-medium leading-relaxed">
                      {t('Connect with us on Discord, Telegram, and Reddit for the latest updates and exclusive drops.')}
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 justify-center lg:justify-start pt-4">
-                     <a href="https://discord.gg/pygmDWFAHK" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
+                  <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 sm:gap-4 justify-center lg:justify-start pt-2 sm:pt-4">
+                     <a href="https://discord.gg/pygmDWFAHK" target="_blank" rel="noopener noreferrer" className="px-5 py-3 sm:px-6 sm:py-3.5 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
                         <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
                         {t('Discord')}
                      </a>
-                     <a href="https://t.me/secretarea1337" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
+                     <a href="https://t.me/secretarea1337" target="_blank" rel="noopener noreferrer" className="px-5 py-3 sm:px-6 sm:py-3.5 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
                         <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
                         {t('Telegram')}
                      </a>
-                     <a href="https://www.reddit.com/r/SecretArea1337/" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-[#FF4500] hover:bg-[#e03d00] text-white rounded-xl font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
+                     <a href="https://www.reddit.com/r/SecretArea1337/" target="_blank" rel="noopener noreferrer" className="px-5 py-3 sm:px-6 sm:py-3.5 bg-[#FF4500] hover:bg-[#e03d00] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
                         <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.249 0 .688.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-2.465 3.928a.373.373 0 0 0-.279-.13.371.371 0 0 0-.281.133c-.092.11-.275.34-.693.34-.403 0-.583-.217-.677-.333a.372.372 0 0 0-.281-.132.373.373 0 0 0-.279.131.373.373 0 0 0-.022.502c.28.375.726.568 1.259.568.537 0 .983-.195 1.264-.57a.374.374 0 0 0-.01-.509z"/></svg>
                         {t('Reddit')}
                      </a>
@@ -10217,9 +10284,9 @@ const paginatedData = useMemo(() => {
                </div>
 
                {/* Right Side: Background/Banner Image */}
-               <div className="lg:w-1/2 relative flex items-center justify-center p-6 lg:p-12 order-first lg:order-last min-h-[300px] lg:min-h-[450px]">
-                  <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 blur-[120px] rounded-full w-[300px] h-[300px] mx-auto"></div>
-                  <img src="/images/banner 02.png" alt="Community Banner" className="relative z-10 w-full h-auto max-h-[400px] lg:max-h-[600px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-1000" />
+               <div className="lg:w-1/2 relative flex items-center justify-center p-4 sm:p-6 lg:p-12 order-first lg:order-last min-h-[200px] sm:min-h-[280px] lg:min-h-[450px]">
+                  <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 blur-[120px] rounded-full w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] mx-auto"></div>
+                  <img src="/images/banner 02.png" alt="Community Banner" className="relative z-10 w-full h-auto max-h-[220px] sm:max-h-[340px] lg:max-h-[550px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-1000" />
                </div>
             </div>
           </div>
@@ -10400,8 +10467,8 @@ const paginatedData = useMemo(() => {
                </button>
             </div>
           ) : (
-            <div className="space-y-12">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="space-y-10 sm:space-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
                 {paginatedData.map((item, idx) => {
                       const compStatus = globalSpecs.isActive ? checkCompatibilityStatus({...globalSpecs, cpuTier: getCpuTier(globalSpecs.cpuModel), gpuTier: getGpuTier(globalSpecs.gpuModel)}, item.systemReqs) : null;
                       const isFail = compStatus === 'fail';
@@ -10420,13 +10487,7 @@ const paginatedData = useMemo(() => {
                               if (item.category === 'profil') {
                                   handleCompanyClick(resolvedDev || item.name);
                               } else {
-                                  const secSlug = item.category === 'ps5' ? 'ps5' :
-                                                  item.category === 'hypervisor' ? 'hypervisor' :
-                                                  item.category === 'steamtools' ? 'steamtools' :
-                                                  item.category === 'architect' ? 'tools' :
-                                                  item.category === 'extra' ? 'savegame' : 'game';
-                                  window.history.pushState(null, '', `/${secSlug}/${encodeURIComponent(item.id)}`);
-                                  setSelectedResource(item);
+                                  openResourceDetail(item);
                               }
                           }}
                       >
@@ -10627,7 +10688,7 @@ const paginatedData = useMemo(() => {
         {['game', 'hypervisor', 'steamtools'].includes(activeTab) && allResources.hypervisor?.length > 0 && (
             <GameOfTheDaySection 
                 game={allResources.hypervisor[0]}
-                onSelect={setSelectedResource}
+                onSelect={(item) => openResourceDetail(item)}
             />
         )}
         {['game', 'hypervisor', 'steamtools'].includes(activeTab) && (
@@ -10637,7 +10698,7 @@ const paginatedData = useMemo(() => {
 
                 gameIds={popularRepackIds}
                 allResources={allResources}
-                onSelect={setSelectedResource}
+                onSelect={(item) => openResourceDetail(item)}
             />
         </>
         )}
@@ -10650,16 +10711,11 @@ const paginatedData = useMemo(() => {
                     categoryType="games"
                 />
                 {/* TWO PLAYERS. ENDLESS FUN. SECTION - MOVED BETWEEN TOP STUDIOS AND OPEN WORLD GAMES */}
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-                    <TwoPlayersSection 
-                        allGames={Object.values(allResources).flat()}
-                        sheetOnlineGames={sheetOnlineGames}
-                        onSelectGame={(game, action) => {
-                            setSelectedResource(game);
-                            if (action) setSelectedResourceAction(action);
-                        }}
-                    />
-                </div>
+                <TwoPlayersSection 
+                    allGames={Object.values(allResources).flat()}
+                    sheetOnlineGames={sheetOnlineGames}
+                    onSelectGame={(game, action) => openResourceDetail(game, action)}
+                />
                 <TopGamesSection games={topGames} />
             </>
         )}
@@ -10689,7 +10745,7 @@ const paginatedData = useMemo(() => {
       
 
       {/* Featured Genres Full Width Section */}
-      <div id="featured-genres" className="w-full relative mt-2 mb-24">
+      <div id="featured-genres" className="w-full relative mt-2 mb-14 sm:mb-24">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
               <FeaturedGenres 
                   games={Object.values(allResources).flat()} 
@@ -10721,9 +10777,9 @@ const paginatedData = useMemo(() => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-[85px] md:bottom-10 start-6 sm:start-10 z-[90] w-12 h-12 rounded-full bg-slate-900/50 dark:bg-slate-100/10 backdrop-blur-md border border-white/20 hover:bg-slate-900/70 dark:hover:bg-slate-100/20 text-white flex items-center justify-center shadow-xl transition-all hover:-translate-y-1"
+            className="fixed bottom-[85px] md:bottom-10 start-4 sm:start-8 z-[90] w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-slate-900/50 dark:bg-slate-100/10 backdrop-blur-md border border-white/20 hover:bg-slate-900/70 dark:hover:bg-slate-100/20 text-white flex items-center justify-center shadow-xl transition-all hover:-translate-y-1"
           >
-            <Icon name="ArrowUp" size={24} />
+            <Icon name="ArrowUp" size={22} />
           </motion.button>
         )}
       </AnimatePresence>

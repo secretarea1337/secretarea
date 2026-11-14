@@ -281,7 +281,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
       onTouchEnd={handleTouchEnd}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative w-full min-h-[620px] sm:min-h-[640px] lg:min-h-[700px] h-[90svh] sm:h-[86vh] lg:h-[90svh] max-h-[920px] overflow-hidden bg-slate-100 dark:bg-[#030712] flex flex-col pt-16 sm:pt-20 md:pt-24 transition-colors duration-300 select-none"
+      className="relative w-full min-h-[100svh] md:min-h-[660px] lg:min-h-[700px] h-auto md:h-[86vh] lg:h-[90svh] md:max-h-[920px] overflow-hidden bg-slate-100 dark:bg-[#030712] flex flex-col pt-16 sm:pt-20 md:pt-24 transition-colors duration-300 select-none"
     >
       {/* Dynamic Animated Ambient Wallpaper Background */}
       <AnimatePresence initial={false}>
@@ -314,20 +314,20 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
           />
 
           {/* Vertical fade to blend seamlessly into page content */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-100 via-transparent to-slate-100/40 dark:from-[#030712] dark:via-transparent dark:to-[#030712]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-100 via-slate-100/65 md:via-transparent to-slate-100/40 dark:from-[#030712] dark:via-[#030712]/70 md:dark:via-transparent dark:to-[#030712]/40" />
 
           {/* Subtle ambient colored radial glow */}
-          <div className="absolute -top-32 -start-32 w-96 h-96 rounded-full bg-sky-500/15 dark:bg-sky-500/20 blur-[130px] pointer-events-none" />
-          <div className="absolute -bottom-32 -end-32 w-96 h-96 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-[130px] pointer-events-none" />
+          <div className="absolute -top-32 -start-32 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-sky-500/15 dark:bg-sky-500/20 blur-[110px] sm:blur-[130px] pointer-events-none" />
+          <div className="absolute -bottom-32 -end-32 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-[110px] sm:blur-[130px] pointer-events-none" />
         </motion.div>
       </AnimatePresence>
 
       {/* Main Content Showcase Grid */}
-      <div className="flex-1 flex flex-col justify-center relative z-10 w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-6 md:py-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 lg:gap-12 items-center w-full my-auto">
+      <div className="flex-1 flex flex-col justify-center relative z-10 w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-4 sm:py-6 md:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-10 lg:gap-12 items-center w-full my-auto">
 
           {/* Content Column (Text & CTAs) */}
-          <div className="md:col-span-7 xl:col-span-8 flex flex-col items-start gap-4 sm:gap-5 justify-center order-2 md:order-1 text-start">
+          <div className="md:col-span-7 xl:col-span-8 flex flex-col items-start gap-3 sm:gap-5 justify-center order-2 md:order-1 text-start min-w-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${currentIndex}-${activeLang}-content`}
@@ -379,9 +379,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                   )}
                 </div>
 
-                {/* Main Cinematic Game Title - stable reserved height keeps hero section exactly the same size */}
+                {/* Main Cinematic Game Title - stable reserved height on tablet/laptop, flexible on mobile */}
                 <div
-                  className={`w-full text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] uppercase tracking-tight min-h-[2.25em] h-[2.25em] flex items-center ${
+                  className={`w-full text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] uppercase tracking-tight min-h-[2.2em] md:h-[2.25em] flex items-center ${
                     isRTL ? 'font-arabic' : ''
                   }`}
                   style={{
@@ -394,9 +394,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                 </div>
 
                 {/* Localized Synopsis (EN, FR, ES, AR) */}
-                <div className="min-h-[4rem] sm:min-h-[4.5rem] md:min-h-[5rem] flex items-start">
+                <div className="min-h-[3.5rem] sm:min-h-[4.5rem] md:min-h-[5rem] flex items-start">
                   <p
-                    className={`text-slate-700 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl line-clamp-3 font-normal leading-relaxed ${
+                    className={`text-slate-700 dark:text-slate-300 text-xs sm:text-base md:text-lg max-w-2xl line-clamp-3 font-normal leading-relaxed ${
                       isRTL ? 'font-arabic leading-relaxed' : ''
                     }`}
                   >
@@ -428,30 +428,30 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                 </div>
 
                 {/* Primary & Secondary Action CTAs */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-3 sm:pt-4">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 sm:pt-4 w-full sm:w-auto">
                   {/* Primary Download CTA */}
                   <button
                     onClick={() => onSelectGame(currentItem, 'download')}
-                    className="group px-6 py-3 sm:px-7 sm:py-3.5 bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-black rounded-xl shadow-lg shadow-sky-500/25 transition-all duration-200 active:scale-95 flex items-center gap-2.5 text-sm sm:text-base cursor-pointer"
+                    className="group flex-1 sm:flex-none justify-center px-4 py-2.5 sm:px-7 sm:py-3.5 bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-black rounded-xl shadow-lg shadow-sky-500/25 transition-all duration-200 active:scale-95 flex items-center gap-2 text-xs sm:text-base cursor-pointer whitespace-nowrap"
                   >
-                    <Icon name="Download" size={18} className="shrink-0 group-hover:translate-y-0.5 transition-transform" />
+                    <Icon name="Download" size={17} className="shrink-0 group-hover:translate-y-0.5 transition-transform" />
                     <span>{t('Download Now')}</span>
                     <Icon
                       name="ArrowRight"
-                      size={17}
-                      className="shrink-0 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                      size={16}
+                      className="shrink-0 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1 hidden sm:inline"
                     />
                   </button>
 
                   {/* Secondary Details CTA */}
                   <button
                     onClick={() => onSelectGame(currentItem, 'details')}
-                    className="px-5 py-3 sm:px-6 sm:py-3.5 bg-slate-900/5 hover:bg-slate-900/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white border border-slate-300/80 dark:border-white/15 font-bold rounded-xl backdrop-blur-md transition-all duration-200 active:scale-95 flex items-center gap-2 text-sm sm:text-base cursor-pointer"
+                    className="flex-1 sm:flex-none justify-center px-4 py-2.5 sm:px-6 sm:py-3.5 bg-slate-900/5 hover:bg-slate-900/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white border border-slate-300/80 dark:border-white/15 font-bold rounded-xl backdrop-blur-md transition-all duration-200 active:scale-95 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base cursor-pointer whitespace-nowrap"
                   >
                     <span>{t('Details')}</span>
                     <Icon
                       name="ChevronRight"
-                      size={18}
+                      size={17}
                       className="shrink-0 rtl:rotate-180"
                     />
                   </button>
@@ -461,7 +461,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
           </div>
 
           {/* 3D Floating Game Cover / Poster Column */}
-          <div className="md:col-span-5 xl:col-span-4 flex justify-center md:justify-end items-center order-1 md:order-2 my-2 md:my-0">
+          <div className="md:col-span-5 xl:col-span-4 flex justify-center md:justify-end items-center order-1 md:order-2 my-1 md:my-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${currentIndex}-card`}
@@ -485,7 +485,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
                   scale: 0.92,
                 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80 aspect-[3/4] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl shadow-slate-900/25 dark:shadow-[0_25px_60px_rgba(0,0,0,0.85)] border-2 border-white/80 dark:border-white/10 relative group cursor-pointer"
+                className="w-36 sm:w-52 md:w-64 lg:w-72 xl:w-80 aspect-[3/4] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl shadow-slate-900/25 dark:shadow-[0_25px_60px_rgba(0,0,0,0.85)] border-2 border-white/80 dark:border-white/10 relative group cursor-pointer"
                 onClick={() => onSelectGame(currentItem, 'details')}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -579,9 +579,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
           </div>
 
           {/* Tablet & Mobile Slide Controls & Slide Counter (< 1024px) */}
-          <div className="flex items-center justify-between gap-4 w-full">
+          <div className="flex items-center justify-between gap-2.5 sm:gap-4 w-full">
             {/* Slide Index Counter */}
-            <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+            <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 shrink-0">
               <span className="text-sky-600 dark:text-sky-400">
                 {String(currentIndex + 1).padStart(2, '0')}
               </span>
@@ -590,7 +590,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
             </div>
 
             {/* Progress Bars Indicator */}
-            <div className="flex items-center gap-1.5 flex-1 max-w-xs">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-1 max-w-[160px] sm:max-w-xs">
               {games.map((_, idx) => (
                 <div
                   key={idx}

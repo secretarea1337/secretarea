@@ -280,7 +280,7 @@ export const TwoPlayersSection: React.FC<TwoPlayersSectionProps> = ({
             className="relative z-10 flex items-center justify-center w-full"
           >
             {/* Responsive Container: Native 3:2 Ratio matching the 1536x1024 asset */}
-            <div className="relative w-64 sm:w-80 md:w-96 lg:w-[420px] xl:w-[480px] max-w-full aspect-[3/2] flex items-center justify-center">
+            <div className="relative w-56 sm:w-80 md:w-96 lg:w-[420px] xl:w-[480px] max-w-full aspect-[3/2] flex items-center justify-center">
               <img 
                 src="/images/online.png" 
                 alt="Two Players Co-Op Gaming" 
@@ -407,7 +407,7 @@ export const TwoPlayersSection: React.FC<TwoPlayersSectionProps> = ({
                     onMouseEnter={() => setHoveredGameId(String(game.id))}
                     onMouseLeave={() => setHoveredGameId(null)}
                     onClick={() => onSelectGame(game)}
-                    className="group relative shrink-0 w-64 sm:w-72 md:w-80 h-[380px] sm:h-[430px] rounded-2xl overflow-hidden cursor-pointer snap-start border border-slate-300 dark:border-white/10 hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-lg hover:shadow-[0_10px_30px_rgba(245,158,11,0.25)] flex flex-col justify-end bg-slate-950"
+                    className="group relative shrink-0 w-[76vw] max-w-[280px] sm:max-w-none sm:w-72 md:w-80 h-[350px] sm:h-[430px] rounded-2xl overflow-hidden cursor-pointer snap-start border border-slate-300 dark:border-white/10 hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-lg hover:shadow-[0_10px_30px_rgba(245,158,11,0.25)] flex flex-col justify-end bg-slate-950"
                   >
                     {/* Background Game Cover */}
                     <div className="absolute inset-0 bg-slate-950">

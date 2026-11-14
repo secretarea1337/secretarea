@@ -1151,7 +1151,7 @@ export const UpcomingTrailersSection: React.FC<UpcomingTrailersSectionProps> = (
             onMouseLeave={() => setIsBannerHovered(false)}
             className="mb-8 sm:mb-10 w-full rounded-2xl md:rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 shadow-2xl relative group select-none"
           >
-            <div className="relative w-full min-h-[440px] sm:min-h-[500px] md:min-h-[560px] lg:min-h-[620px] xl:min-h-[660px] flex flex-col justify-between overflow-hidden">
+            <div className="relative w-full min-h-[420px] sm:min-h-[500px] md:min-h-[560px] lg:min-h-[620px] xl:min-h-[660px] flex flex-col justify-between overflow-hidden">
               
               {/* SLOW, SMOOTH ARTWORK TRANSITION */}
               <AnimatePresence mode="wait">
@@ -1187,26 +1187,26 @@ export const UpcomingTrailersSection: React.FC<UpcomingTrailersSectionProps> = (
               <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/40 via-50% to-transparent pointer-events-none" />
               
               {/* Top Banner Bar: Tag + Game Selector Pills */}
-              <div className="relative p-4 sm:p-6 md:p-7 z-10 flex items-center justify-between gap-2.5 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 sm:px-3.5 sm:py-1.5 text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider bg-purple-600 text-white rounded-xl backdrop-blur-md shadow-lg shadow-purple-600/30 flex items-center gap-1.5">
-                    <Flame size={14} className="text-amber-300" />
+              <div className="relative p-3.5 sm:p-6 md:p-7 z-10 flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className="px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider bg-purple-600 text-white rounded-xl backdrop-blur-md shadow-lg shadow-purple-600/30 flex items-center gap-1.5">
+                    <Flame size={13} className="text-amber-300 shrink-0" />
                     {getLoc(currentFeaturedGame.tag) || t('Featured Premiere')}
                   </span>
-                  <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider bg-black/60 text-slate-200 rounded-xl backdrop-blur-md border border-white/10">
+                  <span className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider bg-black/60 text-slate-200 rounded-xl backdrop-blur-md border border-white/10">
                     {currentFeaturedGame.trailers.length} {t('Trailers Available')}
                   </span>
                 </div>
 
                 {/* Game Pills / Quick Jump Indicators */}
-                <div className="hidden xs:flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-2xl border border-white/10 overflow-x-auto scrollbar-none max-w-full">
+                <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-2xl border border-white/10 overflow-x-auto scrollbar-none max-w-full">
                   {allGames.map((g, idx) => {
                     const isCurrent = idx === featuredIndex;
                     return (
                       <button
                         key={g.id}
                         onClick={() => setFeaturedIndex(idx)}
-                        className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-xl transition-all shrink-0 ${
+                        className={`px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-mono font-bold rounded-xl transition-all shrink-0 ${
                           isCurrent
                             ? 'bg-purple-600 text-white shadow-md shadow-purple-600/40 ring-1 ring-purple-300 scale-105'
                             : 'text-slate-400 hover:text-white hover:bg-white/10'
@@ -1224,17 +1224,17 @@ export const UpcomingTrailersSection: React.FC<UpcomingTrailersSectionProps> = (
               <button
                 onClick={() => setFeaturedIndex((prev) => (prev - 1 + allGames.length) % allGames.length)}
                 aria-label={t('Previous Game')}
-                className="absolute start-2 sm:start-4 md:start-5 top-1/3 sm:top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-black/50 hover:bg-purple-600 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                className="absolute start-2 sm:start-4 md:start-5 top-[28%] sm:top-1/2 -translate-y-1/2 z-20 p-1.5 sm:p-3 rounded-full bg-black/50 hover:bg-purple-600 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-xl"
               >
-                <ChevronLeft size={20} className="rtl:rotate-180 sm:w-[22px] sm:h-[22px]" />
+                <ChevronLeft size={18} className="rtl:rotate-180 sm:w-[22px] sm:h-[22px]" />
               </button>
 
               <button
                 onClick={() => setFeaturedIndex((prev) => (prev + 1) % allGames.length)}
                 aria-label={t('Next Game')}
-                className="absolute end-2 sm:end-4 md:end-5 top-1/3 sm:top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-black/50 hover:bg-purple-600 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                className="absolute end-2 sm:end-4 md:end-5 top-[28%] sm:top-1/2 -translate-y-1/2 z-20 p-1.5 sm:p-3 rounded-full bg-black/50 hover:bg-purple-600 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-xl"
               >
-                <ChevronRight size={20} className="rtl:rotate-180 sm:w-[22px] sm:h-[22px]" />
+                <ChevronRight size={18} className="rtl:rotate-180 sm:w-[22px] sm:h-[22px]" />
               </button>
 
               {/* Bottom Content Area (Smooth Animated Text Transition) */}
@@ -1272,41 +1272,43 @@ export const UpcomingTrailersSection: React.FC<UpcomingTrailersSectionProps> = (
                 </AnimatePresence>
 
                 {/* Primary Action & Additional Trailers Strip */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap">
-                  {/* Main Play Button for Trailer 1 */}
-                  <button
-                    onClick={() => handleOpenCinema(currentFeaturedGame, 0)}
-                    className="px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs sm:text-sm tracking-wide shadow-xl shadow-purple-600/40 flex items-center justify-center gap-2 transition-all cursor-pointer"
-                  >
-                    <Play size={17} fill="currentColor" />
-                    <span>{t('Watch Trailer')}</span>
-                  </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 shrink-0 w-full lg:w-auto flex-wrap">
+                  <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    {/* Main Play Button for Trailer 1 */}
+                    <button
+                      onClick={() => handleOpenCinema(currentFeaturedGame, 0)}
+                      className="flex-1 sm:flex-none px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs sm:text-sm tracking-wide shadow-xl shadow-purple-600/40 flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      <Play size={16} fill="currentColor" />
+                      <span>{t('Watch Trailer')}</span>
+                    </button>
 
-                  {/* IMDb Game Profile Button */}
-                  <a
-                    href={getGameImdbUrl(currentFeaturedGame)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-[#F5C518]/15 hover:bg-[#F5C518] hover:text-black active:scale-95 text-[#F5C518] font-bold text-xs sm:text-sm tracking-wide border border-[#F5C518]/30 hover:border-[#F5C518] shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-                    title={t('View in IMDB')}
-                    aria-label={t('View in IMDB')}
-                  >
-                    <SiImdb size={18} />
-                    <span>{t('View in IMDB')}</span>
-                  </a>
+                    {/* IMDb Game Profile Button */}
+                    <a
+                      href={getGameImdbUrl(currentFeaturedGame)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 sm:px-5 py-2.5 sm:py-3.5 rounded-xl bg-[#F5C518]/15 hover:bg-[#F5C518] hover:text-black active:scale-95 text-[#F5C518] font-bold text-xs sm:text-sm tracking-wide border border-[#F5C518]/30 hover:border-[#F5C518] shadow-md flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+                      title={t('View in IMDB')}
+                      aria-label={t('View in IMDB')}
+                    >
+                      <SiImdb size={18} />
+                      <span>{t('View in IMDB')}</span>
+                    </a>
+                  </div>
 
                   {/* Multi-trailer switcher if available */}
                   {currentFeaturedGame.trailers.length > 1 && (
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 w-full sm:w-auto">
                       {currentFeaturedGame.trailers.slice(1).map((tr, idx) => (
                         <button
                           key={tr.id}
                           onClick={() => handleOpenCinema(currentFeaturedGame, idx + 1)}
-                          className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-xs backdrop-blur-md border border-white/20 transition-all flex items-center gap-1.5 shrink-0"
+                          className="px-3 py-2 sm:px-4 sm:py-3 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-[11px] sm:text-xs backdrop-blur-md border border-white/20 transition-all flex items-center gap-1.5 shrink-0"
                           title={getLoc(tr.title)}
                         >
                           <Clapperboard size={13} className="text-purple-300" />
-                          <span className="max-w-[130px] truncate">{getLoc(tr.title)}</span>
+                          <span className="max-w-[120px] sm:max-w-[130px] truncate">{getLoc(tr.title)}</span>
                         </button>
                       ))}
                     </div>
@@ -1398,7 +1400,7 @@ export const UpcomingTrailersSection: React.FC<UpcomingTrailersSectionProps> = (
               return (
                 <div
                   key={game.id}
-                  className={`group shrink-0 snap-start w-[82vw] xs:w-[320px] sm:w-[340px] md:w-[360px] lg:w-[380px] rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-xl ${
+                  className={`group shrink-0 snap-start w-[84vw] max-w-[330px] sm:max-w-none sm:w-[340px] md:w-[360px] lg:w-[380px] rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-xl ${
                     isSelectedInSpotlight
                       ? 'border-purple-500 ring-2 ring-purple-500/25 shadow-purple-500/10'
                       : 'border-slate-200 dark:border-slate-800 hover:border-purple-500/50 dark:hover:border-purple-500/40'
@@ -1551,7 +1553,7 @@ export const UpcomingTrailersSection: React.FC<UpcomingTrailersSectionProps> = (
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0, y: 15 }}
                 transition={{ type: 'spring', duration: 0.35, bounce: 0.1 }}
-                className="relative w-full max-w-5xl rounded-2xl md:rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl flex flex-col z-10 max-h-[96vh]"
+                className="relative w-full max-w-5xl rounded-2xl md:rounded-3xl overflow-y-auto overflow-x-hidden bg-slate-950 border border-slate-800 shadow-2xl flex flex-col z-10 max-h-[94dvh]"
               >
                 {/* Cinema Header */}
                 <div className="px-3 sm:px-6 py-3 bg-slate-950/95 border-b border-slate-800/80 flex items-center justify-between gap-2.5 text-white">
