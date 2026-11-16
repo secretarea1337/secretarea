@@ -20,8 +20,6 @@ export const SOCIAL_LINKS = {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Secret Area', path: '/', iconName: 'Lock' },
-  { label: 'Personal Space', path: '/personal-space', iconName: 'Activity' },
-  { label: 'Roadmap', path: '/roadmap', iconName: 'Rocket' },
 ];
 
 export const CATEGORIES: CategoryData[] = [

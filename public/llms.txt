@@ -12,6 +12,4 @@ SecretArea is a curated digital gaming and hypervisor resource platform providin
 
 ## Key Links
 - [Main Catalog](https://nexa1337.com/): Browse top games, hypervisor utilities, and digital assets.
-- [Roadmap](https://nexa1337.com/roadmap): Current release schedule, feature milestones, and planned upgrades.
-- [Personal Space](https://nexa1337.com/personal-space): Interactive workspace and system monitor.
 - [Legal Compliance & Disclaimer](https://nexa1337.com/disclaimer): Index policy, open-web compliance, and terms of service.

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FaTelegram, FaDiscord, FaReddit } from 'react-icons/fa6';
+import { FaTelegram, FaDiscord } from 'react-icons/fa6';
 import Icon from './Icon';
 import { LowPolyBackground } from './LowPolyBackground';
 
@@ -134,7 +134,6 @@ const MaintenancePage: React.FC<MaintenanceProps> = ({ endTime, message }) => {
         <div className="mt-8 flex items-center justify-center gap-4 relative z-20">
            <a href="https://t.me/secretarea1337" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all hover:scale-110 shadow-lg shadow-slate-200 dark:shadow-slate-900/50"><FaTelegram size={22} /></a>
            <a href="https://discord.gg/pygmDWFAHK" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all hover:scale-110 shadow-lg shadow-slate-200 dark:shadow-slate-900/50"><FaDiscord size={22} /></a>
-           <a href="https://www.reddit.com/r/SecretArea1337/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all hover:scale-110 shadow-lg shadow-slate-200 dark:shadow-slate-900/50"><FaReddit size={22} /></a>
         </div>
       </motion.div>
 

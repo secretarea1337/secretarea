@@ -10,9 +10,6 @@ import LatestIntelPanel from './components/LatestIntelPanel';
 
 import SecretArea from './pages/SecretArea';
 
-const Roadmap = lazy(() => import('./pages/Roadmap'));
-const CategoryDetail = lazy(() => import('./pages/CategoryDetail'));
-const PersonalFinance = lazy(() => import('./pages/PersonalFinance'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
@@ -101,9 +98,6 @@ const MainContent = () => {
           <Route path="/architect/*" element={<div />} />
           <Route path="/savegame/*" element={<div />} />
           <Route path="/extra/*" element={<div />} />
-          <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
-          <Route path="/roadmap/:id" element={<ProtectedRoute><CategoryDetail /></ProtectedRoute>} />
-          <Route path="/personal-space" element={<PersonalFinance />} />
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Profile defaultTab="Reports & Fixes" />} />

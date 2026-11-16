@@ -31,7 +31,6 @@ import { Link } from 'react-router-dom';
 import Icon from '../components/Icon';
 import HeroSlider from '../components/HeroSlider';
 import AnimatedGenreHero from '../components/AnimatedGenreHero';
-import PartnersSection from '../components/PartnersSection';
 import UpcomingTrailersSection from '../components/UpcomingTrailersSection';
 import TwoPlayersSection from '../components/TwoPlayersSection';
 import MostPopularRepacksSection from '../components/MostPopularRepacksSection';
@@ -93,11 +92,6 @@ import { setCatalogCache, getCatalogCache, saveMaintenanceCache, getMaintenanceC
 const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec';
 const DISCORD_LINK = 'https://discord.gg/pygmDWFAHK';
 const TELEGRAM_LINK = 'https://t.me/secretarea1337';
-const REDDIT_LINK = 'https://www.reddit.com/r/SecretArea1337/';
-const INSTAGRAM_LINK = 'https://instagram.com/nexa1337';
-const KICK_LINK = 'https://kick.com/secretarea1337';
-const TIKTOK_LINK = 'https://www.tiktok.com/@secretarea1337';
-const YOUTUBE_LINK = 'https://www.youtube.com/@SecretArea1337';
 const ITEMS_PER_PAGE = 12; // Show 12 items per page for laptop grid (4x3)
 
 const getCategoryPathPrefix = (category?: string): string => {
@@ -156,13 +150,6 @@ const AD_CONFIG = {
 
 const ADMIN_SOCIAL_LINKS = [
     {
-        name: 'Reddit',
-        url: REDDIT_LINK,
-        icon: 'Reddit',
-        hoverColor: 'hover:text-[#FF4500] hover:border-[#FF4500]/50 hover:bg-[#FF4500]/10',
-        badgeColor: 'text-[#FF4500]',
-    },
-    {
         name: 'Discord',
         url: DISCORD_LINK,
         icon: 'Discord',
@@ -175,27 +162,6 @@ const ADMIN_SOCIAL_LINKS = [
         icon: 'Telegram',
         hoverColor: 'hover:text-[#2AABEE] hover:border-[#2AABEE]/50 hover:bg-[#2AABEE]/10',
         badgeColor: 'text-[#2AABEE]',
-    },
-    {
-        name: 'Kick',
-        url: KICK_LINK,
-        icon: 'Kick',
-        hoverColor: 'hover:text-[#53FC18] hover:border-[#53FC18]/50 hover:bg-[#53FC18]/10',
-        badgeColor: 'text-[#53FC18]',
-    },
-    {
-        name: 'TikTok',
-        url: TIKTOK_LINK,
-        icon: 'Tiktok',
-        hoverColor: 'hover:text-[#FE2C55] hover:border-[#FE2C55]/50 hover:bg-[#FE2C55]/10',
-        badgeColor: 'text-[#FE2C55]',
-    },
-    {
-        name: 'YouTube',
-        url: YOUTUBE_LINK,
-        icon: 'Youtube',
-        hoverColor: 'hover:text-[#FF0000] hover:border-[#FF0000]/50 hover:bg-[#FF0000]/10',
-        badgeColor: 'text-[#FF0000]',
     },
 ];
 
@@ -665,7 +631,7 @@ const UploaderProfilePopup: React.FC<{ isOpen: boolean; onClose: () => void; gam
                                 {t('Real Links')}
                             </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                             {ADMIN_SOCIAL_LINKS.map((social) => (
                                 <a
                                     key={social.name}
@@ -5222,56 +5188,72 @@ export const ResourceDetailModal: React.FC<{
                       </div>
                   </div>
 
-                  {/* Streamer Section */}
-                  <div className="py-6 sm:py-12 border-b border-slate-200 dark:border-slate-800" dir={dir}>
-                      <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col lg:flex-row">
-                          {/* Image Column */}
-                          <div className="w-full lg:w-5/12 relative bg-[#09090b] flex items-center justify-center min-h-[300px] lg:min-h-[500px]">
-                              <img 
-                                  src="/images/streamer.png" 
-                                  alt="Streamer" 
-                                  className="absolute inset-0 w-full h-full object-contain opacity-100 z-0"
+                  {/* Community Squad Section */}
+                  <div className="py-6 sm:py-10 border-b border-slate-200 dark:border-slate-800" dir={dir}>
+                      <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1120] shadow-xl grid grid-cols-1 lg:grid-cols-12 items-stretch">
+                          {/* Artwork Showcase Stage */}
+                          <div className="lg:col-span-6 relative overflow-hidden bg-[#070b14] flex items-end justify-center pt-6 px-3 sm:pt-8 sm:px-6 lg:pt-8 lg:px-6 pb-0 min-h-[220px] sm:min-h-[290px] lg:min-h-[380px] border-b lg:border-b-0 lg:border-e border-slate-200/80 dark:border-slate-800/80">
+                              {/* Subtle Studio Radial Glow Behind Squad */}
+                              <div
+                                  className="absolute inset-0 pointer-events-none"
+                                  style={{
+                                      background: 'radial-gradient(circle at 50% 62%, rgba(88, 101, 242, 0.28) 0%, rgba(14, 165, 233, 0.12) 40%, rgba(7, 11, 20, 0) 75%)'
+                                  }}
                               />
-                              {/* Mobile/Tablet bottom gradient */}
-                              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-50 to-transparent dark:from-slate-900 pointer-events-none lg:hidden z-10" />
-                              {/* Desktop side gradient */}
-                              <div className={`hidden lg:block absolute inset-y-0 ${dir === 'rtl' ? 'left-0 w-40 bg-gradient-to-r' : 'right-0 w-40 bg-gradient-to-l'} from-slate-50 to-transparent dark:from-slate-900 pointer-events-none z-10`} />
+                              <div
+                                  className="absolute inset-x-0 bottom-0 h-20 pointer-events-none bg-gradient-to-t from-[#070b14]/70 via-[#070b14]/20 to-transparent"
+                              />
+                              <img
+                                  src="/images/streamer.png"
+                                  alt="SecretArea Community"
+                                  referrerPolicy="no-referrer"
+                                  className="relative z-10 w-full max-w-[440px] sm:max-w-[540px] lg:max-w-full h-auto max-h-[260px] sm:max-h-[320px] lg:max-h-[380px] object-contain object-bottom select-none drop-shadow-[0_14px_28px_rgba(0,0,0,0.65)]"
+                              />
                           </div>
-                          
+
                           {/* Content Column */}
-                          <div className="w-full lg:w-7/12 p-8 lg:p-12 flex flex-col justify-center bg-slate-50 dark:bg-slate-900 z-10 relative">
-                              <h4 className="text-primary-500 font-black tracking-widest uppercase text-xs sm:text-sm mb-4">
+                          <div className="lg:col-span-6 p-5 sm:p-8 lg:p-10 xl:p-12 flex flex-col justify-center bg-white dark:bg-[#0b1120]">
+                              <p className="text-primary-600 dark:text-primary-400 font-extrabold tracking-widest uppercase text-[11px] sm:text-xs mb-2.5 sm:mb-3">
                                   {t('ONE PASSION. ONE COMMUNITY. FREEDOM TO PLAY.')}
-                              </h4>
-                              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-6 uppercase leading-tight">
-                                  {t("WE DON'T JUST PLAY GAMES, WE LIVE THEM.")}
-                              </h2>
-                              <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
-                                  {t('Different players. Same passion. Same freedom. Come join a community where gaming brings us together, friendships grow, and everyone is free to play their way. No limits. No judgment. Just gaming, fun & good vibes.')}
                               </p>
-                              
-                              <div className="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase mb-4 flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0"></span>
-                                  {t('LIVE ON KICK • TIKTOK • YOUTUBE')}
+                              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white mb-3.5 sm:mb-4 uppercase leading-[1.12] tracking-tight text-balance">
+                                  {t('JOIN THE PACK. PLAY WITHOUT LIMITS.')}
+                              </h2>
+                              <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-[15px] leading-relaxed mb-5 sm:mb-6 max-w-xl">
+                                  {t('Connect with gamers in our official Discord server and Telegram channel. Get instant release alerts, request your favorite titles, verify mirror updates, and get fast help from the SecretArea community anytime.')}
+                              </p>
+
+                              <div className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase mb-4 flex items-center gap-2">
+                                  <Icon name="Users" size={14} className="text-primary-500 shrink-0" />
+                                  <span>{t('ACTIVE COMMUNITY ON DISCORD & TELEGRAM')}</span>
                               </div>
-                              
-                              <div className="flex flex-wrap gap-3 mb-6">
-                                  <a href="https://kick.com/secretarea1337" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[#53FC18] hover:bg-[#4AE315] text-black rounded-xl font-bold uppercase tracking-wider text-sm transition-transform active:scale-95 shadow-lg shadow-[#53FC18]/20">
-                                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M5 2h4v8h2V6h2V4h6v6h-2v2h-2v2h2v2h2v6h-6v-2h-2v-4h-2v6H5V2z"/></svg>
-                                      {t('WATCH LIVE')}
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 mb-5">
+                                  <a
+                                      href={DISCORD_LINK}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="flex items-center justify-center gap-2.5 px-5 py-3 min-h-[46px] bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-bold uppercase tracking-wider text-xs sm:text-sm transition-colors active:scale-[0.98] shadow-md shadow-[#5865F2]/25 whitespace-nowrap shrink-0"
+                                  >
+                                      <Icon name="Discord" size={18} className="shrink-0" />
+                                      <span>{t('Join Discord')}</span>
                                   </a>
-                                  <a href="https://www.tiktok.com/@secretarea1337" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-black hover:bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-sm transition-transform active:scale-95 shadow-lg border border-slate-700">
-                                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 15.68l.01.02a6.33 6.33 0 0 0 11.23 4.04 6.27 6.27 0 0 0 1.54-4.2V8.65a8.21 8.21 0 0 0 3.84 1.34V6.52a5.06 5.06 0 0 1-2.03-.83Z"/></svg>
-                                      {t('FOLLOW US')}
-                                  </a>
-                                  <a href="https://www.youtube.com/@SecretArea1337" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[#FF0000] hover:bg-[#E60000] text-white rounded-xl font-bold uppercase tracking-wider text-sm transition-transform active:scale-95 shadow-lg shadow-[#FF0000]/20">
-                                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M21.582 6.186a2.6 2.6 0 0 0-1.826-1.834C18.145 3.9 12 3.9 12 3.9s-6.145 0-7.756.452a2.6 2.6 0 0 0-1.826 1.834C2 7.8 2 12 2 12s0 4.2.418 5.814a2.6 2.6 0 0 0 1.826 1.834C5.855 20.1 12 20.1 12 20.1s6.145 0 7.756-.452a2.6 2.6 0 0 0 1.826-1.834C22 16.2 22 12 22 12s0-4.2-.418-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                      {t('SUBSCRIBE')}
+                                  <a
+                                      href={TELEGRAM_LINK}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="flex items-center justify-center gap-2.5 px-5 py-3 min-h-[46px] bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl font-bold uppercase tracking-wider text-xs sm:text-sm transition-colors active:scale-[0.98] shadow-md shadow-[#0088cc]/25 whitespace-nowrap shrink-0"
+                                  >
+                                      <Icon name="Telegram" size={18} className="shrink-0" />
+                                      <span>{t('Join Telegram')}</span>
                                   </a>
                               </div>
-                              
-                              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                                  {t('Your support keeps the stream alive.')} <span className="font-bold text-slate-800 dark:text-slate-200">{t('Your passion belongs here.')}</span>
+
+                              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium leading-relaxed">
+                                  {t('Daily drops, fast support & zero clutter.')}{' '}
+                                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                      {t('Your passion belongs here.')}
+                                  </span>
                               </p>
                           </div>
                       </div>
@@ -6889,20 +6871,20 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     const isEs = language === 'es' || (language as any) === 'esp';
 
     let title = '🔑 Access Denied - Guest Mode';
-    let text = 'Please login with Secret Key To get Full Access. If you don\'t have a Secret Key, contact Admin from TikTok, Instagram, or Email.';
+    let text = 'Please login with Secret Key To get Full Access. If you don\'t have a Secret Key, contact Admin via Discord or Telegram.';
     let time = 'Just now';
 
     if (isAr) {
       title = '🔑 تم رفض الوصول - وضع الزائر';
-      text = 'يرجى تسجيل الدخول بالمفتاح السري للحصول على الصلاحيات الكاملة. إذا لم يكن لديك مفتاح، تواصل مع المشرف عبر تيك توك، إنستغرام أو البريد.';
+      text = 'يرجى تسجيل الدخول بالمفتاح السري للحصول على الصلاحيات الكاملة. إذا لم يكن لديك مفتاح، تواصل مع المشرف عبر ديسكورد أو تيليجرام.';
       time = 'الآن';
     } else if (isFr) {
       title = '🔑 Accès Refusé - Mode Invité';
-      text = 'Veuillez vous connecter avec la Clé Secrète pour un accès complet. Si vous n\'en avez pas, contactez l\'Admin sur TikTok ou Instagram.';
+      text = 'Veuillez vous connecter avec la Clé Secrète pour un accès complet. Si vous n\'en avez pas, contactez l\'Admin sur Discord ou Telegram.';
       time = 'À l\'instant';
     } else if (isEs) {
       title = '🔑 Acceso Denegado - Modo Invitado';
-      text = 'Inicia sesión con la Clave Secreta para obtener acceso completo. Si no tienes una clave, contacta al Admin por TikTok o Instagram.';
+      text = 'Inicia sesión con la Clave Secreta para obtener acceso completo. Si no tienes una clave, contacta al Admin por Discord o Telegram.';
       time = 'Ahora mismo';
     }
 
@@ -7255,13 +7237,14 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
         text: '⚠️ Terminal CLI login is disabled.\nPlease use the Visitor Login buttons below (Login with Google, Discord, GitHub, or Continue as Guest) to enter.' 
       });
     } else if (lowerCmd === 'help') {
-      newHistory.push({ type: 'system', text: '┌──────────────────────────────────┐' });
-      newHistory.push({ type: 'system', text: '│ AVAILABLE PROTOCOLS              │' });
-      newHistory.push({ type: 'system', text: '└──────────────────────────────────┘' });
-      newHistory.push({ type: 'info', text: '  [1] INQUIRE : What is inside?' });
-      newHistory.push({ type: 'info', text: '  [2] COMMS   : Contact Support' });
-      newHistory.push({ type: 'info', text: '  [3] NETWORK : Community & Socials' });
-      newHistory.push({ type: 'info', text: '  clear       : Flush memory' });
+      newHistory.push({ type: 'system', text: '┌─────────────────────────────────────────┐' });
+      newHistory.push({ type: 'system', text: '│ AVAILABLE PROTOCOLS                     │' });
+      newHistory.push({ type: 'system', text: '└─────────────────────────────────────────┘' });
+      newHistory.push({ type: 'info', text: '  [1] INQUIRE   : What is inside?' });
+      newHistory.push({ type: 'info', text: '  [2] COMMS     : Contact Support' });
+      newHistory.push({ type: 'info', text: '  [3] NETWORK   : Community & Socials' });
+      newHistory.push({ type: 'info', text: '  [4] RESOURCES : SecretArea 1337' });
+      newHistory.push({ type: 'info', text: '  clear         : Flush memory' });
       newHistory.push({ type: 'system', text: ' ' });
       newHistory.push({ type: 'success', text: '  💡 TIP: Login with Google, Discord, GitHub, or Guest mode using the buttons below.' });
     } else if (lowerCmd === '1' || lowerCmd === 'inquire') {
@@ -7273,31 +7256,28 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       newHistory.push({ type: 'info', text: '  ╚███╔███╔╝╚██████╔╝███████╗██║        ██║██████╔╝██████╔╝   ██║  ' });
       newHistory.push({ type: 'info', text: '   ╚══╝╚══╝  ╚═════╝ ╚══════╝╚═╝        ╚═╝╚═════╝ ╚═════╝    ╚═╝  ' });
       newHistory.push({ type: 'system', text: '────────────────────────────────────────────────────────────────────────────' });
-      newHistory.push({ type: 'info', text: '[-] 🎮 Hypervisors Games from FitGirl with easy UI to understand' });
-      newHistory.push({ type: 'info', text: '[-] 💿 Repacks Games from FitGirl with easy UI to understand' });
-      newHistory.push({ type: 'info', text: '[-] 🚂 Steam games With SteamTools One Click Get File without ADS' });
-      newHistory.push({ type: 'info', text: '[-] 🔓 Crack Apps From Popular Company' });
-      newHistory.push({ type: 'info', text: '[-] 💾 100% save games Files' });
-      newHistory.push({ type: 'info', text: '[-] 👤 Free Offline Steam Account' });
-      newHistory.push({ type: 'info', text: '[-] 🎁 Free Gifts like Netflix Accounts and more.' });
-      newHistory.push({ type: 'success', text: '[+] All this and more without adult pop-up ads and with an easy-to-use user interface.' });
+      newHistory.push({ type: 'info', text: '  [-] 🎮 PC Games & Verified Repacks (FitGirl, DODI & Direct Mirrors)' });
+      newHistory.push({ type: 'info', text: '  [-] ⚡ Game Hypervisor Releases, Guides & System Runtimes' });
+      newHistory.push({ type: 'info', text: '  [-] 🚂 SteamTools One-Click Files & Manifests (Zero Pop-up Ads)' });
+      newHistory.push({ type: 'info', text: '  [-] 🎯 PlayStation 5 (PS5) Packages & Multi-Channel Downloads' });
+      newHistory.push({ type: 'info', text: '  [-] 🛠️ Architecture, Design & Productivity Tools & Software' });
+      newHistory.push({ type: 'info', text: '  [-] 💾 100% SaveGame Archives & Progression Backups' });
+      newHistory.push({ type: 'info', text: '  [-] 🎁 Free Offline Steam Accounts & Mastergift Rewards (Google Login)' });
+      newHistory.push({ type: 'info', text: '  [-] 🧠 Smart PC Hardware Checker ("Can I Run It?") & Game Spin Wheel' });
+      newHistory.push({ type: 'success', text: '  [+] Clean EN / FR / ES / AR interface with verified links and fast community support.' });
       newHistory.push({ type: 'system', text: '────────────────────────────────────────────────────────────────────────────' });
-      newHistory.push({ type: 'info', text: '💡 Ready to browse? Select a login option below to continue.' });
+      newHistory.push({ type: 'info', text: '💡 Ready to enter? Choose Discord, Google, GitHub, or Guest mode below.' });
     } else if (lowerCmd === '2' || lowerCmd === 'comms') {
       newHistory.push({ type: 'system', text: 'ESTABLISHING SECURE COMMS...' });
       newHistory.push({ 
         type: 'info', 
         text: (
           <div className="flex flex-col space-y-2 mt-1 ms-2">
-            <div>[-] <a href="https://wa.me/212723242286" target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">WhatsApp</a></div>
-            <div>[-] <a href="https://www.instagram.com/nexa1337" target="_blank" rel="noreferrer" className="text-pink-400 hover:text-pink-300 underline underline-offset-2">Instagram</a></div>
-            <div>[-] <a href="mailto:support@nexa1337.com" className="text-purple-400 hover:text-purple-300 underline underline-offset-2">Email (support@nexa1337.com)</a></div>
             <div>[-] <a href="mailto:admin.secretarea1337@proton.me" className="text-red-400 hover:text-red-300 underline underline-offset-2">Email (admin.secretarea1337@proton.me)</a></div>
-            <div>[-] <a href="https://linktr.ee/nexa1337" target="_blank" rel="noreferrer" className="text-green-400 hover:text-green-300 underline underline-offset-2">SecretArea</a></div>
           </div>
         ) 
       });
-    } else if (lowerCmd === '3' || lowerCmd === '4' || lowerCmd === 'network') {
+    } else if (lowerCmd === '3' || lowerCmd === 'network') {
       newHistory.push({ 
         type: 'info', 
         text: (
@@ -7335,24 +7315,104 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
                 Discord Server
               </a>
             </div>
-            <div className="flex items-center space-x-2.5">
-              <img 
-                src="https://vectorseek.com/wp-content/uploads/2023/12/Reddit-New-2023-Icon-Logo-Vector.svg-.png" 
-                alt="Reddit" 
-                referrerPolicy="no-referrer" 
-                className="w-5 h-5 object-contain" 
-               loading="lazy" />
-              <a 
-                href="https://www.reddit.com/r/SecretArea1337/" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 font-bold"
-              >
-                Reddit Community
-              </a>
-            </div>
           </div>
         ) 
+      });
+    } else if (lowerCmd === '4' || lowerCmd === 'resources') {
+      const resourceGroups = [
+        {
+          title: 'Games',
+          color: 'text-sky-400',
+          items: [
+            { name: 'FitGirl Repacks', url: 'https://fitgirl-repacks.site', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjmp-5yP8z8XJVV12ysM_siTa9zsRbEW4J6bB636PNmhHEvzmHrAykwOE&s=10' },
+            { name: 'DODI Repacks', url: 'https://dodi-repacks.site', icon: 'https://avatars.githubusercontent.com/u/214397634?s=200&v=4' },
+            { name: 'Skidrow', url: 'https://www.skidrowreloaded.com', icon: 'https://cdn-icons-png.magnific.com/256/11892/11892389.png?semt=ais_white_label' },
+            { name: 'SteamRIP', url: 'https://steamrip.com', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD6DVFwEfDPbuhVBvLipIx5OnA0ywK7iFWmbWTApMLWuo9Oa8HTaydDTs&s=10' },
+          ],
+        },
+        {
+          title: 'Games Pre-Install',
+          color: 'text-emerald-400',
+          items: [
+            { name: 'AnkerGames', url: 'https://ankergames.net', icon: 'https://apktodo.io/uploads/2026/3/ankergames-icon.jpg' },
+            { name: 'SteamUnlocked', url: 'https://steamunlocked.org', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR60YPsdaLm2LbMZqEi6jBBgqqtwvfmB3jqfPX0fWtPhvGRQ6hud13sSTk&s=10' },
+          ],
+        },
+        {
+          title: 'Logiciel & Others',
+          color: 'text-amber-400',
+          items: [
+            { name: '1337x', url: 'https://1337x.to', icon: 'https://styles.redditmedia.com/t5_6k740u/styles/profileIcon_e6wsmb15qy691.jpg?frame=1&auto=webp&crop=256%3A256%2Csmart&s=240ba3bf38cbcffcbfada8716cba2732289f5103' },
+            { name: 'CracksHash', url: 'https://crackshash.com', icon: 'https://styles.redditmedia.com/t5_3090sa/styles/profileIcon_bxfg9p8ybkvg1.png?frame=1&auto=webp&crop=256%3A256%2Csmart&s=ff1659366d305bd65b78b76288805a9c1b02cf83' },
+            { name: 'AppDoze', url: 'https://appdoze.net', icon: 'https://pbs.twimg.com/profile_images/1550026434474700800/-IXPfJLc_400x400.jpg' },
+            { name: 'FileCR', url: 'https://filecr.com', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj5dvlG1WxQwQGm0FlMD_6-DXV09aj7_uI-8I40YDAvGN3AvOYkqWxsQFX&s=10' },
+            { name: 'Mutaz', url: 'https://mutaz.net', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhEIDzk73JHvzmiHEmRpQEeHKF-PqadgBhPtqdrsDfpQ&s' },
+          ],
+        },
+        {
+          title: 'Telegram Channels',
+          color: 'text-cyan-400',
+          items: [
+            { name: '3dsmaxArchitect', url: 'https://t.me/dsmaxachitect', icon: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/1280px-Telegram_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail' },
+            { name: 'R', url: 'https://t.me/graviton24', icon: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/1280px-Telegram_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail' },
+          ],
+        },
+      ];
+
+      newHistory.push({
+        type: 'info',
+        text: (
+          <div className="flex flex-col space-y-4 mt-2 ms-1 font-mono">
+            <div className="text-[#a6e3a1] font-bold">
+              {">>> SECRETAREA : RESOURCES <<<"}
+            </div>
+            {resourceGroups.map((group) => (
+              <div key={group.title} className="space-y-1.5">
+                <div className={`text-xs font-bold uppercase tracking-wider ${group.color}`}>
+                  [{group.title}]
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {group.items.map((res) => (
+                    <a
+                      key={res.name}
+                      href={res.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-slate-800/75 hover:bg-slate-800 border border-slate-700/70 hover:border-sky-400/50 transition-colors group"
+                    >
+                      <img
+                        src={res.icon}
+                        alt={res.name}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                        className="w-5 h-5 rounded object-cover shrink-0 bg-slate-900"
+                      />
+                      <span
+                        style={{ display: 'none' }}
+                        className="w-5 h-5 rounded bg-sky-500/20 border border-sky-400/30 text-sky-300 text-[10px] font-bold items-center justify-center shrink-0"
+                      >
+                        {res.name.slice(0, 1).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-slate-100 group-hover:text-sky-300 truncate">
+                          {res.name}
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate">
+                          {res.url.replace(/^https?:\/\//, '')}
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ),
       });
     } else if (lowerCmd === 'clear') {
       setTerminalHistory([]);
@@ -10092,8 +10152,6 @@ const paginatedData = useMemo(() => {
         onSelectGame={(game, action) => openResourceDetail(game, action)}
       />
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-4 md:pb-8 relative z-10">
-        <PartnersSection />
-
         <UpcomingTrailersSection sheetTrailersData={sheetUpcomingTrailers} />
 
         {/* PROMO SECTION */}
@@ -10264,7 +10322,7 @@ const paginatedData = useMemo(() => {
                      {t('Join Our')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-cyan-400 dark:to-blue-500">{t('Community')}</span>
                   </h2>
                   <p className="text-slate-600 dark:text-slate-300 text-sm md:text-base font-medium leading-relaxed">
-                     {t('Connect with us on Discord, Telegram, and Reddit for the latest updates and exclusive drops.')}
+                     {t('Connect with us on Discord and Telegram for the latest updates and exclusive drops.')}
                   </p>
                   
                   <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 sm:gap-4 justify-center lg:justify-start pt-2 sm:pt-4">
@@ -10275,10 +10333,6 @@ const paginatedData = useMemo(() => {
                      <a href="https://t.me/secretarea1337" target="_blank" rel="noopener noreferrer" className="px-5 py-3 sm:px-6 sm:py-3.5 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
                         <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
                         {t('Telegram')}
-                     </a>
-                     <a href="https://www.reddit.com/r/SecretArea1337/" target="_blank" rel="noopener noreferrer" className="px-5 py-3 sm:px-6 sm:py-3.5 bg-[#FF4500] hover:bg-[#e03d00] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto">
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.249 0 .688.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-2.465 3.928a.373.373 0 0 0-.279-.13.371.371 0 0 0-.281.133c-.092.11-.275.34-.693.34-.403 0-.583-.217-.677-.333a.372.372 0 0 0-.281-.132.373.373 0 0 0-.279.131.373.373 0 0 0-.022.502c.28.375.726.568 1.259.568.537 0 .983-.195 1.264-.57a.374.374 0 0 0-.01-.509z"/></svg>
-                        {t('Reddit')}
                      </a>
                   </div>
                </div>

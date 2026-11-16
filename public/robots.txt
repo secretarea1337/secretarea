@@ -16,10 +16,6 @@ Allow: /savegame/
 Allow: /savegame/*
 Allow: /extra/
 Allow: /extra/*
-Disallow: /personal-space
-Disallow: /personal-space/*
-Disallow: /roadmap
-Disallow: /roadmap/*
 Disallow: /disclaimer
 Disallow: /disclaimer/*
 Disallow: /profile
@@ -47,10 +43,6 @@ Allow: /savegame/
 Allow: /savegame/*
 Allow: /extra/
 Allow: /extra/*
-Disallow: /personal-space
-Disallow: /personal-space/*
-Disallow: /roadmap
-Disallow: /roadmap/*
 Disallow: /disclaimer
 Disallow: /disclaimer/*
 Disallow: /profile

@@ -307,18 +307,15 @@ const BottomNav: React.FC = () => {
           <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">{t('Home')}</span>
         </Link>
 
-        {/* Personal Space */}
-        <Link 
-          to="/personal-space"
-          className={`flex flex-col items-center justify-center w-full h-full transition-colors group active:scale-95 ${
-            location.pathname === '/personal-space' 
-              ? 'text-blue-600 dark:text-blue-400 font-bold' 
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+        {/* Library */}
+        <button 
+          type="button"
+          onClick={handleScrollToLibrary}
+          className="flex flex-col items-center justify-center w-full h-full transition-colors group active:scale-95 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 cursor-pointer"
         >
-          <Icon name="Activity" size={20} className={location.pathname === '/personal-space' ? 'scale-110' : ''} />
-          <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">{t('Personal')}</span>
-        </Link>
+          <Icon name="Gamepad2" size={20} />
+          <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">{t('Library')}</span>
+        </button>
 
         {/* Center SecretArea */}
         <Link
@@ -333,17 +330,17 @@ const BottomNav: React.FC = () => {
           </span>
         </Link>
 
-        {/* Roadmap */}
+        {/* Profile */}
         <Link 
-          to="/roadmap"
+          to="/profile"
           className={`flex flex-col items-center justify-center w-full h-full transition-colors group active:scale-95 ${
-            location.pathname === '/roadmap' 
+            location.pathname === '/profile' 
               ? 'text-blue-600 dark:text-blue-400 font-bold' 
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
-          <Icon name="Rocket" size={20} className={location.pathname === '/roadmap' ? 'scale-110' : ''} />
-          <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">{t('Roadmap')}</span>
+          <Icon name="User" size={20} className={location.pathname === '/profile' ? 'scale-110' : ''} />
+          <span className="text-[10px] mt-1 font-medium truncate max-w-[65px]">{t('My profile')}</span>
         </Link>
 
         {/* Menu Dropdown Trigger - Fixed with ref, proper outside click, and ALWAYS display Menu label */}

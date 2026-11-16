@@ -382,7 +382,7 @@ export async function ensureUserProfile(user: any): Promise<UserProfileData> {
     displayName: user.displayName || (isAdmin ? 'SecretArea' : (detectedMethod === 'discord' ? 'Discord Gamer' : (detectedMethod === 'github' ? 'GitHub Gamer' : 'Gamer'))),
     username: user.username || (user.email ? user.email.split('@')[0] : (detectedMethod === 'discord' ? 'discord_gamer' : 'gamer')),
     photoURL: user.photoURL || '',
-    bio: isAdmin ? DEFAULT_ADMIN_BIO : 'Exploring games and roadmaps in SecretArea.',
+    bio: isAdmin ? DEFAULT_ADMIN_BIO : 'Exploring games and digital tools in SecretArea.',
     bannerURL: '/images/userprofile.png',
     role: isAdmin ? 'admin' : 'user', // Default role for any login is 'user'
     loginMethod: detectedMethod,

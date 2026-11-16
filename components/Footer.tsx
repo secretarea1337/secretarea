@@ -43,9 +43,6 @@ const Footer: React.FC = () => {
               <a href="https://t.me/secretarea1337" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:text-[#0088cc] hover:border-[#0088cc]/40 hover:bg-[#0088cc]/5 transition-all shadow-sm" aria-label="Telegram">
                 <Icon name="Telegram" size={20} />
               </a>
-              <a href="https://www.reddit.com/r/SecretArea1337/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:text-[#FF4500] hover:border-[#FF4500]/40 hover:bg-[#FF4500]/5 transition-all shadow-sm" aria-label="Reddit">
-                <Icon name="Reddit" size={20} />
-              </a>
               <button onClick={(e) => { e.preventDefault(); setShowDonateModal(true); }} className="h-10 px-4 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 hover:scale-105 transition-all shadow-sm cursor-pointer z-50 relative">
                 <Icon name="Heart" size={18} className="animate-pulse" />
                 <span className="text-sm font-bold">{t('Support Us')}</span>
@@ -61,13 +58,9 @@ const Footer: React.FC = () => {
                 <Icon name="Wolf" size={18} className="transition-transform group-hover:scale-110" />
                 <span>{t('Secret Area')}</span>
               </Link>
-              <Link to="/personal-space" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
+              <Link to="/profile" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
                 <Icon name="User" size={18} className="text-slate-700 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
-                <span>{t('Personal Space')}</span>
-              </Link>
-              <Link to="/roadmap" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
-                <Icon name="Rocket" size={18} className="text-slate-700 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
-                <span>{t('Roadmap')}</span>
+                <span>{t('My profile')}</span>
               </Link>
               <Link to="/disclaimer" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
                 <Icon name="ShieldAlert" size={18} className="text-slate-700 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />

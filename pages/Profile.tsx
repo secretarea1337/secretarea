@@ -1159,7 +1159,7 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
 
                                 {/* Bio */}
                                 <p className="text-slate-600 dark:text-slate-300 text-sm max-w-3xl leading-relaxed">
-                                    {profileData.bio || 'Exploring games and roadmaps in SecretArea.'}
+                                    {profileData.bio || 'Exploring games and digital tools in SecretArea.'}
                                 </p>
 
                                 {/* Meta Tags: Email, Active, Hardware */}
@@ -1822,7 +1822,7 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
                                             )}
                                         </div>
                                     ) : (
-                                        <EmptyState message="No movements recorded yet. Start browsing roadmaps or games to see realtime results here!" />
+                                        <EmptyState message="No movements recorded yet. Start browsing games or tools to see realtime results here!" />
                                     )}
                                 </div>
                             )}

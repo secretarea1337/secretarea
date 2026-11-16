@@ -875,9 +875,6 @@ const UserDropdown = ({
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 font-semibold uppercase">Profile</span>
               </Link>
               <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-1 mx-3" />
-              <Link to="/roadmap" onClick={() => setIsOpen(false)} className="block px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors text-start">{t('Roadmap') || 'Roadmap'}</Link>
-              <Link to="/personal-space" onClick={() => setIsOpen(false)} className="block px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors text-start">{t('Personal Space') || 'Personal Space'}</Link>
-              <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-1 mx-3" />
               <Link to="/settings" onClick={() => setIsOpen(false)} className="block px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors text-start">{t('Settings') || 'Settings'}</Link>
               <button onClick={() => { handleLogout(); setIsOpen(false); }} className="w-full text-start px-5 py-2.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors">{t('Logout') || 'Logout'}</button>
             </div>
