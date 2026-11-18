@@ -5,6 +5,7 @@ import DonateModal from './DonateModal';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Icon from './Icon';
+import TrustpilotBadge from './TrustpilotBadge';
 
 const WindowsLogo = () => (
   <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -47,6 +48,7 @@ const Footer: React.FC = () => {
                 <Icon name="Heart" size={18} className="animate-pulse" />
                 <span className="text-sm font-bold">{t('Support Us')}</span>
               </button>
+              <TrustpilotBadge variant="pill" />
             </div>
           </div>
 
@@ -57,6 +59,10 @@ const Footer: React.FC = () => {
               <Link to="/" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
                 <Icon name="Wolf" size={18} className="transition-transform group-hover:scale-110" />
                 <span>{t('Secret Area')}</span>
+              </Link>
+              <Link to="/blog" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
+                <Icon name="Newspaper" size={18} className="text-slate-700 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
+                <span>{t('Blog')}</span>
               </Link>
               <Link to="/profile" className="flex items-center gap-3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
                 <Icon name="User" size={18} className="text-slate-700 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />

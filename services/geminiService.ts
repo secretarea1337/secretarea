@@ -1,4 +1,4 @@
-export const chatWithNexa = async (message: string) => {
+export const chatWithSecretArea = async (message: string) => {
   try {
     const response = await fetch("/api/chat", {
       method: "POST",

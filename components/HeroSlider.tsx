@@ -281,7 +281,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
       onTouchEnd={handleTouchEnd}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative w-full min-h-[100svh] md:min-h-[660px] lg:min-h-[700px] h-auto md:h-[86vh] lg:h-[90svh] md:max-h-[920px] overflow-hidden bg-slate-100 dark:bg-[#030712] flex flex-col pt-16 sm:pt-20 md:pt-24 transition-colors duration-300 select-none"
+      className="relative w-full min-h-[100svh] md:min-h-[84svh] lg:min-h-[88svh] h-auto overflow-hidden bg-slate-100 dark:bg-[#030712] flex flex-col pt-16 sm:pt-20 md:pt-24 transition-colors duration-300 select-none"
     >
       {/* Dynamic Animated Ambient Wallpaper Background */}
       <AnimatePresence initial={false}>
@@ -531,7 +531,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
       </div>
 
       {/* Interactive Bottom Control Strip & Thumbnail Bar */}
-      <div className="relative z-20 w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 pb-4 sm:pb-6 mt-auto">
+      <div className="relative z-20 w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 pb-6 sm:pb-7 lg:pb-8 mt-auto">
         <div className="flex flex-col gap-3 w-full">
 
           {/* Laptop & Desktop Interactive Thumbnail Cards (>= 1024px) */}
@@ -631,25 +631,33 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ games, onSelectGame }) => {
             </div>
           </div>
 
-          {/* Quick Jump to SecretArea Library Anchor Button */}
-          <div className="flex justify-center w-full pt-1">
+          {/* Quick Jump to SecretArea Library Anchor Control */}
+          <div className="flex items-center justify-center gap-4 w-full pt-2 sm:pt-3">
+            <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-slate-300/80 dark:via-slate-700/70 dark:to-slate-700/70 rtl:bg-gradient-to-l" />
             <button
+              type="button"
               onClick={scrollToLibrary}
-              className="group inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/75 hover:bg-slate-900 dark:bg-black/75 dark:hover:bg-black text-slate-200 hover:text-white border border-white/15 hover:border-sky-400/50 shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer text-xs"
+              className={`group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-4 py-2.5 sm:px-5 sm:py-2.5 min-h-[44px] rounded-xl bg-white/90 hover:bg-white dark:bg-slate-900/90 dark:hover:bg-slate-800 text-slate-900 dark:text-white border border-slate-200/90 hover:border-sky-400/70 dark:border-slate-700/80 dark:hover:border-sky-400/60 shadow-sm hover:shadow-md shadow-slate-900/5 dark:shadow-black/40 backdrop-blur-md transition-all duration-200 active:scale-[0.98] cursor-pointer ${
+                isRTL ? 'font-arabic' : ''
+              }`}
               title={t('SecretArea Library')}
               aria-label={t('SecretArea Library')}
             >
-              <span className="font-bold tracking-wider uppercase text-[11px]">
+              <span className="w-7 h-7 rounded-lg bg-sky-500/10 dark:bg-sky-400/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 transition-colors group-hover:bg-sky-500/20 dark:group-hover:bg-sky-400/25">
+                <Icon name="Gamepad" size={16} />
+              </span>
+              <span className="text-xs sm:text-sm font-extrabold tracking-wide uppercase whitespace-nowrap">
                 {t('SecretArea Library')}
               </span>
               <motion.span
                 animate={{ y: [0, 3, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-                className="text-sky-400 group-hover:text-sky-300 flex items-center"
+                transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+                className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-500/20"
               >
-                <Icon name="ChevronDown" size={13} />
+                <Icon name="ChevronDown" size={15} />
               </motion.span>
             </button>
+            <div className="hidden md:block flex-1 h-px bg-gradient-to-l from-transparent via-slate-300/80 to-slate-300/80 dark:via-slate-700/70 dark:to-slate-700/70 rtl:bg-gradient-to-r" />
           </div>
 
         </div>

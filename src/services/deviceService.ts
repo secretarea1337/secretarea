@@ -45,9 +45,9 @@ function getCanvasFingerprint(): string {
     ctx.fillRect(125, 1, 62, 20);
 
     ctx.fillStyle = '#069';
-    ctx.fillText('NEXA-1337-HWFP, \ud83d\ude03', 2, 15);
+    ctx.fillText('SECRETAREA-HWFP, \ud83d\ude03', 2, 15);
     ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-    ctx.fillText('NEXA-1337-HWFP, \ud83d\ude03', 4, 17);
+    ctx.fillText('SECRETAREA-HWFP, \ud83d\ude03', 4, 17);
 
     return hashString(canvas.toDataURL());
   } catch (e) {
@@ -208,7 +208,7 @@ export async function recordDeviceBan(params: {
       localStorage.setItem('secretarea_device_banned', 'true');
       localStorage.setItem('secretarea_device_blacklisted', 'true');
       localStorage.removeItem('secret_area_unlocked');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
     } catch (e) {}
   }
 }

@@ -24,7 +24,7 @@ export default {
           700: '#0369a1',
           900: '#0c4a6e',
         },
-        nexa: {
+        secretarea: {
           dark: '#0f172a',
           accent: '#38bdf8',
           card: '#1e293b'

@@ -712,7 +712,7 @@ export const LatestIntelPanel: React.FC<LatestIntelPanelProps> = ({
               )}
             </div>
 
-            {/* Clean Footer Section without NEXA 1337 network feed text */}
+            {/* Clean Footer Section without SecretArea network feed text */}
             <div className="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-900/70 text-center shrink-0 flex items-center justify-center text-[11px] text-slate-500 dark:text-slate-400">
               <span className="font-semibold">
                 {displayItems.length} {tr('recordsVerified')}

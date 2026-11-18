@@ -9,6 +9,7 @@ import {
 import confetti from 'canvas-confetti';
 import QRCode from 'qrcode';
 import { useLanguage, Language } from '../src/contexts/LanguageContext';
+import TrustpilotBadge from './TrustpilotBadge';
 
 interface DonateModalProps {
   open: boolean;
@@ -469,6 +470,9 @@ const DonateModal: React.FC<DonateModalProps> = ({ open, onClose }) => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Free Review Support via Trustpilot */}
+                  <TrustpilotBadge variant="card" className="mt-1" />
                 </div>
               </div>
 

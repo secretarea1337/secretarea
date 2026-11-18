@@ -327,9 +327,9 @@ const LoginModal = ({
 
       ensureUserProfile(profileObj as any).catch(() => {});
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
-      localStorage.setItem('nexa_user_profile', JSON.stringify(profileObj));
-      localStorage.setItem('nexa_discord_user', JSON.stringify(discordUser));
+      localStorage.removeItem('secretarea_guest_mode');
+      localStorage.setItem('secretarea_user_profile', JSON.stringify(profileObj));
+      localStorage.setItem('secretarea_discord_user', JSON.stringify(discordUser));
       window.dispatchEvent(new Event('authChange'));
       onClose();
       navigate('/profile');
@@ -360,9 +360,9 @@ const LoginModal = ({
 
         ensureUserProfile(profileObj).catch(() => {});
         localStorage.setItem('secret_area_unlocked', 'true');
-        localStorage.removeItem('nexa_guest_mode');
-        localStorage.setItem('nexa_user_profile', JSON.stringify(profileObj));
-        localStorage.setItem('nexa_discord_user', JSON.stringify(discordUser));
+        localStorage.removeItem('secretarea_guest_mode');
+        localStorage.setItem('secretarea_user_profile', JSON.stringify(profileObj));
+        localStorage.setItem('secretarea_discord_user', JSON.stringify(discordUser));
         window.dispatchEvent(new Event('authChange'));
         onClose();
         navigate('/profile');
@@ -385,7 +385,7 @@ const LoginModal = ({
         await ensureUserProfile(cred.user);
       }
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       window.dispatchEvent(new Event('authChange'));
       onClose();
       navigate('/profile');
@@ -465,7 +465,7 @@ const LoginModal = ({
         await ensureUserProfile(cred.user);
       }
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       window.dispatchEvent(new Event('authChange'));
       onClose();
       navigate('/profile');
@@ -505,7 +505,7 @@ const LoginModal = ({
         await ensureUserProfile(cred.user);
       }
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       window.dispatchEvent(new Event('authChange'));
       onClose();
       navigate('/profile');
@@ -1025,10 +1025,10 @@ const Header: React.FC = () => {
   const checkUnlocked = () =>
     localStorage.getItem('secret_area_unlocked') === 'true' ||
     localStorage.getItem('secret_area_unlocked') === 'guest' ||
-    localStorage.getItem('nexa_guest_mode') === 'true';
+    localStorage.getItem('secretarea_guest_mode') === 'true';
 
   const checkGuest = () =>
-    localStorage.getItem('nexa_guest_mode') === 'true' ||
+    localStorage.getItem('secretarea_guest_mode') === 'true' ||
     localStorage.getItem('secret_area_unlocked') === 'guest';
 
   const [isUnlocked, setIsUnlocked] = React.useState(checkUnlocked);
@@ -1067,7 +1067,7 @@ const Header: React.FC = () => {
         const guestActive = checkGuest();
         setIsGuest(guestActive);
         if (guestActive) {
-          const guestStr = localStorage.getItem('nexa_guest_profile');
+          const guestStr = localStorage.getItem('secretarea_guest_profile');
           if (guestStr) {
             try { setProfileData(JSON.parse(guestStr)); } catch (e) {}
           }
@@ -1104,7 +1104,7 @@ const Header: React.FC = () => {
 
   const handleLogout = async () => {
     localStorage.removeItem('secret_area_unlocked');
-    localStorage.removeItem('nexa_guest_mode');
+    localStorage.removeItem('secretarea_guest_mode');
     try {
       if (auth && typeof auth.signOut === 'function') {
         await auth.signOut();

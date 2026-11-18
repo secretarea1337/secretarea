@@ -41,6 +41,7 @@ import { BestGameSeriesSection } from '../components/BestGameSeriesSection';
 import DisclaimerModal from '../components/DisclaimerModal';
 import { NetworkDiagnostic } from '../components/NetworkDiagnostic';
 import DonateModal from "../components/DonateModal";
+import TrustpilotBadge from "../components/TrustpilotBadge";
 import SpinWheelIcon from '../components/SpinWheelIcon';
 import RandomGameSpinModal from '../components/RandomGameSpinModal';
 import MaintenancePage from '../components/MaintenancePage';
@@ -134,12 +135,12 @@ const AD_CONFIG = {
   banner3: {
     desktop: "https://blogger.googleusercontent.com/img/a/AVvXsEiSEyx6A5aXHKHgULr34BNBrXr1T1zwDDY6AzfDmoju_y5RofIrU3hD8656Wx_p2CWs-lye2-ZADxwF1OQdiP-iFeHacWd7d0zqi0mcXb6v6GkzSJ8wCnFt0OtmoHW9GigDZK9p5fu5QQw5tyQFoBNOS1dfcDt5e7HHMJD8FeNvGYcfRCoHHBtWdRxbyD_D",
     mobile: "https://blogger.googleusercontent.com/img/a/AVvXsEjR_OB4CqAqv5g8iq9gu8RKlm8ljH8iuEY-hTnqIlvEHfsz5iJI8QnYmBZ1i9gppBD0axWdTzu9np-rE8wKlDWJ4MjBhNo1uKMVux9ToeY2SK8fpoHy7v7cf493n_FbLo4nF8yOFLD9J2slTY4_3lHTaJJEsUB8U7MCGCHGwXR7ohzD0DdKSlamZY09wQJS",
-    link: "https://nexa1337.github.io/tool/"
+    link: "https://secretarea.site"
   },
   banner4: {
     desktop: "https://blogger.googleusercontent.com/img/a/AVvXsEgN1RQy1V6nR0osv3oNgTei-P_rZykcqf8dfM62jeYWIvxDOQ1fdpvz77DXZ6PWl98uPlH5BLO18M6B8wxeiVds49Ns1lcShLMmG_ASbuQl9-4i6UOaEGyh3Be8bfWnyhL-TZ4igI09zAsmWkqNaULeJxXPFqAQ81BHvQc0F-kZV2yzgF6g8JbWBL7cQhse",
     mobile: "https://blogger.googleusercontent.com/img/a/AVvXsEg8axchD7U8xQW7JH6F6twwFLvKCG0TfVUjWF8JsFctG42IY3y2pkQDHdRRkVExTf7ewL609l9ztXO9Dq61fPXZPfVlSXwEDB7olykBOZUV4LCzCqdA2SGw0KdJ1F_JPjJPgyl9gMi_gMD9raxaKGAAXqXcEucqknI232gkZPNpYR5OoIzrsmIWh03vy1JF",
-    link: "https://nexa1337.github.io/toolv2"
+    link: "https://secretarea.site"
   },
   banner5: {
     desktop: "https://blogger.googleusercontent.com/img/a/AVvXsEglYrDKA_WlXZZ7wipHFuzNUndOiozyVITTrLQJ7FAYnSVMpLao7EPdx10rxGkfrT9RtoSZadoVdD77Y_pElZyqWEcBX06-MrPBysM8180sAlzvk85IT35ztmLPEJ4ttQw5QNFqWW-8Pz5-hQBCg2AB0NeiviP4I1lXfk9DDta4f0IySkD1JBNUJ9jT8PQL",
@@ -1694,7 +1695,7 @@ const RewardLoginModal: React.FC<{
     try {
       await signInWithGoogle();
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       window.dispatchEvent(new Event('authChange'));
       onSuccess();
     } catch (err: any) {
@@ -2303,7 +2304,7 @@ const AboutSecretAreaSection: React.FC = () => {
                         <span>{t("What's SecretArea?")}</span>
                     </div>
                     
-                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
+                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight transition-colors duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {t('The idea behind')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">{t('SecretArea')}</span>
                     </h2>
                     
@@ -2467,7 +2468,7 @@ const FreeTimeTopStudiosSection: React.FC<{
                         <span>{t("Top Studios")}</span>
                     </div>
                     
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight transition-colors duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {t('Your Free Time Called.')}
                     </h2>
                     
@@ -4214,15 +4215,13 @@ export const ResourceDetailModal: React.FC<{
   };
 
   const handleCopyLink = () => {
-    const origin = window.location.origin.includes('localhost') || window.location.origin.includes('run.app')
-      ? window.location.origin
-      : 'https://nexa1337.com';
-    const sectionSlug = item.category === 'ps5' ? 'ps5' :
-                        item.category === 'hypervisor' ? 'hypervisor' :
-                        item.category === 'steamtools' ? 'steamtools' :
-                        item.category === 'architect' ? 'tools' :
-                        item.category === 'extra' ? 'savegame' : 'game';
-    const url = `${origin}/${sectionSlug}/${encodeURIComponent(item.id)}`;
+    const origin =
+      typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin.replace(/\/+$/, '')
+        : 'https://secretarea.site';
+    const sectionSlug = getCategoryPathPrefix(item.category);
+    const titleSlug = slugifyGameTitle(item.name, item.id);
+    const url = `${origin}/${sectionSlug}/${encodeURIComponent(titleSlug)}`;
     navigator.clipboard.writeText(url);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
@@ -4340,63 +4339,128 @@ export const ResourceDetailModal: React.FC<{
       className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-slate-50 dark:bg-[#0B1120] overflow-y-auto custom-scrollbar flex flex-col w-full h-full pb-16 sm:pb-20 md:pb-16"
       onClick={(e) => e.stopPropagation()}
     >
-      <Helmet>
-        <title>{(() => {
-          const cat = (item.category || '').toLowerCase();
-          if (cat === 'ps5') return `${item.name} PS5 Edition – Download & Requirements | Secret Area`;
-          if (cat === 'hypervisor') return `${item.name} Hypervisor Edition – Download & Setup | Secret Area`;
-          if (cat === 'steamtools') return `${item.name} SteamTools – Files & Details | Secret Area`;
-          if (cat === 'architect' || cat === 'tools') return `${item.name} – Developer & Gaming Tools | Secret Area`;
-          if (cat === 'extra' || cat === 'savegame') return `${item.name} – Save Game Download & Backup | Secret Area`;
-          return `${item.name} – Download, System Requirements & Install | Secret Area`;
-        })()}</title>
-        <meta name="description" content={`Download ${item.name} (${item.category.toUpperCase()}). Version: ${item.version || 'v1.0'}. Size: ${item.originalSize || item.repackSize || 'N/A'}. Full installation guide, system specifications, and direct download mirrors.`} />
-        <meta name="keywords" content={`${item.name}, ${item.category}, download ${item.name}, ${item.genres || 'gaming'}, Secret Area, repack, free download, PC games, PS5 games, hypervisor, steamtools`} />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        {(() => {
-          const secSlug = getCategoryPathPrefix(item.category);
-          const itemSlug = slugifyGameTitle(item.name, item.id);
-          const itemUrl = `https://nexa1337.com/${secSlug}/${encodeURIComponent(itemSlug)}`;
-          return (
-            <>
-              <link rel="canonical" href={itemUrl} />
-              <meta property="og:url" content={itemUrl} />
-            </>
-          );
-        })()}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${item.name} | Secret Area`} />
-        <meta name="twitter:description" content={`Download ${item.name} (${item.category.toUpperCase()}). Version: ${item.version || 'v1.0'}. Size: ${item.originalSize || item.repackSize || 'N/A'}.`} />
-        <meta name="twitter:image" content={item.coverImage} />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": item.category === 'architect' ? "SoftwareApplication" : "VideoGame",
-            "name": item.name,
-            "description": item.description || `Download ${item.name} on Secret Area.`,
-            "image": item.coverImage,
-            "applicationCategory": item.category === 'architect' ? "UtilityApplication" : "GameApplication",
-            "operatingSystem": item.category === 'ps5' ? "PlayStation 5" : "Windows 10/11",
-            "gamePlatform": item.category === 'ps5' ? ["PlayStation 5"] : ["PC", "Windows"],
-            "genre": (item.genres || "").split(',').map((s: string) => s.trim()).filter(Boolean),
-            "author": {
-              "@type": "Organization",
-              "name": item.publishBy || item.developer || item.repackBy || "SecretArea"
+      {(() => {
+        const origin =
+          typeof window !== 'undefined' && window.location.origin
+            ? window.location.origin.replace(/\/+$/, '')
+            : 'https://secretarea.site';
+        const cat = (item.category || '').toLowerCase();
+        const secSlug = getCategoryPathPrefix(item.category);
+        const itemSlug = slugifyGameTitle(item.name, item.id);
+        const itemUrl = `${origin}/${secSlug}/${encodeURIComponent(itemSlug)}`;
+        const hubUrl = `${origin}/${secSlug}`;
+        const sectionLabel =
+          cat === 'ps5'
+            ? 'PS5 Games'
+            : cat === 'hypervisor'
+            ? 'Game Hypervisor'
+            : cat === 'steamtools'
+            ? 'SteamTools'
+            : cat === 'architect' || cat === 'tools'
+            ? 'Tools & Software'
+            : cat === 'extra' || cat === 'savegame'
+            ? 'SaveGame Archives'
+            : 'PC Games';
+
+        const pageTitle =
+          cat === 'ps5'
+            ? `${item.name} PS5 Edition – Specs & Links | Secret Area`
+            : cat === 'hypervisor'
+            ? `${item.name} Hypervisor – Setup & Files | Secret Area`
+            : cat === 'steamtools'
+            ? `${item.name} SteamTools – Files & Guide | Secret Area`
+            : cat === 'architect' || cat === 'tools'
+            ? `${item.name} – Software Tool & Specs | Secret Area`
+            : cat === 'extra' || cat === 'savegame'
+            ? `${item.name} – Save Game Files | Secret Area`
+            : `${item.name} – Free PC Game, Specs & Mirrors | Secret Area`;
+
+        const rawDesc = `Download ${item.name} (${sectionLabel}). Version ${item.version || 'Latest'}, size ${item.repackSize || item.originalSize || 'N/A'}. Verified mirrors, system requirements & setup guide on Secret Area.`;
+        const seoDesc = rawDesc.length > 160 ? `${rawDesc.slice(0, 157).trimEnd()}...` : rawDesc;
+        const resolvedCover = item.coverImage || `${origin}/images/hero01.png`;
+
+        const schemaGraph = {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': cat === 'architect' || cat === 'tools' ? 'SoftwareApplication' : 'VideoGame',
+              name: item.name,
+              url: itemUrl,
+              description: item.description || seoDesc,
+              image: resolvedCover,
+              applicationCategory: cat === 'architect' || cat === 'tools' ? 'UtilitiesApplication' : 'GameApplication',
+              operatingSystem: cat === 'ps5' ? 'PlayStation 5' : 'Windows 10, Windows 11',
+              gamePlatform: cat === 'ps5' ? ['PlayStation 5'] : ['PC', 'Windows'],
+              genre: (item.genres || '').split(',').map((s: string) => s.trim()).filter(Boolean),
+              softwareVersion: item.version || '1.0',
+              author: {
+                '@type': 'Organization',
+                name: item.publishBy || item.developer || item.repackBy || 'SecretArea',
+              },
+              publisher: {
+                '@type': 'Organization',
+                name: item.publishBy || 'SecretArea',
+              },
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+                availability: 'https://schema.org/InStock',
+                url: itemUrl,
+              },
             },
-            "publisher": {
-              "@type": "Organization",
-              "name": item.publishBy || "SecretArea"
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: `${origin}/`,
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: sectionLabel,
+                  item: hubUrl,
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: item.name,
+                  item: itemUrl,
+                },
+              ],
             },
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD",
-              "availability": "https://schema.org/InStock"
-            }
-          })}
-        </script>
-      </Helmet>
+          ],
+        };
+
+        return (
+          <Helmet>
+            <title>{pageTitle}</title>
+            <meta name="description" content={seoDesc} />
+            <meta
+              name="keywords"
+              content={`${item.name}, download ${item.name}, ${item.name} repack, ${sectionLabel}, ${item.genres || 'PC games'}, Secret Area`}
+            />
+            <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+            <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+            <link rel="canonical" href={itemUrl} />
+            <meta property="og:site_name" content="Secret Area" />
+            <meta property="og:type" content="article" />
+            <meta property="og:title" content={pageTitle} />
+            <meta property="og:description" content={seoDesc} />
+            <meta property="og:url" content={itemUrl} />
+            <meta property="og:image" content={resolvedCover} />
+            <meta property="og:image:alt" content={item.name} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={pageTitle} />
+            <meta name="twitter:description" content={seoDesc} />
+            <meta name="twitter:image" content={resolvedCover} />
+            <script type="application/ld+json">{JSON.stringify(schemaGraph)}</script>
+          </Helmet>
+        );
+      })()}
 
       {/* Header with Breadcrumb and Close Button */}
       <div className="sticky top-0 z-50 bg-slate-50/90 dark:bg-[#0B1120]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/50 px-4 sm:px-8 py-4 flex items-center justify-between">
@@ -5247,6 +5311,7 @@ export const ResourceDetailModal: React.FC<{
                                       <Icon name="Telegram" size={18} className="shrink-0" />
                                       <span>{t('Join Telegram')}</span>
                                   </a>
+                                  <TrustpilotBadge variant="pill" className="min-h-[46px] px-4 justify-center sm:col-span-2 lg:col-span-1" />
                               </div>
 
                               <p className="text-slate-500 dark:text-slate-400 text-xs font-medium leading-relaxed">
@@ -6330,19 +6395,22 @@ const SupportUsBanner: React.FC = () => {
                     <Icon name="Heart" size={14} className="animate-pulse" />
                     <span>{t('Support The Community')}</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter transition-colors duration-300" style={{ fontFamily: "'Nexa', 'Inter', sans-serif" }}>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter transition-colors duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {t('Keep Us')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{t('Alive')}</span>
                 </h2>
                 <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 max-w-md font-medium leading-relaxed transition-colors duration-300">
                     {t('Help us maintain the servers and continue delivering premium content. Every contribution makes a huge difference.')}
                 </p>
-                <button 
-                    onClick={() => setIsDonateOpen(true)}
-                    className="mt-2 sm:mt-4 w-full sm:w-auto justify-center px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs sm:text-sm uppercase tracking-widest rounded-2xl shadow-[0_0_30px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
-                >
-                    <Icon name="Heart" size={20} className="fill-current" />
-                    {t('Support Us')}
-                </button>
+                <div className="mt-2 sm:mt-4 w-full sm:w-auto md:w-full lg:w-auto flex flex-col sm:flex-row md:flex-col lg:flex-row flex-wrap items-stretch sm:items-center md:items-stretch lg:items-center gap-3">
+                    <button 
+                        onClick={() => setIsDonateOpen(true)}
+                        className="w-full sm:w-auto md:w-full lg:w-auto justify-center px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs sm:text-sm uppercase tracking-widest rounded-2xl shadow-[0_0_30px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-3 cursor-pointer"
+                    >
+                        <Icon name="Heart" size={20} className="fill-current shrink-0" />
+                        <span>{t('Support Us')}</span>
+                    </button>
+                    <TrustpilotBadge variant="button" className="md:w-full lg:w-auto" />
+                </div>
             </div>
 
             {/* Right Side Image */}
@@ -6572,17 +6640,17 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       return localStorage.getItem('secret_area_unlocked') === 'true';
     }
     const val = localStorage.getItem('secret_area_unlocked');
-    if (val === 'true' || val === 'guest' || localStorage.getItem('nexa_guest_mode') === 'true') {
+    if (val === 'true' || val === 'guest' || localStorage.getItem('secretarea_guest_mode') === 'true') {
       return true;
     }
     // Auto-bypass terminal for new visitor:
     localStorage.setItem('secret_area_unlocked', 'guest');
-    localStorage.setItem('nexa_guest_mode', 'true');
+    localStorage.setItem('secretarea_guest_mode', 'true');
     return true;
   });
 
   const [isGuestMode, setIsGuestMode] = useState(() => {
-    return localStorage.getItem('nexa_guest_mode') === 'true' || localStorage.getItem('secret_area_unlocked') === 'guest';
+    return localStorage.getItem('secretarea_guest_mode') === 'true' || localStorage.getItem('secret_area_unlocked') === 'guest';
   });
 
   // Hacker Loader: On visiting the site (when not on terminal page), show the loader page
@@ -6599,9 +6667,9 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     if (targetUnlocked) {
       localStorage.setItem('secret_area_unlocked', targetGuest ? 'guest' : 'true');
       if (targetGuest) {
-        localStorage.setItem('nexa_guest_mode', 'true');
+        localStorage.setItem('secretarea_guest_mode', 'true');
       } else {
-        localStorage.removeItem('nexa_guest_mode');
+        localStorage.removeItem('secretarea_guest_mode');
       }
       setIsUnlocked(true);
       setIsGuestMode(targetGuest);
@@ -6626,7 +6694,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
   useEffect(() => {
     const handleAuthChange = () => {
-      const isGuest = localStorage.getItem('nexa_guest_mode') === 'true' || localStorage.getItem('secret_area_unlocked') === 'guest';
+      const isGuest = localStorage.getItem('secretarea_guest_mode') === 'true' || localStorage.getItem('secret_area_unlocked') === 'guest';
       const isTrue = localStorage.getItem('secret_area_unlocked') === 'true';
       const unlocked = isTrue || isGuest;
       setIsUnlocked(unlocked);
@@ -6669,9 +6737,9 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
           ensureUserProfile(profileObj).catch(() => {});
         });
         localStorage.setItem('secret_area_unlocked', 'true');
-        localStorage.removeItem('nexa_guest_mode');
-        localStorage.setItem('nexa_user_profile', JSON.stringify(profileObj));
-        localStorage.setItem('nexa_discord_user', JSON.stringify(discordUser));
+        localStorage.removeItem('secretarea_guest_mode');
+        localStorage.setItem('secretarea_user_profile', JSON.stringify(profileObj));
+        localStorage.setItem('secretarea_discord_user', JSON.stringify(discordUser));
         sessionStorage.removeItem('open_terminal');
         setShowTerminal(false);
         setIsUnlocked(true);
@@ -7106,6 +7174,25 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
       setOpenedViaRandom(false);
     }
   }, [routerLocation.state, routerLocation.search, routerLocation.pathname, allResources]);
+
+  // Sync active catalog tab when visiting direct category hub routes (/game, /ps5, /hypervisor, /steamtools, /tools, /savegame)
+  useEffect(() => {
+    const cleanPath = routerLocation.pathname.replace(/\/+$/, '').toLowerCase();
+    const tabMap: Record<string, 'game' | 'hypervisor' | 'steamtools' | 'ps5' | 'architect' | 'extra'> = {
+      '/game': 'game',
+      '/ps5': 'ps5',
+      '/hypervisor': 'hypervisor',
+      '/steamtools': 'steamtools',
+      '/tools': 'architect',
+      '/architect': 'architect',
+      '/savegame': 'extra',
+      '/extra': 'extra',
+    };
+    const matchedTab = tabMap[cleanPath];
+    if (matchedTab) {
+      setActiveTab(matchedTab);
+    }
+  }, [routerLocation.pathname]);
 
   // Handle direct selection from Recent Products panel
   useEffect(() => {
@@ -7619,7 +7706,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const isGmailUser = Boolean(
     currentUser &&
     !isGuestMode &&
-    localStorage.getItem('nexa_guest_mode') !== 'true' &&
+    localStorage.getItem('secretarea_guest_mode') !== 'true' &&
     localStorage.getItem('secret_area_unlocked') !== 'guest' &&
     (currentUser.email || currentUser.providerData?.some((p: any) => p?.providerId === 'google.com'))
   );
@@ -7633,7 +7720,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   const [attemptsLeft, setAttemptsLeft] = useState(2);
 
   useEffect(() => {
-    const accepted = localStorage.getItem('nexa_disclaimer_accepted');
+    const accepted = localStorage.getItem('secretarea_disclaimer_accepted');
     if (!accepted) {
         setShowDisclaimer(true);
     }
@@ -7645,14 +7732,14 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
   // --- INITIALIZE LOCKOUT STATE ---
   useEffect(() => {
-    const lockout = localStorage.getItem('nexa_math_lockout');
+    const lockout = localStorage.getItem('secretarea_math_lockout');
     if (lockout) {
         const time = parseInt(lockout);
         if (time > Date.now()) {
             setMathLockoutTime(time);
             setMathStatus('locked');
         } else {
-            localStorage.removeItem('nexa_math_lockout');
+            localStorage.removeItem('secretarea_math_lockout');
         }
     }
   }, []);
@@ -7713,14 +7800,14 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
 
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
-    localStorage.setItem('nexa_disclaimer_accepted', 'true');
+    localStorage.setItem('secretarea_disclaimer_accepted', 'true');
   };
 
   useEffect(() => {
     if (isUnlocked && !showHackerLoader) {
-        const hasSeenWolfGreeting = localStorage.getItem('nexa_wolf_greeting_seen');
+        const hasSeenWolfGreeting = localStorage.getItem('secretarea_wolf_greeting_seen');
         if (hasSeenWolfGreeting) return;
-        localStorage.setItem('nexa_wolf_greeting_seen', 'true');
+        localStorage.setItem('secretarea_wolf_greeting_seen', 'true');
 
         const t1 = setTimeout(() => {
             const id = Date.now();
@@ -7752,7 +7839,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
   // Math Game Functions
   const startMathGame = () => {
     // Check for lockout first
-    const lockout = localStorage.getItem('nexa_math_lockout');
+    const lockout = localStorage.getItem('secretarea_math_lockout');
     if (lockout) {
         const time = parseInt(lockout);
         if (time > Date.now()) {
@@ -7761,7 +7848,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             setShowMathGame(true);
             return;
         } else {
-            localStorage.removeItem('nexa_math_lockout');
+            localStorage.removeItem('secretarea_math_lockout');
         }
     }
 
@@ -7830,7 +7917,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
     if (Math.abs(parseFloat(mathInput) - mathProblem.a) < 0.1) {
         setMathStatus('won');
         // Clear any previous attempts/lockout if won
-        localStorage.removeItem('nexa_math_lockout');
+        localStorage.removeItem('secretarea_math_lockout');
     } else {
         const newAttempts = attemptsLeft - 1;
         setAttemptsLeft(newAttempts);
@@ -7838,7 +7925,7 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
         if (newAttempts <= 0) {
             // LOCKOUT LOGIC
             const lockTime = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-            localStorage.setItem('nexa_math_lockout', lockTime.toString());
+            localStorage.setItem('secretarea_math_lockout', lockTime.toString());
             setMathLockoutTime(lockTime);
             setMathStatus('locked');
         } else {
@@ -8992,9 +9079,9 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
         };
 
         localStorage.setItem('secret_area_unlocked', 'true');
-        localStorage.removeItem('nexa_guest_mode');
-        localStorage.setItem('nexa_user_profile', JSON.stringify(profileObj));
-        localStorage.setItem('nexa_discord_user', JSON.stringify(discordUser));
+        localStorage.removeItem('secretarea_guest_mode');
+        localStorage.setItem('secretarea_user_profile', JSON.stringify(profileObj));
+        localStorage.setItem('secretarea_discord_user', JSON.stringify(discordUser));
         setIsUnlocked(true);
         setIsGuestMode(false);
         setShowHackerLoader(true);
@@ -9134,9 +9221,9 @@ const paginatedData = useMemo(() => {
         ensureUserProfile(profileObj).catch(() => {});
       });
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
-      localStorage.setItem('nexa_user_profile', JSON.stringify(profileObj));
-      localStorage.setItem('nexa_discord_user', JSON.stringify(discordUser));
+      localStorage.removeItem('secretarea_guest_mode');
+      localStorage.setItem('secretarea_user_profile', JSON.stringify(profileObj));
+      localStorage.setItem('secretarea_discord_user', JSON.stringify(discordUser));
       setIsUnlocked(true);
       setIsGuestMode(false);
       setShowHackerLoader(true);
@@ -9160,7 +9247,7 @@ const paginatedData = useMemo(() => {
         });
       }
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       sessionStorage.removeItem('open_terminal');
       setShowTerminal(false);
       setIsUnlocked(true);
@@ -9255,7 +9342,7 @@ const paginatedData = useMemo(() => {
         });
       }
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       sessionStorage.removeItem('open_terminal');
       setShowTerminal(false);
       setIsUnlocked(true);
@@ -9301,7 +9388,7 @@ const paginatedData = useMemo(() => {
         });
       }
       localStorage.setItem('secret_area_unlocked', 'true');
-      localStorage.removeItem('nexa_guest_mode');
+      localStorage.removeItem('secretarea_guest_mode');
       sessionStorage.removeItem('open_terminal');
       setShowTerminal(false);
       setIsUnlocked(true);
@@ -9326,9 +9413,9 @@ const paginatedData = useMemo(() => {
   };
 
   if (maintenanceConfig?.active) {
-    // Admin bypass: append ?bypass=nexa to the URL
+    // Admin bypass: append ?bypass=secretarea to the URL
     const urlParams = new URLSearchParams(window.location.search);
-    const isBypass = urlParams.get('bypass') === 'nexa';
+    const isBypass = urlParams.get('bypass') === 'secretarea';
     
     if (!isBypass) {
         return <MaintenancePage endTime={maintenanceConfig.endTime} message={maintenanceConfig.message} />;

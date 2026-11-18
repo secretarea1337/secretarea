@@ -9,7 +9,7 @@ class SpinAudioEngine {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.isMuted = localStorage.getItem('nexa_spin_sound_muted') === 'true';
+      this.isMuted = localStorage.getItem('secretarea_spin_sound_muted') === 'true';
     }
   }
 
@@ -34,7 +34,7 @@ class SpinAudioEngine {
   public setMuted(muted: boolean): void {
     this.isMuted = muted;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('nexa_spin_sound_muted', muted ? 'true' : 'false');
+      localStorage.setItem('secretarea_spin_sound_muted', muted ? 'true' : 'false');
     }
     if (muted) {
       this.stopAll();

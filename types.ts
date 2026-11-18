@@ -100,7 +100,7 @@ export interface GamingStat {
 }
 
 // Business Specific Types
-export interface NexaService {
+export interface BusinessService {
   title: string;
   description: string;
   price: string;
@@ -108,7 +108,7 @@ export interface NexaService {
   category: string;
 }
 
-export interface NexaProject {
+export interface BusinessProject {
   title: string;
   description: string;
   category: 'web' | 'branding' | 'ai';
@@ -156,9 +156,9 @@ export interface CategoryData {
   gamingMarketStats?: GamingStat[];
   categorySocials?: { platform: string; url: string; icon: string }[];
   // Business Specific Fields
-  nexaServices?: NexaService[];
-  nexaProjects?: NexaProject[];
-  nexaBusinessLinks?: { label: string; url: string; description: string }[];
+  businessServices?: BusinessService[];
+  businessProjects?: BusinessProject[];
+  businessLinks?: { label: string; url: string; description: string }[];
 }
 
 export interface NavItem {

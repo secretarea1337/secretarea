@@ -229,7 +229,7 @@ export function computeUserBadge(user: UserProfileData | any): string {
 
 export function getLocalProfile(uid: string): UserProfileData | null {
   try {
-    const key = uid === 'guest' ? 'nexa_guest_profile' : `secretarea_profile_${uid}`;
+    const key = uid === 'guest' ? 'secretarea_guest_profile' : `secretarea_profile_${uid}`;
     const data = localStorage.getItem(key);
     if (data) {
       return JSON.parse(data);
@@ -242,7 +242,7 @@ export function getLocalProfile(uid: string): UserProfileData | null {
 
 export function saveLocalProfile(uid: string, profile: UserProfileData): void {
   try {
-    const key = uid === 'guest' ? 'nexa_guest_profile' : `secretarea_profile_${uid}`;
+    const key = uid === 'guest' ? 'secretarea_guest_profile' : `secretarea_profile_${uid}`;
     localStorage.setItem(key, JSON.stringify(profile));
     if (typeof window !== 'undefined') {
       setTimeout(() => {
@@ -357,7 +357,7 @@ export async function ensureUserProfile(user: any): Promise<UserProfileData> {
       const merged: UserProfileData = { ...DEFAULT_PROFILE, ...data, ...updated, uid };
       saveLocalProfile(uid, merged);
       if (isAdmin) {
-        const adminName = merged.displayName && !['NEXA 1337', 'NEXA', 'SecretArea Gamer'].includes(merged.displayName)
+        const adminName = merged.displayName && merged.displayName !== 'SecretArea Gamer'
           ? merged.displayName
           : (user.displayName || 'SecretArea');
         saveAdminPublicProfile({
@@ -975,7 +975,7 @@ export function getCachedAdminBio(): string {
 export function getCachedAdminName(): string {
   try {
     const cached = localStorage.getItem('secretarea_admin_name');
-    if (cached && cached.trim() !== '' && cached !== 'NEXA 1337' && cached !== 'NEXA' && cached !== 'SecretArea Gamer') {
+    if (cached && cached.trim() !== '' && cached !== 'SecretArea Gamer') {
       return cached;
     }
     // If current logged-in user is an admin, check their active profile display name
@@ -996,10 +996,10 @@ export function getCachedAdminName(): string {
 }
 
 export function subscribeAdminPublicProfile(callback: (data: AdminPublicProfile) => void): () => void {
-  // Clear any obsolete hardcoded 'NEXA 1337', 'NEXA', or 'SecretArea Gamer' placeholder in local storage
+  // Clear any obsolete hardcoded 'SecretArea Gamer' placeholder in local storage
   try {
     const rawName = localStorage.getItem('secretarea_admin_name');
-    if (rawName === 'NEXA 1337' || rawName === 'NEXA' || rawName === 'SecretArea Gamer') {
+    if (rawName === 'SecretArea Gamer') {
       localStorage.removeItem('secretarea_admin_name');
     }
   } catch (e) {}
@@ -1070,13 +1070,13 @@ export function subscribeAdminPublicProfile(callback: (data: AdminPublicProfile)
         const d = snap.data();
         const photo = d.photoURL || d.avatarURL || getCachedAdminAvatar();
         let displayName = d.displayName;
-        if (!displayName || displayName.trim() === '' || displayName === 'NEXA 1337' || displayName === 'NEXA' || displayName === 'SecretArea Gamer') {
+        if (!displayName || displayName.trim() === '' || displayName === 'SecretArea Gamer') {
           displayName = getCachedAdminName();
         }
         const bio = d.bio !== undefined && d.bio !== null ? d.bio : getCachedAdminBio();
 
         if (photo) localStorage.setItem('secretarea_admin_avatar', photo);
-        if (displayName && displayName !== 'NEXA 1337' && displayName !== 'NEXA' && displayName !== 'SecretArea Gamer') {
+        if (displayName && displayName !== 'SecretArea Gamer') {
           localStorage.setItem('secretarea_admin_name', displayName);
         }
         if (bio) localStorage.setItem('secretarea_admin_bio', bio);

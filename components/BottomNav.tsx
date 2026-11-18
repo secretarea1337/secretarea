@@ -17,7 +17,7 @@ const BottomNav: React.FC = () => {
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   const checkGuest = () =>
-    localStorage.getItem('nexa_guest_mode') === 'true' ||
+    localStorage.getItem('secretarea_guest_mode') === 'true' ||
     localStorage.getItem('secret_area_unlocked') === 'guest';
 
   const [isGuest, setIsGuest] = useState(checkGuest);
@@ -122,7 +122,7 @@ const BottomNav: React.FC = () => {
   const handleLogout = async () => {
     setIsMenuOpen(false);
     localStorage.removeItem('secret_area_unlocked');
-    localStorage.removeItem('nexa_guest_mode');
+    localStorage.removeItem('secretarea_guest_mode');
     try {
       if (auth && typeof auth.signOut === 'function') {
         await auth.signOut();

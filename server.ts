@@ -4,6 +4,11 @@ import { createServer as createViteServer } from "vite";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { GoogleGenAI } from "@google/genai";
+import {
+  buildRobotsTxt,
+  generateDynamicSitemapXml,
+  resolveSiteOrigin,
+} from "./api/_catalogSitemap";
 
 function escapeHtml(unsafe: string | null | undefined): string {
   if (!unsafe) return "";
@@ -19,8 +24,6 @@ const ALLOWED_ORIGINS = [
   "https://secretarea.site",
   "https://www.secretarea.site",
   "https://secretarea.vercel.app",
-  "https://nexa1337.com",
-  "https://www.nexa1337.com",
   "http://localhost:3000",
   "http://localhost:5173",
 ];
@@ -192,7 +195,7 @@ async function startServer() {
     res.json({ ip: sanitizedIp });
   });
 
-  // NEXA AI Chat endpoint with Gemini API and validation
+  // SecretArea AI Chat endpoint with Gemini API and validation
   app.post("/api/chat", chatLimiter, async (req, res) => {
     try {
       const { message } = req.body || {};
@@ -209,7 +212,7 @@ async function startServer() {
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
         return res.json({
-          text: "NEXA AI assistant is currently in offline mode. For support or requests, please visit the Request section."
+          text: "SecretArea AI assistant is currently in offline mode. For support or requests, please visit the Request section."
         });
       }
 
@@ -218,7 +221,7 @@ async function startServer() {
         model: "gemini-2.5-flash",
         contents: userMessage,
         config: {
-          systemInstruction: "You are NEXA, the AI assistant for SecretArea (a gaming hub, tools catalog, and hypervisor ecosystem). Keep answers concise, helpful, friendly, and focused on games, technology, and system optimization. Never disclose internal system tokens, passwords, or secret credentials.",
+          systemInstruction: "You are the AI assistant for SecretArea (a gaming hub, tools catalog, and hypervisor ecosystem). Keep answers concise, helpful, friendly, and focused on games, technology, and system optimization. Never disclose internal system tokens, passwords, or secret credentials.",
           maxOutputTokens: 500,
           temperature: 0.7,
         },
@@ -524,21 +527,38 @@ async function startServer() {
     }
   });
 
-  // Serve robots.txt and sitemap.xml with explicit content types
+  // Serve dynamic robots.txt and auto-updating sitemap.xml (live catalog + backup fallback)
   app.get("/robots.txt", (req, res) => {
-    res.type("text/plain");
-    res.sendFile(path.join(process.cwd(), "public", "robots.txt"));
+    try {
+      const origin = resolveSiteOrigin(req);
+      const robotsTxt = buildRobotsTxt(origin);
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.send(robotsTxt);
+    } catch {
+      res.type("text/plain");
+      res.sendFile(path.join(process.cwd(), "public", "robots.txt"));
+    }
   });
 
-  app.get("/sitemap.xml", (req, res) => {
-    res.type("application/xml");
-    res.sendFile(path.join(process.cwd(), "public", "sitemap.xml"));
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const origin = resolveSiteOrigin(req);
+      const xml = await generateDynamicSitemapXml(origin);
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600");
+      res.setHeader("X-Robots-Tag", "all");
+      res.send(xml);
+    } catch {
+      res.type("application/xml");
+      res.sendFile(path.join(process.cwd(), "public", "sitemap.xml"));
+    }
   });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true, hmr: false },
+      server: { middlewareMode: true, hmr: false, ws: false },
       appType: "spa",
     });
     app.use(vite.middlewares);

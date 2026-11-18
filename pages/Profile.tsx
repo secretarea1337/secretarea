@@ -4,6 +4,7 @@ import { useLanguage } from '../src/contexts/LanguageContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Icon from '../components/Icon';
 import AdminReportsManager from '../components/AdminReportsManager';
+import AdminBlogManager from '../components/AdminBlogManager';
 import { subscribeReports } from '../src/services/reportService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -42,7 +43,8 @@ import {
   TbTrophy,
   TbMap,
   TbStar,
-  TbRadar
+  TbRadar,
+  TbNews
 } from 'react-icons/tb';
 import { FaAngleLeft, FaAngleRight, FaArrowLeft } from 'react-icons/fa6';
 import { auth } from '../src/firebase';
@@ -111,10 +113,15 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState(() => {
-        if (defaultTab) return defaultTab;
-        if (typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.search.includes('reports'))) {
-            return 'Reports & Fixes';
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('tab') === 'blog') return 'Blog Studio';
+            if (params.get('tab') === 'reports') return 'Reports & Fixes';
+            if (window.location.pathname === '/admin' || window.location.search.includes('reports')) {
+                return 'Reports & Fixes';
+            }
         }
+        if (defaultTab) return defaultTab;
         return 'Overview';
     });
     const [pendingReportsCount, setPendingReportsCount] = useState<number>(0);
@@ -433,7 +440,7 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
         loadResources();
     }, []);
 
-    const isUnlocked = localStorage.getItem('secret_area_unlocked') === 'true' || localStorage.getItem('nexa_guest_mode') === 'true';
+    const isUnlocked = localStorage.getItem('secret_area_unlocked') === 'true' || localStorage.getItem('secretarea_guest_mode') === 'true';
 
     useEffect(() => {
         let unsubscribeProfile: (() => void) | null = null;
@@ -531,9 +538,13 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
     // Handle deep-link to tab
     useEffect(() => {
         const search = new URLSearchParams(location.search);
-        if (defaultTab) {
+        if (search.get('tab') === 'blog') {
+            setActiveTab('Blog Studio');
+        } else if (search.get('tab') === 'reports' || search.get('tab') === 'admin') {
+            setActiveTab('Reports & Fixes');
+        } else if (defaultTab) {
             setActiveTab(defaultTab);
-        } else if (location.pathname === '/admin' || search.get('tab') === 'reports' || search.get('tab') === 'admin') {
+        } else if (location.pathname === '/admin') {
             setActiveTab('Reports & Fixes');
         }
     }, [defaultTab, location.pathname, location.search]);
@@ -613,7 +624,7 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
         'Game history', 
         'Favorites', 
         'Live Movement',
-        ...(isAdmin ? ['Reports & Fixes', 'Users Directory'] : [])
+        ...(isAdmin ? ['Blog Studio', 'Reports & Fixes', 'Users Directory'] : [])
     ];
 
     // Filtered users & pagination for admin
@@ -1207,6 +1218,7 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
                                         : 'text-slate-500 dark:text-[#8892b0] border-transparent hover:text-slate-800 dark:hover:text-slate-300'
                                 }`}
                             >
+                                {tab === 'Blog Studio' && <TbNews size={16} className="text-[#29aaea]" />}
                                 {tab === 'Users Directory' && <TbUsers size={16} className="text-amber-400" />}
                                 {tab === 'Reports & Fixes' && (
                                     <TbAlertTriangle size={16} className={pendingReportsCount > 0 ? "text-amber-500 animate-pulse" : "text-slate-400"} />
@@ -2236,6 +2248,13 @@ const Profile: React.FC<{ defaultTab?: string }> = ({ defaultTab }) => {
                                         </div>
                                     )}
                                 </div>
+                            )}
+
+                            {/* ADMIN BLOG STUDIO TAB */}
+                            {activeTab === 'Blog Studio' && isAdmin && (
+                                <AdminBlogManager
+                                    initialEditId={new URLSearchParams(location.search).get('edit')}
+                                />
                             )}
 
                         </motion.div>

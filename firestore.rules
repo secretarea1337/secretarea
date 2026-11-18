@@ -193,5 +193,37 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    function isValidBlogId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidBlogPost(data) {
+      return data.keys().hasAll(['id', 'status', 'slug', 'title', 'seoTitle']) &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
+        data.status in ['draft', 'published', 'scheduled'] &&
+        data.slug is string && data.slug.size() > 0 && data.slug.size() <= 240 &&
+        data.title is string && data.title.size() <= 300 &&
+        data.seoTitle is string && data.seoTitle.size() <= 300 &&
+        (!('metaDescription' in data) || (data.metaDescription is string && data.metaDescription.size() <= 600)) &&
+        (!('scheduledAtMs' in data) || data.scheduledAtMs == null || data.scheduledAtMs is int) &&
+        (!('tags' in data) || (data.tags is list && data.tags.size() <= 30)) &&
+        (!('sections' in data) || (data.sections is list && data.sections.size() <= 50)) &&
+        (!('faqs' in data) || (data.faqs is list && data.faqs.size() <= 30)) &&
+        (!('sources' in data) || (data.sources is list && data.sources.size() <= 40)) &&
+        (!('relatedSlugs' in data) || (data.relatedSlugs is list && data.relatedSlugs.size() <= 20));
+    }
+
+    // Blog Posts collection:
+    // - Published posts (and scheduled posts past their publish timestamp) are publicly readable and listable for SEO indexing
+    // - Drafts and future scheduled posts are strictly restricted to Admins
+    // - Create, update, delete are Admin-only with schema validation
+    match /blog_posts/{postId} {
+      allow get, list: if resource.data.status == 'published' ||
+        (resource.data.status == 'scheduled' && resource.data.scheduledAtMs is int && request.time.toMillis() >= resource.data.scheduledAtMs) ||
+        isAdmin();
+      allow create, update: if isAdmin() && isValidBlogId(postId) && isValidBlogPost(request.resource.data);
+      allow delete: if isAdmin() && isValidBlogId(postId);
+    }
+
   }
 }

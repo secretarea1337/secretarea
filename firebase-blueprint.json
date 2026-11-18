@@ -219,6 +219,49 @@
         "fixedBy": { "type": "string" }
       },
       "required": ["itemId", "fixedLinks"]
+    },
+    "BlogPost": {
+      "title": "BlogPost",
+      "description": "SEO-structured blog article with metadata, quick answer, sections, rich media blocks, comparison table, pros/cons, steps, FAQs, and references.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "language": { "type": "string", "enum": ["en", "fr", "es", "ar"] },
+        "seoTitle": { "type": "string", "maxLength": 300 },
+        "metaDescription": { "type": "string", "maxLength": 600 },
+        "slug": { "type": "string", "maxLength": 240 },
+        "focusKeyword": { "type": "string", "maxLength": 160 },
+        "secondaryKeywords": { "type": "array" },
+        "canonicalUrl": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string", "maxLength": 120 },
+        "tags": { "type": "array" },
+        "title": { "type": "string", "maxLength": 300 },
+        "introduction": { "type": "string", "maxLength": 2000 },
+        "authorName": { "type": "string", "maxLength": 160 },
+        "authorRole": { "type": "string", "maxLength": 160 },
+        "authorAvatar": { "type": "string", "maxLength": 500 },
+        "authorBio": { "type": "string", "maxLength": 1000 },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "readingTimeMinutes": { "type": "number" },
+        "featuredImage": { "type": "string", "maxLength": 1000 },
+        "featuredImageAlt": { "type": "string", "maxLength": 300 },
+        "quickAnswer": { "type": "string", "maxLength": 2000 },
+        "showToc": { "type": "boolean" },
+        "sections": { "type": "array" },
+        "comparisonTable": { "type": "object" },
+        "prosCons": { "type": "object" },
+        "stepByStep": { "type": "object" },
+        "faqs": { "type": "array" },
+        "conclusion": { "type": "string", "maxLength": 3000 },
+        "relatedSlugs": { "type": "array" },
+        "sources": { "type": "array" },
+        "views": { "type": "number" },
+        "createdByUid": { "type": "string" },
+        "createdByEmail": { "type": "string" }
+      },
+      "required": ["id", "status", "slug", "title", "seoTitle"]
     }
   },
   "firestore": {
@@ -249,6 +292,10 @@
     "/item_fixes/{itemId}": {
       "schema": "ItemFix",
       "description": "Live fixes applied by admin for broken download links. Publicly readable, admin writable."
+    },
+    "/blog_posts/{postId}": {
+      "schema": "BlogPost",
+      "description": "SEO-structured blog articles. Published posts are publicly readable; drafts and writes are restricted to Admins."
     }
   }
 }

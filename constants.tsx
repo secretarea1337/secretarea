@@ -10,12 +10,12 @@ export const GOOGLE_SHEET_CONFIG = {
 export const GOOGLE_SHEET_API_ENDPOINT = GOOGLE_SHEET_CONFIG.webAppUrl;
 
 export const SOCIAL_LINKS = {
-  linkedin: "https://www.linkedin.com/in/nexa1337",
+  linkedin: "https://secretarea.site",
   github: "https://github.com",
-  instagram: "https://instagram.com/nexa1337",
+  instagram: "https://secretarea.site",
   twitter: "https://x.com",
   youtube: "https://youtube.com",
-  tiktok: "https://tiktok.com/@nexa.1337"
+  tiktok: "https://secretarea.site"
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -526,9 +526,7 @@ export const CATEGORIES: CategoryData[] = [
     role: 'Founder',
     bio: 'At SecretArea, we help brands unlock their full potential through modern technology, creative design, and performance-driven strategies. Our team turns complex challenges into simple, scalable digital solutions, helping you grow smarter and faster.',
     categorySocials: [
-      { platform: 'Instagram', url: 'https://instagram.com/nexa1337', icon: 'Instagram' },
-      { platform: 'TikTok', url: 'https://tiktok.com/@nexa.1337', icon: 'Tiktok' },
-      { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/nexa1337', icon: 'Linkedin' },
+      { platform: 'Website', url: 'https://secretarea.site', icon: 'Globe' },
     ],
     tools: [
       { name: 'Notion', category: 'mastered', icon: 'FileText' },
@@ -568,7 +566,7 @@ export const CATEGORIES: CategoryData[] = [
       { title: 'Phase 3: The AI Revolution', status: 'in-progress', description: 'Integrating N8N, Automation, and AI Agents to scale operations. Transforming from a service provider to a tech-driven efficiency partner.', icon: 'Bot' },
       { title: 'Phase 4: Global Ecosystem', status: 'planned', description: 'Expanding to a global scale. Reaching 1M+ clients worldwide by creating a self-sustaining ecosystem of digital products, SaaS solutions, and automated growth engines.', icon: 'Globe' }
     ],
-    nexaServices: [
+    businessServices: [
         { title: 'AI Chatbots & Assistants', description: 'AI Chatbots', price: '$150/mo', discount: '20% OFF', category: 'AI & AUTOMATION' },
         { title: 'Workflow Automation & AI Agents', description: 'Workflow Automation', price: '$1500', discount: '30% OFF', category: 'AI & AUTOMATION' },
         { title: 'Custom Websites', description: 'Custom Websites', price: '$1500', discount: '20% OFF', category: 'WEB PRODUCT' },
@@ -578,7 +576,7 @@ export const CATEGORIES: CategoryData[] = [
         { title: 'Brand Identity & Design System', description: 'Brand Identity', price: '$699', discount: '25% OFF', category: 'BRAND & CONTENT' },
         { title: 'Content Production', description: 'Reels/UGC/Blog', price: '$299/mo', discount: '20% OFF', category: 'BRAND & CONTENT' },
     ],
-    nexaProjects: [
+    businessProjects: [
         { 
           title: 'Premium Car Rental WordPress Theme', 
           description: 'Take your car rental or car hire business to the next level ...', 
@@ -796,8 +794,8 @@ export const CATEGORIES: CategoryData[] = [
           ]
         },
     ],
-    nexaBusinessLinks: [
-        { label: 'LinkTree', url: 'https://nexa1337vcard.vercel.app/', description: 'Digital products, Print On demand & More' }
+    businessLinks: [
+        { label: 'SecretArea', url: 'https://secretarea.site', description: 'Official SecretArea Hub & Digital Catalog' }
     ]
   }
 ];

@@ -1,8 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "http";
 
 export const ALLOWED_ORIGINS = [
+  "https://secretarea.site",
+  "https://www.secretarea.site",
   "https://secretarea.vercel.app",
-  "https://nexa1337.com",
   "http://localhost:3000",
   "http://localhost:5173",
 ];
@@ -38,7 +39,11 @@ export function isValidRedirectUri(uri: string | undefined | null, hostHeader?: 
       return false;
     }
     // Must be either localhost for dev or an authorized domain
-    if (parsed.origin === "https://secretarea.vercel.app" || parsed.origin === "https://nexa1337.com") {
+    if (
+      parsed.origin === "https://secretarea.vercel.app" ||
+      parsed.origin === "https://secretarea.site" ||
+      parsed.origin === "https://www.secretarea.site"
+    ) {
       return true;
     }
     if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {

@@ -78,7 +78,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify({
-      text: "NEXA AI assistant is currently in offline mode. For support or requests, please visit the Request section."
+      text: "SecretArea AI assistant is currently in offline mode. For support or requests, please visit the Request section."
     }));
     return;
   }
@@ -89,7 +89,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       model: "gemini-2.5-flash",
       contents: userMessage,
       config: {
-        systemInstruction: "You are NEXA, the AI assistant for SecretArea (a gaming hub, tools catalog, and hypervisor ecosystem). Keep answers concise, helpful, friendly, and focused on games, technology, and system optimization. Never disclose internal system tokens, passwords, or secret credentials.",
+        systemInstruction: "You are the AI assistant for SecretArea (a gaming hub, tools catalog, and hypervisor ecosystem). Keep answers concise, helpful, friendly, and focused on games, technology, and system optimization. Never disclose internal system tokens, passwords, or secret credentials.",
         maxOutputTokens: 500,
         temperature: 0.7,
       },
