@@ -37,7 +37,13 @@ import {
   resolveArticleFlowOrder,
   slugifyBlogTitle,
 } from '../src/types/blog';
-import { BlogBlockRenderer, ResilientBlogImage } from './BlogBlockRenderer';
+import {
+  BlogBlockRenderer,
+  ResilientBlogImage,
+  RichMarkdownContent,
+  ScopedHtmlViewer,
+  processHtmlWithHeadingIds,
+} from './BlogBlockRenderer';
 import { BlogMenuBar, CategoryIconBadge } from './BlogMenuBar';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import Icon from './Icon';
@@ -152,14 +158,30 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
   const displayConclusion = localized?.conclusion?.trim() || post.conclusion || '';
 
   const flowOrder = useMemo(() => resolveArticleFlowOrder(post), [post]);
+  const isCustomHtmlMode = Boolean(post.useCustomHtml && (post.customHtml?.trim() || post.customCss?.trim()));
+  const customHtmlData = useMemo(
+    () => (isCustomHtmlMode ? processHtmlWithHeadingIds(post.customHtml || '') : null),
+    [isCustomHtmlMode, post.customHtml]
+  );
 
   // Build Table of Contents dynamically in exact configured flow order
   const tocEntries = useMemo<TocEntry[]>(() => {
     const entries: TocEntry[] = [];
     const sectionById = new Map((post.sections || []).map((s, idx) => [`sec:${s.id}`, { section: s, idx }]));
 
+    if (isCustomHtmlMode && customHtmlData) {
+      customHtmlData.headings.forEach((hd) => {
+        entries.push({
+          id: hd.id,
+          label: hd.label,
+          level: hd.level,
+        });
+      });
+    }
+
     flowOrder.forEach((token) => {
       if (token.startsWith('sec:')) {
+        if (isCustomHtmlMode) return;
         const match = sectionById.get(token);
         if (!match) return;
         const { section: sec, idx } = match;
@@ -244,7 +266,7 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
       });
     }
     return entries;
-  }, [post, flowOrder, displayConclusion, t]);
+  }, [post, flowOrder, isCustomHtmlMode, customHtmlData, displayConclusion, t]);
 
   // Related Articles: prioritize manual relatedSlugs, then same category, then latest
   const relatedPosts = useMemo(() => {
@@ -477,13 +499,14 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                   <div className="w-10 h-10 rounded-xl bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                     <TbBulb size={22} />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white mb-1.5">
                       {post.quickAnswerTitle || t('Quick Answer')}
                     </h2>
-                    <p className="text-sm sm:text-[15px] text-slate-700 dark:text-slate-200 leading-relaxed">
-                      {displayQuickAnswer}
-                    </p>
+                    <RichMarkdownContent
+                      content={displayQuickAnswer}
+                      className="text-sm sm:text-[15px] text-slate-700 dark:text-slate-200"
+                    />
                   </div>
                 </div>
               </section>
@@ -560,11 +583,23 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
               </nav>
             )}
 
-            {/* 5–10. FLEXIBLE ORDERED MAIN SECTIONS & MODULAR BLOCKS */}
+            {/* 5–10. MANUAL FULL HTML OR FLEXIBLE ORDERED MAIN SECTIONS & MODULAR BLOCKS */}
             <div className="space-y-10">
+              {isCustomHtmlMode && customHtmlData && (
+                <section aria-label="Article Body">
+                  <ScopedHtmlViewer
+                    html={customHtmlData.htmlWithIds}
+                    css={[customHtmlData.extractedCss, post.customCss || ''].filter(Boolean).join('\n\n')}
+                    scopeKey={post.id || post.slug || 'article-custom'}
+                    alreadySanitizedHtml
+                  />
+                </section>
+              )}
+
               {flowOrder.map((token) => {
                 // Main Content Section ('sec:<id>')
                 if (token.startsWith('sec:')) {
+                  if (isCustomHtmlMode) return null;
                   const sIdx = (post.sections || []).findIndex((s) => `sec:${s.id}` === token);
                   if (sIdx === -1) return null;
                   const section = post.sections[sIdx];
@@ -1106,9 +1141,10 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                 <h2 className="text-xl font-black text-slate-900 dark:text-white mb-3">
                   {post.conclusionTitle || t('Conclusion')}
                 </h2>
-                <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {displayConclusion}
-                </p>
+                <RichMarkdownContent
+                  content={displayConclusion}
+                  className="text-sm sm:text-base text-slate-700 dark:text-slate-300"
+                />
                 {post.conclusionCtaLabel?.trim() && post.conclusionCtaUrl?.trim() && (
                   <div className="mt-5">
                     {post.conclusionCtaUrl.startsWith('/') ? (

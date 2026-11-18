@@ -36,6 +36,10 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/rss.xml",
+      "destination": "/api/rss"
+    },
+    {
       "source": "/robots.txt",
       "destination": "/api/robots"
     },

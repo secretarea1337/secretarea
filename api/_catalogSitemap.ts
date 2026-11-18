@@ -36,10 +36,24 @@ function readFirebaseProjectConfig(): { projectId: string; databaseId: string } 
   return { projectId: "secretarea-1337", databaseId: "(default)" };
 }
 
-async function fetchPublishedBlogSitemapEntries(): Promise<SitemapItem[]> {
+interface BlogEntryMeta {
+  slug: string;
+  title: string;
+  description: string;
+  authorName: string;
+  category: string;
+  publishedAtIso: string;
+  lastmodDate: string;
+  image?: string;
+}
+
+let cachedBlogEntries: BlogEntryMeta[] = [];
+let cachedBlogEntriesTimestamp = 0;
+
+async function fetchPublishedBlogEntries(): Promise<BlogEntryMeta[]> {
   const now = Date.now();
-  if (cachedBlogSitemapItems.length > 0 && now - cachedBlogTimestamp < CACHE_TTL_MS) {
-    return cachedBlogSitemapItems;
+  if (cachedBlogEntries.length > 0 && now - cachedBlogEntriesTimestamp < CACHE_TTL_MS) {
+    return cachedBlogEntries;
   }
 
   const { projectId, databaseId } = readFirebaseProjectConfig();
@@ -71,46 +85,84 @@ async function fetchPublishedBlogSitemapEntries(): Promise<SitemapItem[]> {
     });
     clearTimeout(timeout);
 
-    if (!res.ok) return cachedBlogSitemapItems;
+    if (!res.ok) return cachedBlogEntries;
 
     const rows = (await res.json()) as Array<{ document?: { name?: string; fields?: Record<string, any> } }>;
-    if (!Array.isArray(rows)) return cachedBlogSitemapItems;
+    if (!Array.isArray(rows)) return cachedBlogEntries;
 
-    const items: SitemapItem[] = [];
+    const items: BlogEntryMeta[] = [];
     for (const row of rows) {
       const fields = row?.document?.fields;
       if (!fields) continue;
+      if (fields.noIndex?.booleanValue === true) continue;
+
       const slug = fields.slug?.stringValue?.trim();
       const title = fields.title?.stringValue?.trim() || fields.seoTitle?.stringValue?.trim();
-      if (!slug) continue;
+      if (!slug || !title) continue;
 
       const updatedAt =
         fields.updatedAt?.stringValue ||
         fields.publishedAt?.stringValue ||
         fields.createdAt?.stringValue;
+      const publishedRaw = fields.publishedAt?.stringValue || updatedAt;
+      const parsedPub = publishedRaw ? new Date(String(publishedRaw)) : new Date();
+      const publishedAtIso = Number.isNaN(parsedPub.getTime())
+        ? new Date().toISOString()
+        : parsedPub.toISOString();
+
       const featuredImage = fields.featuredImage?.stringValue?.trim();
       const isValidImage =
         Boolean(featuredImage) &&
         /^https?:\/\//i.test(featuredImage || "") &&
         !String(featuredImage).includes("placehold.co");
 
+      const description =
+        fields.metaDescription?.stringValue?.trim() ||
+        fields.introduction?.stringValue?.trim() ||
+        title;
+
       items.push({
-        path: `/blog/${encodeURIComponent(slug)}`,
-        lastmod: formatIsoDate(updatedAt),
-        changefreq: "weekly",
-        priority: "0.85",
-        image: isValidImage ? featuredImage : undefined,
+        slug,
         title,
+        description: description.slice(0, 320),
+        authorName: fields.authorName?.stringValue?.trim() || "SecretArea Team",
+        category: fields.category?.stringValue?.trim() || "Gaming Guides",
+        publishedAtIso,
+        lastmodDate: formatIsoDate(updatedAt),
+        image: isValidImage ? featuredImage : undefined,
       });
     }
 
-    cachedBlogSitemapItems = items;
-    cachedBlogTimestamp = now;
+    items.sort((a, b) => new Date(b.publishedAtIso).getTime() - new Date(a.publishedAtIso).getTime());
+
+    cachedBlogEntries = items;
+    cachedBlogEntriesTimestamp = now;
     return items;
   } catch {
     clearTimeout(timeout);
+    return cachedBlogEntries;
+  }
+}
+
+async function fetchPublishedBlogSitemapEntries(): Promise<SitemapItem[]> {
+  const now = Date.now();
+  if (cachedBlogSitemapItems.length > 0 && now - cachedBlogTimestamp < CACHE_TTL_MS) {
     return cachedBlogSitemapItems;
   }
+
+  const entries = await fetchPublishedBlogEntries();
+  const items: SitemapItem[] = entries.map((entry) => ({
+    path: `/blog/${encodeURIComponent(entry.slug)}`,
+    lastmod: entry.lastmodDate,
+    changefreq: "weekly",
+    priority: "0.85",
+    image: entry.image,
+    title: entry.title,
+  }));
+
+  cachedBlogSitemapItems = items;
+  cachedBlogTimestamp = now;
+  return items;
 }
 
 export function getCategoryPathPrefix(category?: string): string {
@@ -383,6 +435,50 @@ export async function generateDynamicSitemapXml(baseUrl: string): Promise<string
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urlBlocks}\n</urlset>\n`;
 }
 
+export async function generateBlogRssXml(baseUrl: string): Promise<string> {
+  const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
+  const entries = await fetchPublishedBlogEntries();
+  const buildDate = new Date().toUTCString();
+
+  const itemsXml = entries
+    .slice(0, 100)
+    .map((entry) => {
+      const link = `${cleanBaseUrl}/blog/${encodeURIComponent(entry.slug)}`;
+      const pubDate = new Date(entry.publishedAtIso).toUTCString();
+      const enclosureXml = entry.image
+        ? `\n      <enclosure url="${escapeXml(entry.image)}" type="image/jpeg" />`
+        : "";
+      return [
+        "    <item>",
+        `      <title>${escapeXml(entry.title)}</title>`,
+        `      <link>${escapeXml(link)}</link>`,
+        `      <guid isPermaLink="true">${escapeXml(link)}</guid>`,
+        `      <pubDate>${escapeXml(pubDate)}</pubDate>`,
+        `      <category>${escapeXml(entry.category)}</category>`,
+        `      <author>contact@secretarea.site (${escapeXml(entry.authorName)})</author>`,
+        `      <description>${escapeXml(entry.description)}</description>${enclosureXml}`,
+        "    </item>",
+      ].join("\n");
+    })
+    .join("\n");
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
+    "  <channel>",
+    "    <title>Secret Area Blog – Gaming Guides &amp; Tech Tutorials</title>",
+    `    <link>${escapeXml(`${cleanBaseUrl}/blog`)}</link>`,
+    `    <atom:link href="${escapeXml(`${cleanBaseUrl}/rss.xml`)}" rel="self" type="application/rss+xml" />`,
+    "    <description>In-depth PC gaming guides, repack checklists, hardware benchmarks, reviews, and Hypervisor tutorials on Secret Area.</description>",
+    "    <language>en-us</language>",
+    `    <lastBuildDate>${escapeXml(buildDate)}</lastBuildDate>`,
+    itemsXml,
+    "  </channel>",
+    "</rss>",
+    "",
+  ].join("\n");
+}
+
 export function buildRobotsTxt(baseUrl: string): string {
   const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
   return [
@@ -397,6 +493,10 @@ export function buildRobotsTxt(baseUrl: string): string {
     "Allow: /steamtools/",
     "Allow: /tools/",
     "Allow: /savegame/",
+    "Allow: /rss.xml",
+    "Allow: /sitemap.xml",
+    "Allow: /llms.txt",
+    "Allow: /ai-catalog.json",
     "Disallow: /api/",
     "Disallow: /admin",
     "Disallow: /profile",
@@ -414,6 +514,8 @@ export function buildRobotsTxt(baseUrl: string): string {
     "Allow: /steamtools/",
     "Allow: /tools/",
     "Allow: /savegame/",
+    "Allow: /rss.xml",
+    "Allow: /sitemap.xml",
     "Disallow: /api/",
     "Disallow: /admin",
     "Disallow: /profile",
@@ -427,10 +529,21 @@ export function buildRobotsTxt(baseUrl: string): string {
     "",
     "User-agent: Bingbot",
     "Allow: /",
+    "Allow: /blog",
+    "Allow: /blog/",
+    "Allow: /game/",
+    "Allow: /ps5/",
+    "Allow: /hypervisor/",
+    "Allow: /steamtools/",
+    "Allow: /tools/",
+    "Allow: /savegame/",
+    "Allow: /rss.xml",
+    "Allow: /sitemap.xml",
     "Disallow: /api/",
     "Disallow: /admin",
     "Disallow: /profile",
     "Disallow: /settings",
+    "Disallow: /disclaimer",
     "Disallow: /terminal",
     "",
     `Sitemap: ${cleanBaseUrl}/sitemap.xml`,

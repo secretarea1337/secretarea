@@ -78,38 +78,56 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const CATEGORY_SEO: Record<string, { title: string; description: string; keywords: string }> = {
+const CATEGORY_SEO: Record<string, { label: string; title: string; description: string; keywords: string }> = {
   '/game': {
-    title: 'PC Games & Verified Repacks Catalog | Secret Area',
+    label: 'PC Games',
+    title: 'PC Games & Repacks Catalog | Secret Area',
     description: 'Browse verified PC games, compressed repacks, system requirements, and direct download mirrors on Secret Area. Updated daily with new releases.',
     keywords: 'PC Games, Free PC Games, Game Repacks, FitGirl, DODI, SteamRIP, Direct Download Games, Secret Area',
   },
   '/ps5': {
-    title: 'PS5 Games – Direct Downloads & Firmware Specs | Secret Area',
-    description: 'Explore curated PlayStation 5 game releases, firmware compatibility notes, and verified download links on Secret Area.',
+    label: 'PS5 Games',
+    title: 'PS5 Games – Direct Links & Firmware | Secret Area',
+    description: 'Explore curated PlayStation 5 game releases, firmware compatibility notes, and verified direct download links curated on Secret Area.',
     keywords: 'PS5 Games, PlayStation 5 Games, PS5 Backups, PS5 Firmware, Secret Area',
   },
   '/hypervisor': {
-    title: 'Game Hypervisor – Bypass Tools & Runtimes | Secret Area',
-    description: 'Discover Game Hypervisor releases, virtualization runtimes, kernel tools, and setup guides curated on Secret Area.',
+    label: 'Game Hypervisor',
+    title: 'Game Hypervisor – Bypass Tools & Guides | Secret Area',
+    description: 'Discover Game Hypervisor releases, virtualization runtimes, kernel tools, and step-by-step setup guides curated on Secret Area.',
     keywords: 'Hypervisor Games, Game Hypervisor, Virtualization Gaming, Secret Area',
   },
   '/steamtools': {
-    title: 'SteamTools – Manifests, Utilities & Guides | Secret Area',
-    description: 'Access SteamTools manifests, library utilities, and configuration guides with fast mirrors and clear install steps on Secret Area.',
+    label: 'SteamTools',
+    title: 'SteamTools – Manifests & Guides | Secret Area',
+    description: 'Access SteamTools manifests, library utilities, and configuration guides with fast mirrors and clear installation steps on Secret Area.',
     keywords: 'SteamTools, Steam Manifests, Steam Library Tools, Secret Area',
   },
   '/tools': {
-    title: 'Software & Developer Tools – Direct Links | Secret Area',
-    description: 'Download essential architecture, design, editing, and system utility software packages curated on Secret Area.',
+    label: 'Tools & Software',
+    title: 'Software & Developer Tools | Secret Area',
+    description: 'Download essential architecture, design, editing, and system utility software packages with verified specs curated on Secret Area.',
     keywords: 'Software Tools, Developer Utilities, Architect Software, PC Tools, Secret Area',
   },
   '/savegame': {
-    title: 'SaveGame Archives – 100% Completed Saves | Secret Area',
-    description: 'Download verified PC save game archives, 100% completion files, and backup utilities on Secret Area.',
+    label: 'SaveGame Archives',
+    title: 'SaveGame Archives – 100% Saves | Secret Area',
+    description: 'Download verified PC save game archives, 100% completion files, and backup utilities for top single-player titles on Secret Area.',
     keywords: 'SaveGame, 100% Save Games, Game Saves, PC Save Files, Secret Area',
   },
 };
+
+function formatSlugTitleFallback(rawSlug: string): string {
+  try {
+    return decodeURIComponent(rawSlug)
+      .split('-')
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  } catch {
+    return rawSlug.replace(/-/g, ' ');
+  }
+}
 
 const SeoHead = () => {
   const { pathname } = useLocation();
@@ -135,15 +153,34 @@ const SeoHead = () => {
       : normalizedPath;
   const hubSeo = CATEGORY_SEO[hubKey];
 
+  const itemMatch = normalizedPath.match(
+    /^\/(game|ps5|hypervisor|steamtools|tools|architect|savegame|extra)\/([^/]+)$/
+  );
+  const itemHubKey = itemMatch
+    ? itemMatch[1] === 'architect'
+      ? '/tools'
+      : itemMatch[1] === 'extra'
+      ? '/savegame'
+      : `/${itemMatch[1]}`
+    : '';
+  const itemHubMeta = itemHubKey ? CATEGORY_SEO[itemHubKey] : undefined;
+  const fallbackItemName = itemMatch ? formatSlugTitleFallback(itemMatch[2]) : '';
+
   const title = hubSeo
     ? hubSeo.title
+    : fallbackItemName && itemHubMeta
+    ? `${fallbackItemName} – ${itemHubMeta.label} | Secret Area`
     : 'Secret Area – Free PC Games, PS5, Repacks & Hypervisor Hub';
   const description = hubSeo
     ? hubSeo.description
-    : 'Explore Secret Area for verified PC game repacks, PS5 releases, Hypervisor tools, SteamTools, and software utilities with direct links and system specs.';
+    : fallbackItemName && itemHubMeta
+    ? `View ${fallbackItemName} (${itemHubMeta.label}) details, verified mirrors, version info, and system requirements on Secret Area.`
+    : 'Explore Secret Area for verified PC game repacks, PS5 releases, Hypervisor tools, SteamTools, software utilities, and gaming guides with system specs.';
   const keywords = hubSeo
     ? hubSeo.keywords
-    : 'Secret Area, SecretArea, PC Games, Game Repacks, PS5 Games, Hypervisor, SteamTools, Save Games, Software Tools';
+    : fallbackItemName && itemHubMeta
+    ? `${fallbackItemName}, ${itemHubMeta.label}, ${itemHubMeta.keywords}`
+    : 'Secret Area, SecretArea, PC Games, Game Repacks, PS5 Games, Hypervisor, SteamTools, Save Games, Gaming Guides, Software Tools';
   const ogImage = `${origin}/images/hero01.png`;
   const robotsContent = isPrivateRoute
     ? 'noindex, nofollow'
@@ -153,22 +190,33 @@ const SeoHead = () => {
     '@context': 'https://schema.org',
     '@graph': [
       {
+        '@type': 'Organization',
+        '@id': `${origin}/#organization`,
+        name: 'SecretArea',
+        alternateName: 'Secret Area',
+        url: `${origin}/`,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${origin}/images/logo04.png`,
+        },
+        sameAs: ['https://discord.gg/pygmDWFAHK'],
+      },
+      {
         '@type': 'WebSite',
+        '@id': `${origin}/#website`,
         name: 'Secret Area',
         alternateName: 'SecretArea',
         url: `${origin}/`,
         description,
+        inLanguage: ['en', 'fr', 'es', 'ar'],
+        publisher: {
+          '@id': `${origin}/#organization`,
+        },
         potentialAction: {
           '@type': 'SearchAction',
           target: `${origin}/?q={search_term_string}`,
           'query-input': 'required name=search_term_string',
         },
-      },
-      {
-        '@type': 'Organization',
-        name: 'SecretArea',
-        url: `${origin}/`,
-        logo: `${origin}/images/logo04.png`,
       },
       ...(hubSeo
         ? [
@@ -177,6 +225,14 @@ const SeoHead = () => {
               name: title,
               url: canonicalUrl,
               description,
+              isPartOf: { '@id': `${origin}/#website` },
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
+                { '@type': 'ListItem', position: 2, name: hubSeo.label, item: canonicalUrl },
+              ],
             },
           ]
         : []),
@@ -188,6 +244,7 @@ const SeoHead = () => {
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
+      <meta name="author" content="SecretArea" />
       <meta name="robots" content={robotsContent} />
       <meta name="googlebot" content={robotsContent} />
       <link rel="canonical" href={canonicalUrl} />
@@ -197,11 +254,16 @@ const SeoHead = () => {
       <meta property="og:type" content="website" />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:image:alt" content="Secret Area – Digital Gaming Catalog & Hypervisor Hub" />
+      <meta property="og:image:alt" content="Secret Area – Digital Gaming Catalog, Guides & Hypervisor Hub" />
+      <meta property="og:locale" content="en_US" />
+      <meta property="og:locale:alternate" content="fr_FR" />
+      <meta property="og:locale:alternate" content="es_ES" />
+      <meta property="og:locale:alternate" content="ar_MA" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image:alt" content="Secret Area – Digital Gaming Catalog, Guides & Hypervisor Hub" />
       <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
     </Helmet>
   );

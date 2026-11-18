@@ -27,12 +27,22 @@ export interface BlogSeoAnalysis {
   checks: SeoCheckItem[];
 }
 
+function stripHtmlTags(raw: string): string {
+  return String(raw || '')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ');
+}
+
 function extractTextFromBlock(block: BlogContentBlock): string {
   switch (block.type) {
     case 'subheading':
       return block.text || '';
     case 'paragraph':
-      return block.content || '';
+      return stripHtmlTags(block.content || '');
+    case 'html':
+      return stripHtmlTags(block.html || '');
     case 'callout':
       return `${block.title || ''} ${block.content || ''}`;
     case 'icon_box':
@@ -59,7 +69,7 @@ function extractTextFromBlock(block: BlogContentBlock): string {
 }
 
 function countWords(text: string): number {
-  const cleaned = String(text || '')
+  const cleaned = stripHtmlTags(text)
     .replace(/[#*_`>\[\]()]/g, ' ')
     .trim();
   if (!cleaned) return 0;
@@ -96,6 +106,10 @@ export function estimateReadingTime(post: Partial<BlogPost>): { wordCount: numbe
     post.quickAnswer || '',
     post.conclusion || '',
   ];
+
+  if (post.useCustomHtml && post.customHtml) {
+    textParts.push(stripHtmlTags(post.customHtml));
+  }
 
   (post.sections || []).forEach((sec) => {
     textParts.push(sec.heading || '');
@@ -142,6 +156,27 @@ export function analyzeBlogSeo(post: BlogPost): BlogSeoAnalysis {
     if (slug?.trim()) collectedUrls.push(`/blog/${slug.trim()}`);
   });
 
+  const auditHtmlSnippets = (html: string) => {
+    if (!html) return;
+    h2Count += (html.match(/<h2\b/gi) || []).length;
+    h3Count += (html.match(/<h3\b/gi) || []).length;
+    const imgTags = html.match(/<img\b[^>]*>/gi) || [];
+    imgTags.forEach((tag) => {
+      imageCount += 1;
+      hasRichMedia = true;
+      if (/alt\s*=\s*["'][^"']+["']/i.test(tag)) imagesWithAltCount += 1;
+    });
+    const hrefMatches = html.matchAll(/href\s*=\s*["']([^"']+)["']/gi);
+    for (const m of hrefMatches) {
+      if (m[1]) collectedUrls.push(m[1]);
+    }
+    if (/<(?:table|iframe|video|blockquote)\b/i.test(html)) hasRichMedia = true;
+  };
+
+  if (post.useCustomHtml && post.customHtml?.trim()) {
+    auditHtmlSnippets(post.customHtml);
+  }
+
   (post.sections || []).forEach((sec) => {
     if (sec.heading?.trim()) {
       const secLvl = sec.headingLevel ?? 2;
@@ -155,6 +190,10 @@ export function analyzeBlogSeo(post: BlogPost): BlogSeoAnalysis {
         else h3Count += 1;
       } else if (blk.type === 'paragraph') {
         collectedUrls.push(...extractUrlsFromText(blk.content || ''));
+        auditHtmlSnippets(blk.content || '');
+      } else if (blk.type === 'html') {
+        collectedUrls.push(...extractUrlsFromText(blk.html || ''));
+        auditHtmlSnippets(blk.html || '');
       } else if (blk.type === 'callout') {
         collectedUrls.push(...extractUrlsFromText(blk.content || ''));
       } else if (blk.type === 'image' && blk.url?.trim()) {
@@ -318,7 +357,7 @@ export function analyzeBlogSeo(post: BlogPost): BlogSeoAnalysis {
   });
 
   // 7. Quick Answer (max 7 pts)
-  const quickLen = (post.quickAnswer || '').trim().length;
+  const quickLen = stripHtmlTags(post.quickAnswer || '').trim().length;
   checks.push({
     id: 'quick_answer',
     category: 'content',
@@ -414,7 +453,7 @@ export function analyzeBlogSeo(post: BlogPost): BlogSeoAnalysis {
   });
 
   // 13. Conclusion & Author Bio (max 5 pts)
-  const hasConclusion = (post.conclusion || '').trim().length >= 30;
+  const hasConclusion = stripHtmlTags(post.conclusion || '').trim().length >= 30;
   const hasAuthorBio = Boolean(post.authorName?.trim()) && (post.authorBio || '').trim().length >= 20;
   checks.push({
     id: 'conclusion_author',

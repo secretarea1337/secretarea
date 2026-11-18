@@ -1,10 +1,11 @@
 # SecretArea
 
-> Explore Secret Area for verified PC game repacks, PS5 releases, Hypervisor tools, SteamTools, and software utilities with direct links and system specs.
+> Explore Secret Area for verified PC game repacks, PS5 releases, Hypervisor tools, SteamTools, software utilities, and in-depth gaming guides with direct links and system specs.
 
-SecretArea is a curated digital gaming and hypervisor resource platform providing high-speed direct downloads, repack guides, virtualization tools, and system utility catalogs.
+SecretArea is a curated digital gaming, guides, and hypervisor resource platform providing high-speed direct downloads, repack checklists, virtualization tools, game reviews, and system utility catalogs.
 
 ## Core Features & Collections
+- **Blog, Guides & Reviews**: In-depth PC gaming tutorials, hardware benchmarks, Critic/User review breakdowns, and technical intel (`/blog` and `/blog/<slug>`).
 - **PC Game Repacks & Patches**: Comprehensive library of PC game titles with install guides, system requirements, and verified mirrors (`/game/<title>`).
 - **PS5 Releases**: Curated PS5 game catalog with firmware notes and details (`/ps5/<title>`).
 - **Hypervisor Tools**: Virtualization setups, kernel drivers, and optimization suites (`/hypervisor/<title>`).
@@ -13,5 +14,7 @@ SecretArea is a curated digital gaming and hypervisor resource platform providin
 
 ## Key Links
 - [Main Catalog](https://secretarea.site/): Browse top games, hypervisor utilities, and digital assets.
-- [Dynamic Sitemap](https://secretarea.site/sitemap.xml): Auto-updating index of all game and resource title URLs.
+- [Secret Area Blog](https://secretarea.site/blog): Gaming guides, tech tutorials, and reviews.
+- [Blog RSS Feed](https://secretarea.site/rss.xml): Live XML feed of published articles and tutorials.
+- [Dynamic Sitemap](https://secretarea.site/sitemap.xml): Auto-updating index of all game, resource, and blog article URLs.
 - [Legal Compliance & Disclaimer](https://secretarea.site/disclaimer): Index policy, open-web compliance, and terms of service.

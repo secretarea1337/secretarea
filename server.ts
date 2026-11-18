@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import { GoogleGenAI } from "@google/genai";
 import {
   buildRobotsTxt,
+  generateBlogRssXml,
   generateDynamicSitemapXml,
   resolveSiteOrigin,
 } from "./api/_catalogSitemap";
@@ -552,6 +553,19 @@ async function startServer() {
     } catch {
       res.type("application/xml");
       res.sendFile(path.join(process.cwd(), "public", "sitemap.xml"));
+    }
+  });
+
+  app.get("/rss.xml", async (req, res) => {
+    try {
+      const origin = resolveSiteOrigin(req);
+      const xml = await generateBlogRssXml(origin);
+      res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600");
+      res.setHeader("X-Robots-Tag", "all");
+      res.send(xml);
+    } catch {
+      res.status(500).type("text/plain").send("Failed to generate RSS feed");
     }
   });
 

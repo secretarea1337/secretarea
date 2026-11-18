@@ -62,6 +62,17 @@ import {
   TbShoppingCart,
   TbDeviceGamepad2,
   TbArrowsSort,
+  TbSourceCode,
+  TbWand,
+  TbDownload,
+  TbLayoutColumns,
+  TbFileCode,
+  TbBold,
+  TbItalic,
+  TbUnderline,
+  TbStrikethrough,
+  TbList,
+  TbListNumbers,
 } from 'react-icons/tb';
 import { SiPlaystation, SiSteam, SiEpicgames, SiGogdotcom } from 'react-icons/si';
 import { FaAmazon, FaXbox } from 'react-icons/fa';
@@ -95,6 +106,13 @@ import {
 import { analyzeBlogSeo, estimateReadingTime } from '../src/utils/blogSeoAnalyzer';
 import { BlogArticleView } from './BlogArticleView';
 import { RichTextBlockEditor } from './RichTextBlockEditor';
+import {
+  ScopedHtmlViewer,
+  formatHtmlPretty,
+  isHtmlContent,
+  markdownToHtml,
+  sanitizeRichHtml,
+} from './BlogBlockRenderer';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import Icon from './Icon';
 
@@ -149,6 +167,7 @@ type EditorTabId =
   | 'header'
   | 'quick_answer'
   | 'sections'
+  | 'html_viewer'
   | 'extras'
   | 'reviews'
   | 'faqs'
@@ -251,6 +270,15 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
   // Smart Section Heading Level & Collapse state
   const [defaultSectionLevel, setDefaultSectionLevel] = useState<HeadingLevel>(2);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  // Full Article HTML Viewer & Manual HTML + CSS state
+  const [htmlViewerPaneMode, setHtmlViewerPaneMode] = useState<'split' | 'code' | 'viewer'>('split');
+  const [htmlCodeSubTab, setHtmlCodeSubTab] = useState<'html' | 'css'>('html');
+  const [htmlBlockViewMode, setHtmlBlockViewMode] = useState<Record<string, 'split' | 'code' | 'viewer'>>({});
+  const [htmlBlockLangTab, setHtmlBlockLangTab] = useState<Record<string, 'html' | 'css'>>({});
+  const [mobileSeoExpanded, setMobileSeoExpanded] = useState(false);
+  const [htmlCopied, setHtmlCopied] = useState(false);
+  const fullHtmlTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Comma-separated string helpers so typing keywords/tags feels fluid
   const [secondaryKwInput, setSecondaryKwInput] = useState('');
@@ -902,6 +930,14 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
         return { id, type: 'subheading', level: 3, text: '' };
       case 'paragraph':
         return { id, type: 'paragraph', content: '', align: 'left' };
+      case 'html':
+        return {
+          id,
+          type: 'html',
+          title: '',
+          html: '<div class="sa-custom-card">\n  <h3>Custom HTML + CSS Section</h3>\n  <p>Edit <strong>HTML</strong> or switch to the <strong>CSS</strong> tab to style this block.</p>\n</div>',
+          css: '.sa-custom-card {\n  padding: 16px 20px;\n  border-radius: 14px;\n  border: 1px solid rgba(41, 170, 234, 0.35);\n  background: rgba(41, 170, 234, 0.08);\n}',
+        };
       case 'image':
         return { id, type: 'image', url: '', alt: '', caption: '' };
       case 'multi_image':
@@ -1128,13 +1164,13 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
             />
           </div>
 
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white dark:bg-[#111623] border border-slate-200 dark:border-slate-800 shrink-0">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-white dark:bg-[#111623] border border-slate-200 dark:border-slate-800 shrink-0 overflow-x-auto no-scrollbar">
             {(['all', 'published', 'scheduled', 'draft'] as const).map((st) => (
               <button
                 key={st}
                 type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-colors cursor-pointer ${
                   statusFilter === st
                     ? 'bg-[#29aaea] text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1340,6 +1376,7 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
     { id: 'seo', label: t('SEO Metadata') },
     { id: 'quick_answer', label: t('Quick Answer & TOC') },
     { id: 'sections', label: t('Sections & Rich Blocks') },
+    { id: 'html_viewer', label: t('HTML Viewer & Manual') },
     { id: 'extras', label: t('Table, Pros/Cons & Steps') },
     { id: 'reviews', label: t('Reviews & Stores') },
     { id: 'faqs', label: t('FAQ Section') },
@@ -1347,6 +1384,150 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
     { id: 'sources', label: t('Sources & Related') },
     { id: 'translations', label: t('Multi-Language') },
   ];
+
+  const compilePostSectionsToHtml = (post: BlogPost): string => {
+    const parts: string[] = [];
+    (post.sections || []).forEach((sec) => {
+      const lvl = sec.headingLevel ?? 2;
+      if (sec.heading?.trim()) {
+        parts.push(`<h${lvl}>${sec.heading.trim()}</h${lvl}>`);
+      }
+      (sec.blocks || []).forEach((blk) => {
+        if (blk.type === 'subheading' && blk.text?.trim()) {
+          const sl = blk.level ?? 3;
+          parts.push(`<h${sl}>${blk.text.trim()}</h${sl}>`);
+        } else if (blk.type === 'paragraph' && blk.content?.trim()) {
+          parts.push(isHtmlContent(blk.content) ? blk.content : markdownToHtml(blk.content));
+        } else if (blk.type === 'html' && blk.html?.trim()) {
+          parts.push(blk.html);
+        } else if (blk.type === 'image' && blk.url?.trim()) {
+          parts.push(
+            `<figure><img src="${blk.url}" alt="${blk.alt || ''}" referrerpolicy="no-referrer" />${
+              blk.caption ? `<figcaption>${blk.caption}</figcaption>` : ''
+            }</figure>`
+          );
+        } else if (blk.type === 'callout' && blk.content?.trim()) {
+          parts.push(
+            `<blockquote>${blk.title ? `<strong>${blk.title}:</strong> ` : ''}${blk.content}</blockquote>`
+          );
+        } else if (blk.type === 'checklist' && (blk.items || []).some(Boolean)) {
+          const lis = (blk.items || [])
+            .filter(Boolean)
+            .map((it) => `  <li>${it}</li>`)
+            .join('\n');
+          parts.push(
+            `${blk.title ? `<h4>${blk.title}</h4>\n` : ''}<ul>\n${lis}\n</ul>`
+          );
+        } else if (blk.type === 'code' && blk.code?.trim()) {
+          const escaped = blk.code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          parts.push(`<pre><code>${escaped}</code></pre>`);
+        } else if (blk.type === 'divider') {
+          parts.push('<hr />');
+        }
+      });
+    });
+    return formatHtmlPretty(parts.join('\n'));
+  };
+
+  const wrapFullHtmlSelection = (before: string, after: string, fallback = 'text') => {
+    if (!editingPost) return;
+    const el = fullHtmlTextareaRef.current;
+    const current = editingPost.customHtml || '';
+    if (!el) {
+      updateField('customHtml', `${current}${before}${fallback}${after}`);
+      return;
+    }
+    const start = el.selectionStart ?? current.length;
+    const end = el.selectionEnd ?? current.length;
+    const selected = current.slice(start, end);
+    const replacement = selected ? `${before}${selected}${after}` : `${before}${fallback}${after}`;
+    const next = current.slice(0, start) + replacement + current.slice(end);
+    updateField('customHtml', next);
+    requestAnimationFrame(() => {
+      if (!fullHtmlTextareaRef.current) return;
+      fullHtmlTextareaRef.current.focus();
+      const s = start + before.length;
+      fullHtmlTextareaRef.current.setSelectionRange(s, s + (selected || fallback).length);
+    });
+  };
+
+  const convertManualHtmlToSections = () => {
+    if (!editingPost || !editingPost.customHtml?.trim()) return;
+    try {
+      const clean = sanitizeRichHtml(editingPost.customHtml);
+      const doc = new DOMParser().parseFromString(`<div>${clean}</div>`, 'text/html');
+      const root = doc.body.firstElementChild;
+      if (!root) return;
+
+      const builtSections: BlogSection[] = [];
+      let currentSec: BlogSection | null = null;
+      let htmlBuffer: string[] = [];
+
+      const flushBuffer = () => {
+        const joined = htmlBuffer.join('\n').trim();
+        htmlBuffer = [];
+        if (!joined) return;
+        if (!currentSec) {
+          currentSec = {
+            id: createBlockId('sec'),
+            heading: editingPost.title || 'Overview',
+            headingLevel: 2,
+            blocks: [],
+          };
+          builtSections.push(currentSec);
+        }
+        currentSec.blocks.push({
+          id: createBlockId('blk'),
+          type: 'paragraph',
+          content: joined,
+          align: 'left',
+        });
+      };
+
+      Array.from(root.childNodes).forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && /^H[1-2]$/i.test((node as Element).tagName)) {
+          flushBuffer();
+          const el = node as Element;
+          const lvl = (Number(el.tagName.slice(1)) === 1 ? 1 : 2) as HeadingLevel;
+          currentSec = {
+            id: createBlockId('sec'),
+            heading: (el.textContent || '').trim(),
+            headingLevel: lvl,
+            blocks: [],
+          };
+          builtSections.push(currentSec);
+        } else {
+          const wrapper = document.createElement('div');
+          wrapper.appendChild(node.cloneNode(true));
+          if (wrapper.innerHTML.trim()) {
+            htmlBuffer.push(wrapper.innerHTML);
+          }
+        }
+      });
+      flushBuffer();
+
+      if (builtSections.length > 0) {
+        const nextFlow = [
+          ...builtSections.map((s) => `sec:${s.id}`),
+          ...resolveArticleFlowOrder(editingPost).filter((tok) => tok.startsWith('mod:')),
+        ];
+        setEditingPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                sections: builtSections,
+                contentOrder: nextFlow,
+                useCustomHtml: false,
+              }
+            : prev
+        );
+        setActiveEditorTab('sections');
+        showNotice(t('Converted manual HTML into structured sections!'), 'success');
+      }
+    } catch {
+      showNotice(t('Could not parse HTML into sections.'), 'error');
+    }
+  };
 
   return (
     <div
@@ -1358,8 +1539,8 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
       }
     >
       {/* Sticky Top Action Bar */}
-      <div className="sticky top-2 z-30 p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#111623]/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="sticky top-2 z-30 p-3 sm:p-4 lg:p-5 rounded-2xl bg-white/95 dark:bg-[#111623]/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
@@ -1613,7 +1794,74 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
           {/* LEFT EDITOR WORKSPACE */}
-          <div className="space-y-5 min-w-0">
+          <div className="space-y-4 sm:space-y-5 min-w-0">
+            {/* Compact Mobile / Tablet Live SEO Score Banner */}
+            {seoAnalysis && (
+              <div className="xl:hidden rounded-2xl bg-white dark:bg-[#111623] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setMobileSeoExpanded((v) => !v)}
+                  className="w-full px-4 py-3 flex items-center justify-between gap-3 text-start cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-black text-xs text-white shrink-0 tabular-nums"
+                      style={{ backgroundColor: ringStrokeColor }}
+                    >
+                      {seoAnalysis.score}%
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                        {t('Live SEO Progress')} · {t(seoAnalysis.grade)}
+                      </div>
+                      <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 tabular-nums truncate">
+                        {seoAnalysis.wordCount} {t('Words')} · H2/H3: {seoAnalysis.h2Count}/{seoAnalysis.h3Count} · Alt: {seoAnalysis.imagesWithAltCount}/{seoAnalysis.imageCount}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#29aaea] shrink-0">
+                    <span className="hidden sm:inline">{mobileSeoExpanded ? t('Hide') : t('SEO Checklist')}</span>
+                    {mobileSeoExpanded ? <TbChevronUp size={16} /> : <TbChevronDown size={16} />}
+                  </span>
+                </button>
+                {mobileSeoExpanded && (
+                  <div className="px-4 pb-4 pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                    {seoAnalysis.checks.map((chk) => (
+                      <button
+                        key={chk.id}
+                        type="button"
+                        onClick={() => {
+                          if (chk.targetSection && EDITOR_TABS.some((et) => et.id === chk.targetSection)) {
+                            setActiveEditorTab(chk.targetSection as EditorTabId);
+                            setMobileSeoExpanded(false);
+                          }
+                        }}
+                        className="text-start p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 flex items-start gap-2 cursor-pointer"
+                      >
+                        <span className="mt-0.5 shrink-0">
+                          {chk.status === 'pass' ? (
+                            <TbCircleCheck size={14} className="text-emerald-500" />
+                          ) : chk.status === 'warn' ? (
+                            <TbAlertCircle size={14} className="text-amber-500" />
+                          ) : (
+                            <TbAlertTriangle size={14} className="text-rose-500" />
+                          )}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
+                            {chk.label} ({chk.points}/{chk.maxPoints})
+                          </div>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            {chk.hint}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Sub-Navigation Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1.5 rounded-2xl bg-white dark:bg-[#111623] border border-slate-200 dark:border-slate-800">
               {EDITOR_TABS.map((tab) => (
@@ -2104,12 +2352,11 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
 
                   <div>
                     <label className={labelClass}>{t('Quick Answer Summary (AI Search & Snippet Box)')}</label>
-                    <textarea
-                      rows={4}
+                    <RichTextBlockEditor
                       value={editingPost.quickAnswer}
-                      onChange={(e) => updateField('quickAnswer', e.target.value)}
+                      onChange={(val) => updateField('quickAnswer', val)}
                       placeholder="Give a direct, concise 40–60 word answer summarizing the key takeaway..."
-                      className={inputClass}
+                      minRows={4}
                     />
                   </div>
 
@@ -2609,7 +2856,9 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
                                     {block.type === 'subheading'
                                       ? `Heading H${block.level ?? 3}`
                                       : block.type === 'paragraph'
-                                      ? 'Rich Text / Markdown'
+                                      ? 'Rich Text / Compose & HTML'
+                                      : block.type === 'html'
+                                      ? 'HTML Viewer / Custom HTML'
                                       : block.type.replace('_', ' ')}
                                   </span>
                                 </div>
@@ -2690,6 +2939,180 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
                                   onChange={(content) => updateBlock(sIdx, bIdx, { ...block, content })}
                                 />
                               )}
+
+                              {block.type === 'html' && (() => {
+                                const pane = htmlBlockViewMode[block.id] || 'split';
+                                const langTab = htmlBlockLangTab[block.id] || 'html';
+                                return (
+                                  <div className="space-y-2.5">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                      <input
+                                        type="text"
+                                        value={block.title || ''}
+                                        onChange={(e) =>
+                                          updateBlock(sIdx, bIdx, { ...block, title: e.target.value })
+                                        }
+                                        placeholder="Optional HTML block label..."
+                                        className={`${inputClass} sm:max-w-xs`}
+                                      />
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        {/* Responsive Split / Code / Viewer Toggle */}
+                                        <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                          {(
+                                            [
+                                              ['split', t('Split')],
+                                              ['code', t('Code')],
+                                              ['viewer', t('Viewer')],
+                                            ] as const
+                                          ).map(([modeKey, modeLabel]) => (
+                                            <button
+                                              key={modeKey}
+                                              type="button"
+                                              onClick={() =>
+                                                setHtmlBlockViewMode((prev) => ({
+                                                  ...prev,
+                                                  [block.id]: modeKey,
+                                                }))
+                                              }
+                                              className={`px-2 py-1 rounded-md text-[11px] font-bold cursor-pointer ${
+                                                pane === modeKey
+                                                  ? 'bg-[#29aaea] text-white'
+                                                  : 'text-slate-600 dark:text-slate-300'
+                                              }`}
+                                            >
+                                              {modeLabel}
+                                            </button>
+                                          ))}
+                                        </div>
+
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            updateBlock(sIdx, bIdx, {
+                                              ...block,
+                                              html: formatHtmlPretty(block.html || ''),
+                                            })
+                                          }
+                                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:text-[#29aaea] text-xs font-bold cursor-pointer"
+                                        >
+                                          <TbWand size={13} />
+                                          <span>{t('Format HTML')}</span>
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            updateBlock(sIdx, bIdx, {
+                                              ...block,
+                                              html: `${
+                                                block.html ? `${block.html}\n` : ''
+                                              }<div class="sa-feature-box">\n  <h4>Featured Highlight</h4>\n  <p>Custom styled HTML &amp; CSS box inside your article.</p>\n</div>`,
+                                              css: `${
+                                                block.css ? `${block.css}\n\n` : ''
+                                              }.sa-feature-box {\n  padding: 16px 20px;\n  border-radius: 14px;\n  border: 1px solid rgba(41, 170, 234, 0.35);\n  background: linear-gradient(135deg, rgba(41, 170, 234, 0.12), rgba(99, 102, 241, 0.1));\n}\n.sa-feature-box h4 { margin: 0 0 6px; font-weight: 800; color: #29aaea; }\n.sa-feature-box p { margin: 0; }`,
+                                            })
+                                          }
+                                          className="px-2.5 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold cursor-pointer"
+                                        >
+                                          + {t('Card Snippet')}
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    <div
+                                      className={`grid rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 ${
+                                        pane === 'split'
+                                          ? 'grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-slate-800'
+                                          : 'grid-cols-1'
+                                      }`}
+                                    >
+                                      {(pane === 'split' || pane === 'code') && (
+                                        <div className="flex flex-col bg-slate-950">
+                                          <div className="px-3 py-1.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-2">
+                                            <div className="inline-flex items-center gap-1">
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  setHtmlBlockLangTab((prev) => ({ ...prev, [block.id]: 'html' }))
+                                                }
+                                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase cursor-pointer ${
+                                                  langTab === 'html'
+                                                    ? 'bg-[#29aaea] text-white'
+                                                    : 'text-slate-400 hover:text-white'
+                                                }`}
+                                              >
+                                                HTML
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  setHtmlBlockLangTab((prev) => ({ ...prev, [block.id]: 'css' }))
+                                                }
+                                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase cursor-pointer ${
+                                                  langTab === 'css'
+                                                    ? 'bg-indigo-600 text-white'
+                                                    : 'text-slate-400 hover:text-white'
+                                                }`}
+                                              >
+                                                CSS {block.css?.trim() ? '●' : ''}
+                                              </button>
+                                            </div>
+                                            <span className="text-[10px] font-mono text-slate-500">
+                                              &lt;style&gt; + CSS supported
+                                            </span>
+                                          </div>
+
+                                          {langTab === 'html' ? (
+                                            <textarea
+                                              dir="ltr"
+                                              rows={8}
+                                              value={block.html}
+                                              onChange={(e) =>
+                                                updateBlock(sIdx, bIdx, { ...block, html: e.target.value })
+                                              }
+                                              placeholder="<style>&#10;  .card { padding: 16px; border-radius: 12px; }&#10;</style>&#10;<div class='card'>Custom HTML + CSS</div>"
+                                              className="w-full flex-1 bg-slate-950 text-sky-300 font-mono text-xs leading-relaxed p-3.5 focus:outline-none resize-y"
+                                            />
+                                          ) : (
+                                            <textarea
+                                              dir="ltr"
+                                              rows={8}
+                                              value={block.css || ''}
+                                              onChange={(e) =>
+                                                updateBlock(sIdx, bIdx, { ...block, css: e.target.value })
+                                              }
+                                              placeholder=".sa-custom-card {&#10;  padding: 16px;&#10;  border-radius: 12px;&#10;  background: rgba(41,170,234,0.1);&#10;}"
+                                              className="w-full flex-1 bg-slate-950 text-emerald-300 font-mono text-xs leading-relaxed p-3.5 focus:outline-none resize-y"
+                                            />
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {(pane === 'split' || pane === 'viewer') && (
+                                        <div className="flex flex-col bg-white dark:bg-[#0b101b]">
+                                          <div className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-500 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                                            {t('Live HTML Viewer')} (HTML + CSS)
+                                          </div>
+                                          <div className="p-3.5 max-h-[320px] overflow-auto">
+                                            {block.html?.trim() || block.css?.trim() ? (
+                                              <ScopedHtmlViewer
+                                                html={block.html || ''}
+                                                css={block.css || ''}
+                                                scopeKey={block.id}
+                                                className="text-sm"
+                                              />
+                                            ) : (
+                                              <p className="text-xs text-slate-400 italic">
+                                                {t('Live HTML output appears here...')}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
 
                               {block.type === 'image' && (
                                 <div className="space-y-3">
@@ -3145,7 +3568,8 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
                           <div className="flex flex-wrap gap-1.5">
                             {(
                               [
-                                ['paragraph', 'Rich Text / MD', TbAlignLeft],
+                                ['paragraph', 'Rich Text / Compose', TbAlignLeft],
+                                ['html', 'HTML / Viewer', TbSourceCode],
                                 ['subheading', 'Heading (H1–H6)', TbH3],
                                 ['image', 'Image URL', TbPhoto],
                                 ['multi_image', 'Multi Images', TbLayoutGrid],
@@ -4227,12 +4651,11 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
                   </div>
                   <div>
                     <label className={labelClass}>{t('Conclusion Summary')}</label>
-                    <textarea
-                      rows={4}
+                    <RichTextBlockEditor
                       value={editingPost.conclusion}
-                      onChange={(e) => updateField('conclusion', e.target.value)}
+                      onChange={(val) => updateField('conclusion', val)}
                       placeholder="Wrap up the article and guide the reader to the next step..."
-                      className={inputClass}
+                      minRows={4}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4472,6 +4895,394 @@ export const AdminBlogManager: React.FC<AdminBlogManagerProps> = ({ initialEditI
                   })()}
                 </div>
               )}
+
+              {/* TAB: HTML VIEWER & MANUAL FULL HTML ARTICLE */}
+              {activeEditorTab === 'html_viewer' && (() => {
+                const isManual = Boolean(editingPost.useCustomHtml);
+                const activeHtml = isManual
+                  ? editingPost.customHtml || ''
+                  : compilePostSectionsToHtml(editingPost);
+
+                const handleCopyArticleHtml = async () => {
+                  try {
+                    await navigator.clipboard.writeText(activeHtml);
+                    setHtmlCopied(true);
+                    setTimeout(() => setHtmlCopied(false), 1800);
+                  } catch {
+                    // ignore clipboard error
+                  }
+                };
+
+                const handleDownloadHtml = () => {
+                  try {
+                    const blob = new Blob([activeHtml], { type: 'text/html;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${editingPost.slug || 'article'}.html`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  } catch {
+                    // ignore
+                  }
+                };
+
+                return (
+                  <div className="space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <TbFileCode size={20} className="text-[#29aaea] shrink-0" />
+                        <div>
+                          <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                            {t('HTML Viewer & Manual HTML Article')}
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {t('Inspect the complete article HTML or write/paste your own full manual HTML article with live preview.')}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Pane View Switcher */}
+                      <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0">
+                        {(
+                          [
+                            ['split', t('Split'), TbLayoutColumns],
+                            ['code', t('HTML Code'), TbSourceCode],
+                            ['viewer', t('HTML Viewer'), TbEye],
+                          ] as const
+                        ).map(([pMode, pLabel, PIcon]) => (
+                          <button
+                            key={pMode}
+                            type="button"
+                            onClick={() => setHtmlViewerPaneMode(pMode)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${
+                              htmlViewerPaneMode === pMode
+                                ? 'bg-[#29aaea] text-white'
+                                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                            }`}
+                          >
+                            <PIcon size={14} />
+                            <span>{pLabel}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Article Body Source Mode Toggle */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => updateField('useCustomHtml', false)}
+                        className={`text-start p-4 rounded-2xl border transition-all cursor-pointer ${
+                          !isManual
+                            ? 'border-[#29aaea] bg-sky-50/70 dark:bg-sky-950/25 ring-2 ring-[#29aaea]/20'
+                            : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                            {t('Structured Sections Mode (Default)')}
+                          </span>
+                          {!isManual && (
+                            <span className="px-2 py-0.5 rounded-md bg-[#29aaea] text-white text-[10px] font-black">
+                              {t('Active')}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          {t('Public article renders from Sections & Rich Blocks. Here you can inspect, copy, or export the generated HTML.')}
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!editingPost.customHtml?.trim()) {
+                            updateField('customHtml', compilePostSectionsToHtml(editingPost));
+                          }
+                          updateField('useCustomHtml', true);
+                        }}
+                        className={`text-start p-4 rounded-2xl border transition-all cursor-pointer ${
+                          isManual
+                            ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/25 ring-2 ring-indigo-500/20'
+                            : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                            {t('Manual Full HTML Article Mode')}
+                          </span>
+                          {isManual && (
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-600 text-white text-[10px] font-black">
+                              {t('Active')}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          {t('Write or paste complete manual HTML below — headings auto-sync to Table of Contents.')}
+                        </p>
+                      </button>
+                    </div>
+
+                    {/* Action Toolbar */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {isManual && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<h1>', '</h1>', 'Heading 1')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<h1>"
+                            >
+                              <TbH1 size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<h2>', '</h2>', 'Section Heading')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<h2>"
+                            >
+                              <TbH2 size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<h3>', '</h3>', 'Subsection')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<h3>"
+                            >
+                              <TbH3 size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<strong>', '</strong>', 'bold')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<strong>"
+                            >
+                              <TbBold size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<em>', '</em>', 'italic')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<em>"
+                            >
+                              <TbItalic size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<u>', '</u>', 'underline')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<u>"
+                            >
+                              <TbUnderline size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<s>', '</s>', 'strikethrough')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<s>"
+                            >
+                              <TbStrikethrough size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<ul>\n  <li>', '</li>\n</ul>', 'List item')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<ul>"
+                            >
+                              <TbList size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<ol>\n  <li>', '</li>\n</ol>', 'Step 1')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<ol>"
+                            >
+                              <TbListNumbers size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => wrapFullHtmlSelection('<blockquote>', '</blockquote>', 'Quote')}
+                              className="p-1.5 rounded-lg hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              title="<blockquote>"
+                            >
+                              <TbQuote size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateField('customHtml', formatHtmlPretty(editingPost.customHtml || ''))
+                              }
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#29aaea] cursor-pointer ms-1"
+                            >
+                              <TbWand size={13} />
+                              <span>{t('Format HTML')}</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {isManual && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              updateField(
+                                'customHtml',
+                                `${editingPost.customHtml ? `${editingPost.customHtml}\n` : ''}<div class="sa-callout-grid">\n  <div class="sa-callout-card">\n    <h3>Highlight One</h3>\n    <p>Styled cleanly with custom CSS.</p>\n  </div>\n  <div class="sa-callout-card">\n    <h3>Highlight Two</h3>\n    <p>Responsive grid adapts automatically.</p>\n  </div>\n</div>`
+                              );
+                              updateField(
+                                'customCss',
+                                `${editingPost.customCss ? `${editingPost.customCss}\n\n` : ''}.sa-callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; }\n.sa-callout-card { padding: 16px; border-radius: 14px; border: 1px solid rgba(41, 170, 234, 0.35); background: rgba(41, 170, 234, 0.08); }\n.sa-callout-card h3 { margin: 0 0 6px; font-size: 1rem; color: #29aaea; }`
+                              );
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 text-[#29aaea] text-[11px] font-bold hover:bg-sky-500/20 cursor-pointer"
+                          >
+                            + {t('HTML + CSS Card Grid')}
+                          </button>
+                        )}
+                        {isManual ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateField('customHtml', compilePostSectionsToHtml(editingPost))
+                              }
+                              className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:border-[#29aaea] cursor-pointer"
+                            >
+                              {t('Sync From Sections')}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={convertManualHtmlToSections}
+                              className="px-2.5 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold hover:bg-indigo-500/20 cursor-pointer"
+                            >
+                              {t('Convert HTML to Sections')}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              updateField('customHtml', compilePostSectionsToHtml(editingPost));
+                              updateField('useCustomHtml', true);
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[11px] font-bold cursor-pointer"
+                          >
+                            {t('Edit Manually in HTML')}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleCopyArticleHtml}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+                        >
+                          {htmlCopied ? <TbCheck size={13} className="text-emerald-500" /> : <TbCopy size={13} />}
+                          <span>{htmlCopied ? t('Copied') : t('Copy HTML')}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDownloadHtml}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+                        >
+                          <TbDownload size={13} />
+                          <span>.HTML</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Split Code + HTML/CSS Viewer Workspace */}
+                    <div
+                      className={`grid rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 ${
+                        htmlViewerPaneMode === 'split'
+                          ? 'grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-slate-800'
+                          : 'grid-cols-1'
+                      }`}
+                    >
+                      {(htmlViewerPaneMode === 'split' || htmlViewerPaneMode === 'code') && (
+                        <div className="flex flex-col bg-slate-950 min-h-[420px]">
+                          <div className="px-3 sm:px-4 py-2 text-[11px] font-mono font-bold text-slate-400 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setHtmlCodeSubTab('html')}
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase cursor-pointer ${
+                                  htmlCodeSubTab === 'html'
+                                    ? 'bg-[#29aaea] text-white'
+                                    : 'text-slate-400 hover:text-white'
+                                }`}
+                              >
+                                HTML {isManual ? '' : '(Compiled)'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setHtmlCodeSubTab('css')}
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase cursor-pointer ${
+                                  htmlCodeSubTab === 'css'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'text-slate-400 hover:text-white'
+                                }`}
+                              >
+                                Custom CSS {(editingPost.customCss || '').trim() ? '●' : ''}
+                              </button>
+                            </div>
+                            <span className="tabular-nums">
+                              {htmlCodeSubTab === 'html'
+                                ? `${activeHtml.length} chars`
+                                : `${(editingPost.customCss || '').length} chars`}
+                            </span>
+                          </div>
+
+                          {htmlCodeSubTab === 'html' ? (
+                            <textarea
+                              ref={fullHtmlTextareaRef}
+                              dir="ltr"
+                              readOnly={!isManual}
+                              value={activeHtml}
+                              onChange={(e) => {
+                                if (isManual) updateField('customHtml', e.target.value);
+                              }}
+                              placeholder="<style>&#10;  .hero-note { padding: 16px; border-radius: 12px; }&#10;</style>&#10;<h2>Introduction</h2>&#10;<p>Write your complete article HTML + CSS here...</p>"
+                              className="w-full flex-1 min-h-[380px] bg-slate-950 text-sky-300 font-mono text-xs leading-relaxed p-4 focus:outline-none resize-y"
+                            />
+                          ) : (
+                            <textarea
+                              dir="ltr"
+                              value={editingPost.customCss || ''}
+                              onChange={(e) => updateField('customCss', e.target.value)}
+                              placeholder="/* Scoped automatically to this article */&#10;.sa-callout-card {&#10;  padding: 16px;&#10;  border-radius: 14px;&#10;  border: 1px solid rgba(41,170,234,0.35);&#10;}"
+                              className="w-full flex-1 min-h-[380px] bg-slate-950 text-emerald-300 font-mono text-xs leading-relaxed p-4 focus:outline-none resize-y"
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      {(htmlViewerPaneMode === 'split' || htmlViewerPaneMode === 'viewer') && (
+                        <div className="flex flex-col bg-white dark:bg-[#0b101b] min-h-[420px]">
+                          <div className="px-4 py-2 text-[11px] font-mono font-bold text-indigo-500 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <span>{t('Live HTML Viewer')} (HTML + CSS)</span>
+                            <span className="text-[10px] text-slate-400">Scoped</span>
+                          </div>
+                          <div className="p-4 sm:p-5 max-h-[560px] overflow-auto">
+                            {activeHtml.trim() || editingPost.customCss?.trim() ? (
+                              <ScopedHtmlViewer
+                                html={activeHtml}
+                                css={editingPost.customCss || ''}
+                                scopeKey={editingPost.id || 'studio-full-viewer'}
+                              />
+                            ) : (
+                              <div className="text-xs text-slate-400 italic py-8 text-center">
+                                {t('HTML output preview will render here.')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

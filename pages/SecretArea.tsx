@@ -4364,20 +4364,29 @@ export const ResourceDetailModal: React.FC<{
 
         const pageTitle =
           cat === 'ps5'
-            ? `${item.name} PS5 Edition – Specs & Links | Secret Area`
+            ? `${item.name} PS5 – Specs & Links | Secret Area`
             : cat === 'hypervisor'
-            ? `${item.name} Hypervisor – Setup & Files | Secret Area`
+            ? `${item.name} Hypervisor – Setup | Secret Area`
             : cat === 'steamtools'
-            ? `${item.name} SteamTools – Files & Guide | Secret Area`
+            ? `${item.name} SteamTools – Guide | Secret Area`
             : cat === 'architect' || cat === 'tools'
-            ? `${item.name} – Software Tool & Specs | Secret Area`
+            ? `${item.name} – Software & Specs | Secret Area`
             : cat === 'extra' || cat === 'savegame'
-            ? `${item.name} – Save Game Files | Secret Area`
-            : `${item.name} – Free PC Game, Specs & Mirrors | Secret Area`;
+            ? `${item.name} – 100% Save Files | Secret Area`
+            : `${item.name} – PC Specs & Mirrors | Secret Area`;
 
         const rawDesc = `Download ${item.name} (${sectionLabel}). Version ${item.version || 'Latest'}, size ${item.repackSize || item.originalSize || 'N/A'}. Verified mirrors, system requirements & setup guide on Secret Area.`;
         const seoDesc = rawDesc.length > 160 ? `${rawDesc.slice(0, 157).trimEnd()}...` : rawDesc;
-        const resolvedCover = item.coverImage || `${origin}/images/hero01.png`;
+        const rawCover = (item.coverImage || '').trim();
+        const resolvedCover = rawCover
+          ? rawCover.startsWith('http')
+            ? rawCover
+            : `${origin}${rawCover.startsWith('/') ? '' : '/'}${rawCover}`
+          : `${origin}/images/hero01.png`;
+        const parsedGenres = (item.genres || '')
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean);
 
         const schemaGraph = {
           '@context': 'https://schema.org',
@@ -4387,11 +4396,11 @@ export const ResourceDetailModal: React.FC<{
               name: item.name,
               url: itemUrl,
               description: item.description || seoDesc,
-              image: resolvedCover,
+              image: [resolvedCover],
               applicationCategory: cat === 'architect' || cat === 'tools' ? 'UtilitiesApplication' : 'GameApplication',
               operatingSystem: cat === 'ps5' ? 'PlayStation 5' : 'Windows 10, Windows 11',
               gamePlatform: cat === 'ps5' ? ['PlayStation 5'] : ['PC', 'Windows'],
-              genre: (item.genres || '').split(',').map((s: string) => s.trim()).filter(Boolean),
+              ...(parsedGenres.length > 0 ? { genre: parsedGenres } : {}),
               softwareVersion: item.version || '1.0',
               author: {
                 '@type': 'Organization',
@@ -4443,11 +4452,13 @@ export const ResourceDetailModal: React.FC<{
               name="keywords"
               content={`${item.name}, download ${item.name}, ${item.name} repack, ${sectionLabel}, ${item.genres || 'PC games'}, Secret Area`}
             />
+            <meta name="author" content={item.publishBy || item.developer || 'SecretArea'} />
             <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
             <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
             <link rel="canonical" href={itemUrl} />
             <meta property="og:site_name" content="Secret Area" />
             <meta property="og:type" content="article" />
+            <meta property="og:locale" content="en_US" />
             <meta property="og:title" content={pageTitle} />
             <meta property="og:description" content={seoDesc} />
             <meta property="og:url" content={itemUrl} />
@@ -4457,6 +4468,7 @@ export const ResourceDetailModal: React.FC<{
             <meta name="twitter:title" content={pageTitle} />
             <meta name="twitter:description" content={seoDesc} />
             <meta name="twitter:image" content={resolvedCover} />
+            <meta name="twitter:image:alt" content={item.name} />
             <script type="application/ld+json">{JSON.stringify(schemaGraph)}</script>
           </Helmet>
         );

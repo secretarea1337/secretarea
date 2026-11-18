@@ -1673,7 +1673,120 @@ export const translations: Translations = {
         ar: 'تصفح ألعاب الحاسوب الموثوقة وإصدارات PS5 وأدوات Hypervisor وانضم إلى مجتمعنا.'
     },
     'Browse Games Catalog': { en: 'Browse Games Catalog', fr: 'Parcourir le catalogue', es: 'Explorar catálogo de juegos', ar: 'تصفح مكتبة الألعاب' },
-    'Join Our Discord': { en: 'Join Our Discord', fr: 'Rejoindre Discord', es: 'Únete a nuestro Discord', ar: 'انضم إلى ديسكورد' }
+    'Join Our Discord': { en: 'Join Our Discord', fr: 'Rejoindre Discord', es: 'Únete a nuestro Discord', ar: 'انضم إلى ديسكورد' },
+    'Compose': { en: 'Compose', fr: 'Visuel', es: 'Visual', ar: 'المحرر المرئي' },
+    'HTML View': { en: 'HTML View', fr: 'Vue HTML', es: 'Vista HTML', ar: 'عرض HTML' },
+    'Live HTML Viewer': { en: 'Live HTML Viewer', fr: 'Visionneuse HTML en direct', es: 'Visor HTML en vivo', ar: 'عارض HTML المباشر' },
+    'HTML Viewer & Manual': { en: 'HTML Viewer & Manual', fr: 'Visionneuse & HTML Manuel', es: 'Visor HTML y Manual', ar: 'عارض HTML والمقال اليدوي' },
+    'HTML / Viewer': { en: 'HTML / Viewer', fr: 'HTML / Visionneuse', es: 'HTML / Visor', ar: 'كتلة HTML / العارض' },
+    'Rich Text / Compose': { en: 'Rich Text / Compose', fr: 'Texte riche / Visuel', es: 'Texto enriquecido', ar: 'نص منسق / مرئي' },
+    'Format HTML': { en: 'Format HTML', fr: 'Formater HTML', es: 'Formatear HTML', ar: 'تنسيق HTML' },
+    'Card Snippet': { en: 'Card Snippet', fr: 'Bloc Carte', es: 'Tarjeta HTML', ar: 'قالب بطاقة' },
+    'HTML Viewer & Manual HTML Article': {
+        en: 'HTML Viewer & Manual HTML Article',
+        fr: 'Visionneuse HTML & Article HTML Manuel',
+        es: 'Visor HTML y Artículo HTML Manual',
+        ar: 'عارض HTML وكتابة المقال يدوياً بـ HTML'
+    },
+    'Inspect the complete article HTML or write/paste your own full manual HTML article with live preview.': {
+        en: 'Inspect the complete article HTML or write/paste your own full manual HTML article with live preview.',
+        fr: 'Inspectez le HTML complet ou rédigez/collez votre article HTML manuel avec aperçu en direct.',
+        es: 'Inspecciona el HTML completo del artículo o escribe/pega tu propio artículo HTML manual.',
+        ar: 'اعرض كود HTML الكامل للمقال أو اكتب/الصق مقالاً كاملاً يدوياً بصيغة HTML مع معاينة حية.'
+    },
+    'HTML Code': { en: 'HTML Code', fr: 'Code HTML', es: 'Código HTML', ar: 'كود HTML' },
+    'HTML Viewer': { en: 'HTML Viewer', fr: 'Visionneuse HTML', es: 'Visor HTML', ar: 'عارض HTML' },
+    'Structured Sections Mode (Default)': {
+        en: 'Structured Sections Mode (Default)',
+        fr: 'Mode Sections Structurées (Par défaut)',
+        es: 'Modo Secciones Estructuradas (Predeterminado)',
+        ar: 'وضع الأقسام المنظمة (الافتراضي)'
+    },
+    'Public article renders from Sections & Rich Blocks. Here you can inspect, copy, or export the generated HTML.': {
+        en: 'Public article renders from Sections & Rich Blocks. Here you can inspect, copy, or export the generated HTML.',
+        fr: 'L\'article s\'affiche depuis les sections et blocs. Ici vous pouvez inspecter, copier ou exporter le HTML.',
+        es: 'El artículo se muestra desde las secciones. Aquí puedes inspeccionar, copiar o exportar el HTML.',
+        ar: 'يظهر المقال من الأقسام والكتل، ويمكنك هنا فحص أو نسخ أو تنزيل كود HTML الناتج.'
+    },
+    'Manual Full HTML Article Mode': {
+        en: 'Manual Full HTML Article Mode',
+        fr: 'Mode Article HTML Manuel Complet',
+        es: 'Modo Artículo HTML Manual Completo',
+        ar: 'وضع المقال الكامل يدوياً بـ HTML'
+    },
+    'Write or paste complete manual HTML below — headings auto-sync to Table of Contents.': {
+        en: 'Write or paste complete manual HTML below — headings auto-sync to Table of Contents.',
+        fr: 'Rédigez ou collez votre HTML complet ci-dessous — les titres se synchronisent avec le sommaire.',
+        es: 'Escribe o pega HTML manual completo abajo; los encabezados se sincronizan con la tabla de contenidos.',
+        ar: 'اكتب أو الصق كود HTML الكامل أدناه — تتم مزامنة العناوين تلقائياً مع فهرس المحتويات.'
+    },
+    'Sync From Sections': { en: 'Sync From Sections', fr: 'Importer des sections', es: 'Importar de secciones', ar: 'جلب من الأقسام' },
+    'Convert HTML to Sections': { en: 'Convert HTML to Sections', fr: 'Convertir en sections', es: 'Convertir a secciones', ar: 'تحويل إلى أقسام منظمة' },
+    'Edit Manually in HTML': { en: 'Edit Manually in HTML', fr: 'Éditer en HTML manuel', es: 'Editar en HTML manual', ar: 'تحرير المقال يدوياً بـ HTML' },
+    'Copy HTML': { en: 'Copy HTML', fr: 'Copier HTML', es: 'Copiar HTML', ar: 'نسخ HTML' },
+    'Text Color': { en: 'Text Color', fr: 'Couleur du texte', es: 'Color de texto', ar: 'لون النص' },
+    'Highlight Color': { en: 'Highlight Color', fr: 'Surlignage', es: 'Resaltado', ar: 'تظليل النص' },
+    'Clear Formatting': { en: 'Clear Formatting', fr: 'Effacer le formatage', es: 'Limpiar formato', ar: 'مسح التنسيق' },
+    'Find in HTML': { en: 'Find in HTML', fr: 'Rechercher dans HTML', es: 'Buscar en HTML', ar: 'بحث داخل HTML' },
+    'Format / Beautify HTML': { en: 'Format / Beautify HTML', fr: 'Formater HTML', es: 'Formatear HTML', ar: 'تنسيق وترتيب HTML' },
+    'Toggle Split HTML Viewer': { en: 'Toggle Split HTML Viewer', fr: 'Visionneuse HTML divisée', es: 'Visor HTML dividido', ar: 'عرض الكود والعارض معاً' },
+    'Find Next': { en: 'Find Next', fr: 'Suivant', es: 'Siguiente', ar: 'التالي' },
+    'Normal': { en: 'Normal', fr: 'Normal', es: 'Normal', ar: 'نص عادي' },
+    'Active': { en: 'Active', fr: 'Actif', es: 'Activo', ar: 'نشط' },
+    'Live Rendered Output Preview': { en: 'Live Rendered Output Preview', fr: 'Aperçu du rendu en direct', es: 'Vista previa en vivo', ar: 'معاينة النتيجة المباشرة' },
+    'Insert Image URL': { en: 'Insert Image URL', fr: 'Insérer une image', es: 'Insertar imagen', ar: 'إدراج رابط صورة' },
+    'Insert Video': { en: 'Insert Video', fr: 'Insérer une vidéo', es: 'Insertar video', ar: 'إدراج فيديو' },
+    'Insert Link': { en: 'Insert Link', fr: 'Insérer un lien', es: 'Insertar enlace', ar: 'إدراج رابط' },
+    'Search inside HTML code...': { en: 'Search inside HTML code...', fr: 'Rechercher dans le HTML...', es: 'Buscar en el código HTML...', ar: 'ابحث داخل كود HTML...' },
+    'matches': { en: 'matches', fr: 'résultats', es: 'coincidencias', ar: 'نتيجة' },
+    'Converted manual HTML into structured sections!': {
+        en: 'Converted manual HTML into structured sections!',
+        fr: 'HTML manuel converti en sections structurées !',
+        es: '¡HTML manual convertido a secciones estructuradas!',
+        ar: 'تم تحويل كود HTML اليدوي إلى أقسام منظمة بنجاح!'
+    },
+    'Could not parse HTML into sections.': {
+        en: 'Could not parse HTML into sections.',
+        fr: 'Impossible d\'analyser le HTML en sections.',
+        es: 'No se pudo analizar el HTML en secciones.',
+        ar: 'تعذر تحليل كود HTML إلى أقسام.'
+    },
+    'Live HTML output appears here...': {
+        en: 'Live HTML output appears here...',
+        fr: 'L\'aperçu HTML en direct apparaît ici...',
+        es: 'La salida HTML en vivo aparecerá aquí...',
+        ar: 'سيظهر عرض HTML المباشر هنا...'
+    },
+    'HTML output preview will render here.': {
+        en: 'HTML output preview will render here.',
+        fr: 'L\'aperçu du rendu HTML s\'affichera ici.',
+        es: 'La vista previa HTML se mostrará aquí.',
+        ar: 'ستظهر معاينة كود HTML هنا.'
+    },
+    'HTML preview will appear here as you type...': {
+        en: 'HTML preview will appear here as you type...',
+        fr: 'L\'aperçu HTML apparaîtra ici pendant la frappe...',
+        es: 'La vista previa HTML aparecerá aquí mientras escribes...',
+        ar: 'ستظهر معاينة HTML هنا أثناء الكتابة...'
+    },
+    'Preview will appear here as you type...': {
+        en: 'Preview will appear here as you type...',
+        fr: 'L\'aperçu apparaîtra ici pendant la frappe...',
+        es: 'La vista previa aparecerá aquí mientras escribes...',
+        ar: 'ستظهر المعاينة هنا أثناء الكتابة...'
+    },
+    'Remove Link': { en: 'Remove Link', fr: 'Supprimer le lien', es: 'Quitar enlace', ar: 'إزالة الرابط' },
+    'Unlink': { en: 'Unlink', fr: 'Délier', es: 'Desenlazar', ar: 'إزالة الرابط' },
+    'Reset Color': { en: 'Reset Color', fr: 'Réinitialiser la couleur', es: 'Restablecer color', ar: 'إزالة لون النص' },
+    'Remove Highlight': { en: 'Remove Highlight', fr: 'Supprimer le surlignage', es: 'Quitar resaltado', ar: 'إزالة التظليل' },
+    'Custom': { en: 'Custom', fr: 'Personnalisé', es: 'Personalizado', ar: 'مخصص' },
+    'Update': { en: 'Update', fr: 'Mettre à jour', es: 'Actualizar', ar: 'تحديث' },
+    'Undo': { en: 'Undo', fr: 'Annuler', es: 'Deshacer', ar: 'تراجع' },
+    'Redo': { en: 'Redo', fr: 'Rétablir', es: 'Rehacer', ar: 'إعادة' },
+    'Code': { en: 'Code', fr: 'Code', es: 'Código', ar: 'الكود' },
+    'Viewer': { en: 'Viewer', fr: 'Visionneuse', es: 'Visor', ar: 'العارض' },
+    'SEO Checklist': { en: 'SEO Checklist', fr: 'Liste SEO', es: 'Lista SEO', ar: 'قائمة السيو' },
+    'HTML + CSS Card Grid': { en: 'HTML + CSS Card Grid', fr: 'Grille de cartes HTML + CSS', es: 'Cuadrícula HTML + CSS', ar: 'بطاقات HTML + CSS' }
 };
 
 interface LanguageContextType {

@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 import {
   TbCopy,
   TbCheck,
@@ -19,76 +22,376 @@ import {
   TbCheck as TbChecklistMark,
 } from 'react-icons/tb';
 import Icon from './Icon';
-import { BlogContentBlock, BlogImageItem, slugifyBlogTitle } from '../src/types/blog';
+import { BlogContentBlock, BlogImageItem, HeadingLevel, slugifyBlogTitle } from '../src/types/blog';
 import { useLanguage } from '../src/contexts/LanguageContext';
 
-// Safe mdast plugin that turns paired inline <u>...</u> HTML nodes into real <u> elements without rehype-raw
-function remarkUnderline() {
-  const transformChildren = (children: any[]): any[] => {
-    const out: any[] = [];
-    let i = 0;
-    while (i < children.length) {
-      const node = children[i];
-      if (node?.type === 'html' && /^<u\s*>$/i.test(String(node.value || '').trim())) {
-        let closeIdx = -1;
-        for (let j = i + 1; j < children.length; j++) {
-          const cand = children[j];
-          if (cand?.type === 'html' && /^<\/u\s*>$/i.test(String(cand.value || '').trim())) {
-            closeIdx = j;
-            break;
-          }
-        }
-        if (closeIdx !== -1) {
-          out.push({
-            type: 'underline',
-            data: {
-              hName: 'u',
-              hProperties: {
-                className: 'underline decoration-[#29aaea]/80 decoration-2 underline-offset-4',
-              },
-            },
-            children: transformChildren(children.slice(i + 1, closeIdx)),
-          });
-          i = closeIdx + 1;
-          continue;
-        }
-      }
-      if (Array.isArray(node?.children)) {
-        out.push({ ...node, children: transformChildren(node.children) });
-      } else {
-        out.push(node);
-      }
-      i++;
-    }
-    return out;
-  };
+const ALLOWED_IFRAME_HOSTS = [
+  'youtube.com',
+  'www.youtube.com',
+  'youtube-nocookie.com',
+  'www.youtube-nocookie.com',
+  'player.vimeo.com',
+  'www.dailymotion.com',
+  'player.twitch.tv',
+];
 
-  return (tree: any) => {
-    if (Array.isArray(tree?.children)) {
-      tree.children = transformChildren(tree.children);
+let domPurifyConfigured = false;
+function ensureDomPurifyHooks() {
+  if (domPurifyConfigured || typeof window === 'undefined') return;
+  domPurifyConfigured = true;
+  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+    if (data.tagName === 'iframe') {
+      const el = node as HTMLElement;
+      const src = el.getAttribute('src') || '';
+      try {
+        const parsed = new URL(src, window.location.origin);
+        const host = parsed.hostname.toLowerCase();
+        const allowed = ALLOWED_IFRAME_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+        if (!allowed) {
+          el.parentNode?.removeChild(el);
+        }
+      } catch {
+        el.parentNode?.removeChild(el);
+      }
     }
+  });
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A') {
+      const href = node.getAttribute('href') || '';
+      if (href && !href.startsWith('/') && !href.startsWith('#')) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    }
+    if (node.tagName === 'IMG') {
+      if (!node.getAttribute('referrerpolicy')) {
+        node.setAttribute('referrerpolicy', 'no-referrer');
+      }
+    }
+  });
+}
+
+export function sanitizeRichHtml(rawHtml: string): string {
+  if (!rawHtml?.trim()) return '';
+  if (typeof window === 'undefined') return rawHtml;
+  ensureDomPurifyHooks();
+  return DOMPurify.sanitize(rawHtml, {
+    ALLOWED_TAGS: [
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'p', 'div', 'span', 'br', 'hr',
+      'strong', 'b', 'em', 'i', 'u', 's', 'del', 'strike', 'mark', 'small', 'sub', 'sup',
+      'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+      'blockquote', 'pre', 'code', 'kbd',
+      'a', 'img', 'figure', 'figcaption',
+      'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+      'iframe', 'video', 'source',
+      'details', 'summary', 'section', 'article', 'header', 'footer', 'aside', 'main', 'nav', 'font',
+    ],
+    ALLOWED_ATTR: [
+      'id', 'class', 'style', 'dir', 'lang', 'title', 'role',
+      'href', 'target', 'rel',
+      'src', 'alt', 'width', 'height', 'loading', 'referrerpolicy',
+      'controls', 'preload', 'poster', 'type',
+      'allow', 'allowfullscreen', 'frameborder',
+      'colspan', 'rowspan', 'color', 'face', 'size', 'align', 'open',
+    ],
+    ALLOW_DATA_ATTR: false,
+  });
+}
+
+export function extractHtmlAndStyles(rawHtml: string): { bodyHtml: string; extractedCss: string } {
+  const raw = rawHtml || '';
+  if (!raw.trim()) return { bodyHtml: '', extractedCss: '' };
+  const styles: string[] = [];
+  const bodyHtml = raw.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_match, cssContent) => {
+    if (cssContent && cssContent.trim()) {
+      styles.push(cssContent.trim());
+    }
+    return '';
+  });
+  return {
+    bodyHtml: bodyHtml.trim(),
+    extractedCss: styles.join('\n\n'),
   };
 }
+
+function splitCssSelectors(selectorGroup: string): string[] {
+  const parts: string[] = [];
+  let buf = '';
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  for (let i = 0; i < selectorGroup.length; i += 1) {
+    const ch = selectorGroup[i];
+    if (ch === '(') parenDepth += 1;
+    else if (ch === ')') parenDepth = Math.max(0, parenDepth - 1);
+    else if (ch === '[') bracketDepth += 1;
+    else if (ch === ']') bracketDepth = Math.max(0, bracketDepth - 1);
+
+    if (ch === ',' && parenDepth === 0 && bracketDepth === 0) {
+      if (buf.trim()) parts.push(buf.trim());
+      buf = '';
+    } else {
+      buf += ch;
+    }
+  }
+  if (buf.trim()) parts.push(buf.trim());
+  return parts;
+}
+
+function sanitizeCssDeclarations(declBlock: string): string {
+  return declBlock
+    .replace(/expression\s*\([^)]*\)/gi, '')
+    .replace(/javascript\s*:/gi, '')
+    .replace(/vbscript\s*:/gi, '')
+    .replace(/behavior\s*:\s*[^;]+;?/gi, '')
+    .replace(/-moz-binding\s*:\s*[^;]+;?/gi, '')
+    .replace(/url\s*\(\s*(['"]?)\s*(?:javascript:|vbscript:|data:text\/html)[^)]*\)/gi, 'none');
+}
+
+function scopeCssRuleBlock(cssText: string, scopeClass: string): string {
+  let out = '';
+  let i = 0;
+  const len = cssText.length;
+
+  while (i < len) {
+    // Skip whitespace
+    while (i < len && /\s/.test(cssText[i])) {
+      out += cssText[i];
+      i += 1;
+    }
+    if (i >= len) break;
+
+    const openIdx = cssText.indexOf('{', i);
+    if (openIdx === -1) break;
+
+    const prelude = cssText.slice(i, openIdx).trim();
+    // Find matching closing brace
+    let depth = 1;
+    let j = openIdx + 1;
+    while (j < len && depth > 0) {
+      if (cssText[j] === '{') depth += 1;
+      else if (cssText[j] === '}') depth -= 1;
+      j += 1;
+    }
+    const body = cssText.slice(openIdx + 1, depth === 0 ? j - 1 : len);
+    i = j;
+
+    if (!prelude) continue;
+    const lowerPrelude = prelude.toLowerCase();
+
+    // Disallow external @import / @charset / @namespace
+    if (
+      lowerPrelude.startsWith('@import') ||
+      lowerPrelude.startsWith('@charset') ||
+      lowerPrelude.startsWith('@namespace')
+    ) {
+      continue;
+    }
+
+    // Preserve @keyframes verbatim (safe declarations)
+    if (lowerPrelude.startsWith('@keyframes') || lowerPrelude.startsWith('@-webkit-keyframes')) {
+      out += `${prelude} { ${sanitizeCssDeclarations(body)} }\n`;
+      continue;
+    }
+
+    // Recurse inside @media / @supports / @container
+    if (
+      lowerPrelude.startsWith('@media') ||
+      lowerPrelude.startsWith('@supports') ||
+      lowerPrelude.startsWith('@container')
+    ) {
+      const innerScoped = scopeCssRuleBlock(body, scopeClass);
+      if (innerScoped.trim()) {
+        out += `${prelude} {\n${innerScoped}\n}\n`;
+      }
+      continue;
+    }
+
+    // Standard selector block
+    const selectors = splitCssSelectors(prelude).map((sel) => {
+      if (sel === ':root' || sel === 'html' || sel === 'body') {
+        return `.${scopeClass}`;
+      }
+      if (sel.includes(`.${scopeClass}`)) {
+        return sel;
+      }
+      // Handle leading html/body in descendant selectors
+      const cleaned = sel.replace(/^(?:html|body)\b\s*/i, '');
+      return cleaned ? `.${scopeClass} ${cleaned}` : `.${scopeClass}`;
+    });
+
+    const cleanBody = sanitizeCssDeclarations(body).trim();
+    if (selectors.length > 0 && cleanBody) {
+      out += `${selectors.join(', ')} {\n  ${cleanBody}\n}\n`;
+    }
+  }
+
+  return out;
+}
+
+export function sanitizeScopedCss(rawCss: string, scopeClass: string): string {
+  const raw = (rawCss || '').trim();
+  if (!raw) return '';
+  // Strip comments and dangerous patterns first
+  const noComments = raw
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/<\/?style\b[^>]*>/gi, '')
+    .replace(/@import[^;]+;?/gi, '');
+  return scopeCssRuleBlock(noComments, scopeClass).trim();
+}
+
+export function isHtmlContent(value: string): boolean {
+  const trimmed = (value || '').trim();
+  if (!trimmed) return false;
+  if (/^<(?:style|p|div|h[1-6]|ul|ol|li|blockquote|table|section|article|header|footer|aside|main|nav|figure|pre|hr|br|span|strong|b|em|i|u|s|del|strike|mark|a|img|iframe|video|font)\b/i.test(trimmed)) {
+    return true;
+  }
+  const blockTagMatches = trimmed.match(/<\/(?:style|p|div|h[1-6]|ul|ol|li|blockquote|table|figure|pre|section|article|header|footer)>/gi);
+  return Boolean(blockTagMatches && blockTagMatches.length >= 1);
+}
+
+export function markdownToHtml(md: string): string {
+  const raw = md || '';
+  if (!raw.trim()) return '';
+  if (isHtmlContent(raw)) return raw;
+  try {
+    const parsed = marked.parse(raw, { gfm: true, breaks: true });
+    return typeof parsed === 'string' ? parsed : raw;
+  } catch {
+    return raw;
+  }
+}
+
+export function formatHtmlPretty(html: string): string {
+  const raw = (html || '').trim();
+  if (!raw) return '';
+  const tokens = raw
+    .replace(/>\s+</g, '><')
+    .replace(/(<[^>]+>)/g, '\n$1\n')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const voidTags = new Set(['br', 'hr', 'img', 'input', 'source', 'meta', 'link']);
+  let indent = 0;
+  const out: string[] = [];
+
+  for (const tok of tokens) {
+    if (tok.startsWith('</')) {
+      indent = Math.max(0, indent - 1);
+      out.push(`${'  '.repeat(indent)}${tok}`);
+    } else if (tok.startsWith('<') && !tok.startsWith('<!')) {
+      const tagMatch = tok.match(/^<([a-zA-Z0-9]+)/);
+      const tagName = tagMatch ? tagMatch[1].toLowerCase() : '';
+      const selfClosing = tok.endsWith('/>') || voidTags.has(tagName);
+      out.push(`${'  '.repeat(indent)}${tok}`);
+      if (!selfClosing && !tok.includes(`</${tagName}>`)) {
+        indent += 1;
+      }
+    } else {
+      out.push(`${'  '.repeat(indent)}${tok}`);
+    }
+  }
+  return out.join('\n');
+}
+
+export function processHtmlWithHeadingIds(html: string): {
+  htmlWithIds: string;
+  extractedCss: string;
+  headings: Array<{ id: string; label: string; level: HeadingLevel }>;
+} {
+  const { bodyHtml, extractedCss } = extractHtmlAndStyles(html);
+  const clean = sanitizeRichHtml(bodyHtml);
+  if (!clean || typeof window === 'undefined') {
+    return { htmlWithIds: clean, extractedCss, headings: [] };
+  }
+  try {
+    const doc = new DOMParser().parseFromString(`<div>${clean}</div>`, 'text/html');
+    const root = doc.body.firstElementChild;
+    if (!root) return { htmlWithIds: clean, extractedCss, headings: [] };
+    const headings: Array<{ id: string; label: string; level: HeadingLevel }> = [];
+    const usedIds = new Set<string>();
+
+    root.querySelectorAll('h1, h2, h3, h4').forEach((el, idx) => {
+      const label = (el.textContent || '').trim();
+      if (!label) return;
+      const lvl = Math.min(6, Math.max(1, Number(el.tagName.slice(1)))) as HeadingLevel;
+      let id = el.getAttribute('id') || `html-${slugifyBlogTitle(label, `sec-${idx + 1}`)}`;
+      if (usedIds.has(id)) id = `${id}-${idx + 1}`;
+      usedIds.add(id);
+      el.setAttribute('id', id);
+      el.classList.add('scroll-mt-24');
+      headings.push({ id, label, level: lvl });
+    });
+
+    return { htmlWithIds: root.innerHTML, extractedCss, headings };
+  } catch {
+    return { htmlWithIds: clean, extractedCss, headings: [] };
+  }
+}
+
+export const ScopedHtmlViewer: React.FC<{
+  html: string;
+  css?: string;
+  scopeKey?: string;
+  align?: 'left' | 'center' | 'right';
+  className?: string;
+  alreadySanitizedHtml?: boolean;
+}> = ({ html, css = '', scopeKey, align = 'left', className = '', alreadySanitizedHtml = false }) => {
+  const reactId = useId();
+  const scopeClass = useMemo(() => {
+    const raw = (scopeKey || reactId || 'sa').replace(/[^a-zA-Z0-9_-]/g, '');
+    return `sa-html-scope-${raw || 'viewer'}`;
+  }, [scopeKey, reactId]);
+
+  const { cleanHtml, scopedCss } = useMemo(() => {
+    const { bodyHtml, extractedCss } = alreadySanitizedHtml
+      ? { bodyHtml: html || '', extractedCss: '' }
+      : extractHtmlAndStyles(html || '');
+    const sanitizedBody = alreadySanitizedHtml ? bodyHtml : sanitizeRichHtml(bodyHtml);
+    const mergedCss = [extractedCss, css].filter((part) => part && part.trim()).join('\n\n');
+    const safeCss = mergedCss ? sanitizeScopedCss(mergedCss, scopeClass) : '';
+    return { cleanHtml: sanitizedBody, scopedCss: safeCss };
+  }, [html, css, scopeClass, alreadySanitizedHtml]);
+
+  if (!cleanHtml?.trim() && !scopedCss?.trim()) return null;
+  const alignCls =
+    align === 'center' ? 'text-center' : align === 'right' ? 'text-end' : 'text-start';
+
+  return (
+    <div className={`${scopeClass} sa-article-prose max-w-none overflow-x-auto text-[15px] sm:text-base ${alignCls} ${className}`}>
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
+      <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
+    </div>
+  );
+};
 
 export const RichMarkdownContent: React.FC<{
   content: string;
   align?: 'left' | 'center' | 'right';
   className?: string;
 }> = ({ content, align = 'left', className = '' }) => {
+  const htmlMode = useMemo(() => isHtmlContent(content), [content]);
+
   if (!content?.trim()) return null;
   const alignCls =
     align === 'center' ? 'text-center' : align === 'right' ? 'text-end' : 'text-start';
 
+  if (htmlMode) {
+    return <ScopedHtmlViewer html={content} align={align} className={className} />;
+  }
+
   return (
     <div
-      className={`prose prose-slate dark:prose-invert max-w-none overflow-x-auto break-words text-[15px] sm:text-base leading-[1.78] text-slate-700 dark:text-slate-300 prose-headings:font-bold prose-headings:text-slate-900 dark:prose-headings:text-white prose-a:text-[#0284c7] dark:prose-a:text-[#38bdf8] prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-code:bg-slate-100 dark:prose-code:bg-slate-800/90 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-strong:text-slate-900 dark:prose-strong:text-white ${alignCls} ${className}`}
+      className={`sa-article-prose max-w-none overflow-x-auto text-[15px] sm:text-base ${alignCls} ${className}`}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkUnderline]}
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
         components={{
           a: ({ href, children }) => {
             const targetHref = href || '#';
-            if (targetHref.startsWith('/')) {
+            if (targetHref.startsWith('/') || targetHref.startsWith('#')) {
               return (
                 <Link
                   to={targetHref}
@@ -110,6 +413,11 @@ export const RichMarkdownContent: React.FC<{
               </a>
             );
           },
+          u: ({ children }) => (
+            <u className="underline decoration-[#29aaea]/85 decoration-2 underline-offset-4">
+              {children}
+            </u>
+          ),
         }}
       >
         {content}
@@ -407,6 +715,24 @@ export const BlogBlockRenderer: React.FC<{
     case 'paragraph': {
       if (!block.content?.trim()) return null;
       return <RichMarkdownContent content={block.content} align={block.align} className="my-4" />;
+    }
+
+    case 'html': {
+      if (!block.html?.trim() && !block.css?.trim()) return null;
+      return (
+        <div className="my-5">
+          {block.title?.trim() && (
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+              {block.title}
+            </div>
+          )}
+          <ScopedHtmlViewer
+            html={block.html || ''}
+            css={block.css || ''}
+            scopeKey={block.id}
+          />
+        </div>
+      );
     }
 
     case 'image': {

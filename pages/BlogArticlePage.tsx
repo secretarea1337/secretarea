@@ -98,8 +98,12 @@ const BlogArticlePage: React.FC = () => {
 
     const loc = post.translations?.[language];
     const effectiveTitle = loc?.seoTitle?.trim() || post.seoTitle || loc?.title?.trim() || post.title;
+    const rawDesc =
+      loc?.metaDescription?.trim() || post.metaDescription || loc?.introduction?.trim() || post.introduction || post.title;
     const effectiveDesc =
-      loc?.metaDescription?.trim() || post.metaDescription || loc?.introduction?.trim() || post.introduction;
+      rawDesc.length > 160 && !(loc?.metaDescription?.trim() || post.metaDescription)
+        ? `${rawDesc.slice(0, 157).trimEnd()}...`
+        : rawDesc;
     const canonical = post.canonicalUrl?.trim() || `${origin}/blog/${encodeURIComponent(post.slug)}`;
     const rawImg = post.ogImage?.trim() || post.featuredImage?.trim() || '/images/hero01.png';
     const fullImg = rawImg.startsWith('http') ? rawImg : `${origin}${rawImg.startsWith('/') ? '' : '/'}${rawImg}`;
@@ -108,19 +112,47 @@ const BlogArticlePage: React.FC = () => {
       .join(', ');
     const { wordCount } = estimateReadingTime(post);
 
+    const toIsoSafe = (raw?: string): string | undefined => {
+      if (!raw) return undefined;
+      const d = new Date(raw);
+      return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+    };
+    const publishedIso = toIsoSafe(post.publishedAt);
+    const modifiedIso = toIsoSafe(post.updatedAt) || publishedIso;
+
+    const langCode = (post.language || language || 'en').toLowerCase();
+    const ogLocale =
+      langCode === 'fr'
+        ? 'fr_FR'
+        : langCode === 'es'
+        ? 'es_ES'
+        : langCode === 'ar'
+        ? 'ar_MA'
+        : 'en_US';
+
     const graph: any[] = [
+      {
+        '@type': 'Organization',
+        '@id': `${origin}/#organization`,
+        name: 'SecretArea',
+        url: `${origin}/`,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${origin}/images/logo04.png`,
+        },
+      },
       {
         '@type': 'BlogPosting',
         headline: post.title,
         name: effectiveTitle,
         description: effectiveDesc,
         image: [fullImg],
-        datePublished: post.publishedAt,
-        dateModified: post.updatedAt || post.publishedAt,
+        ...(publishedIso ? { datePublished: publishedIso } : {}),
+        ...(modifiedIso ? { dateModified: modifiedIso } : {}),
         wordCount,
         articleSection: post.category || 'Gaming Guides',
-        keywords,
-        inLanguage: post.language || language || 'en',
+        ...(keywords ? { keywords } : {}),
+        inLanguage: langCode,
         mainEntityOfPage: {
           '@type': 'WebPage',
           '@id': canonical,
@@ -130,12 +162,7 @@ const BlogArticlePage: React.FC = () => {
           name: post.authorName || 'SecretArea Team',
         },
         publisher: {
-          '@type': 'Organization',
-          name: 'SecretArea',
-          logo: {
-            '@type': 'ImageObject',
-            url: `${origin}/images/logo04.png`,
-          },
+          '@id': `${origin}/#organization`,
         },
       },
       {
@@ -210,6 +237,9 @@ const BlogArticlePage: React.FC = () => {
       canonical,
       fullImg,
       keywords,
+      ogLocale,
+      publishedIso,
+      modifiedIso,
       robots: post.noIndex
         ? 'noindex, nofollow'
         : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
@@ -268,6 +298,7 @@ const BlogArticlePage: React.FC = () => {
           <title>{seoMetadata.effectiveTitle}</title>
           <meta name="description" content={seoMetadata.effectiveDesc} />
           {seoMetadata.keywords && <meta name="keywords" content={seoMetadata.keywords} />}
+          <meta name="author" content={post.authorName || 'SecretArea Team'} />
           <meta name="robots" content={seoMetadata.robots} />
           <meta name="googlebot" content={seoMetadata.robots} />
           <link rel="canonical" href={seoMetadata.canonical} />
@@ -275,13 +306,15 @@ const BlogArticlePage: React.FC = () => {
           {/* Open Graph */}
           <meta property="og:site_name" content="Secret Area" />
           <meta property="og:type" content="article" />
+          <meta property="og:locale" content={seoMetadata.ogLocale} />
           <meta property="og:title" content={seoMetadata.effectiveTitle} />
           <meta property="og:description" content={seoMetadata.effectiveDesc} />
           <meta property="og:url" content={seoMetadata.canonical} />
           <meta property="og:image" content={seoMetadata.fullImg} />
           <meta property="og:image:alt" content={post.featuredImageAlt || post.title} />
-          {post.publishedAt && <meta property="article:published_time" content={post.publishedAt} />}
-          {post.updatedAt && <meta property="article:modified_time" content={post.updatedAt} />}
+          <meta property="article:author" content={post.authorName || 'SecretArea Team'} />
+          {seoMetadata.publishedIso && <meta property="article:published_time" content={seoMetadata.publishedIso} />}
+          {seoMetadata.modifiedIso && <meta property="article:modified_time" content={seoMetadata.modifiedIso} />}
           {post.category && <meta property="article:section" content={post.category} />}
           {(post.tags || []).map((tg, i) => (
             <meta key={i} property="article:tag" content={tg} />

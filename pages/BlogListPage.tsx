@@ -249,23 +249,54 @@ const BlogListPage: React.FC = () => {
     typeof window !== 'undefined' && window.location.origin
       ? window.location.origin.replace(/\/+$/, '')
       : 'https://secretarea.site';
-  const canonicalUrl = `${origin}/blog`;
-  const seoTitle = 'Secret Area Blog – Gaming Guides, PC Repacks & Tech Tutorials';
+  const isSearchMode = Boolean(searchQuery.trim());
+  const canonicalParams = new URLSearchParams();
+  if (!isSearchMode && selectedCategory !== 'All') {
+    canonicalParams.set('category', selectedCategory);
+    if (selectedSubCategory) {
+      canonicalParams.set('sub', selectedSubCategory);
+    }
+  }
+  if (!isSearchMode && safePage > 1) {
+    canonicalParams.set('page', String(safePage));
+  }
+  const canonicalQuery = canonicalParams.toString();
+  const canonicalUrl = canonicalQuery ? `${origin}/blog?${canonicalQuery}` : `${origin}/blog`;
+
+  const baseSeoTitle =
+    selectedCategory !== 'All'
+      ? `${selectedSubCategory || selectedCategory} Guides | Secret Area Blog`
+      : 'Secret Area Blog – Gaming Guides & Tech Tutorials';
+  const seoTitle = !isSearchMode && safePage > 1 ? `${baseSeoTitle} (Page ${safePage})` : baseSeoTitle;
   const seoDesc =
-    'Read expert PC gaming guides, repack safety tutorials, hardware benchmarks, and Secret Area platform updates structured for fast answers.';
+    selectedCategory !== 'All'
+      ? `Browse verified ${selectedSubCategory || selectedCategory} guides, reviews, checklists, and hardware tutorials curated on the Secret Area Blog.`
+      : 'Read expert PC gaming guides, repack safety tutorials, hardware benchmarks, reviews, and Secret Area platform updates for fast answers.';
+  const seoKeywords =
+    'Secret Area Blog, Gaming Guides, PC Repack Tutorials, Hardware Benchmarks, Game Reviews, Hypervisor Guides, Tech Intel';
+  const seoRobots = isSearchMode
+    ? 'noindex, follow'
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
   const blogJsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
       {
+        '@type': 'Organization',
+        '@id': `${origin}/#organization`,
+        name: 'SecretArea',
+        url: `${origin}/`,
+        logo: { '@type': 'ImageObject', url: `${origin}/images/logo04.png` },
+      },
+      {
         '@type': 'Blog',
+        '@id': `${origin}/blog#blog`,
         name: 'Secret Area Blog',
-        url: canonicalUrl,
+        url: `${origin}/blog`,
         description: seoDesc,
+        inLanguage: ['en', 'fr', 'es', 'ar'],
         publisher: {
-          '@type': 'Organization',
-          name: 'SecretArea',
-          logo: { '@type': 'ImageObject', url: `${origin}/images/logo04.png` },
+          '@id': `${origin}/#organization`,
         },
         blogPost: posts.slice(0, 20).map((p) => ({
           '@type': 'BlogPosting',
@@ -283,7 +314,17 @@ const BlogListPage: React.FC = () => {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
-          { '@type': 'ListItem', position: 2, name: 'Blog', item: canonicalUrl },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${origin}/blog` },
+          ...(selectedCategory !== 'All'
+            ? [
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: selectedSubCategory || selectedCategory,
+                  item: canonicalUrl,
+                },
+              ]
+            : []),
         ],
       },
     ],
@@ -298,7 +339,10 @@ const BlogListPage: React.FC = () => {
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDesc} />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="keywords" content={seoKeywords} />
+        <meta name="author" content="SecretArea" />
+        <meta name="robots" content={seoRobots} />
+        <meta name="googlebot" content={seoRobots} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:site_name" content="Secret Area" />
         <meta property="og:type" content="website" />
@@ -306,10 +350,16 @@ const BlogListPage: React.FC = () => {
         <meta property="og:description" content={seoDesc} />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={`${origin}/images/hero01.png`} />
+        <meta property="og:image:alt" content="Secret Area Blog – Gaming Guides & Technical Intel" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:locale:alternate" content="fr_FR" />
+        <meta property="og:locale:alternate" content="es_ES" />
+        <meta property="og:locale:alternate" content="ar_MA" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDesc} />
         <meta name="twitter:image" content={`${origin}/images/hero01.png`} />
+        <meta name="twitter:image:alt" content="Secret Area Blog – Gaming Guides & Technical Intel" />
         <script type="application/ld+json">{JSON.stringify(blogJsonLd)}</script>
       </Helmet>
 

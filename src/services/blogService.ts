@@ -110,6 +110,9 @@ function normalizeBlogPost(raw: BlogPost): BlogPost {
           collapseAfter: 2,
           offers: [],
         },
+    useCustomHtml: Boolean(raw.useCustomHtml),
+    customHtml: typeof raw.customHtml === 'string' ? raw.customHtml : '',
+    customCss: typeof raw.customCss === 'string' ? raw.customCss : '',
   };
 
   return {

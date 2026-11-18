@@ -5,6 +5,7 @@ export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type BlogBlockType =
   | 'subheading'
   | 'paragraph'
+  | 'html'
   | 'image'
   | 'multi_image'
   | 'slider'
@@ -34,6 +35,14 @@ export interface ParagraphBlock {
   type: 'paragraph';
   content: string;
   align?: 'left' | 'center' | 'right';
+}
+
+export interface HtmlBlock {
+  id: string;
+  type: 'html';
+  title?: string;
+  html: string;
+  css?: string;
 }
 
 export interface ImageBlock {
@@ -117,6 +126,7 @@ export interface DividerBlock {
 export type BlogContentBlock =
   | SubheadingBlock
   | ParagraphBlock
+  | HtmlBlock
   | ImageBlock
   | MultiImageBlock
   | SliderBlock
@@ -310,6 +320,11 @@ export interface BlogPost {
 
   // Flexible Layout Ordering (tokens: 'sec:<id>' | 'mod:<BlogModuleKey>')
   contentOrder?: string[];
+
+  // Optional Manual Full HTML Article Mode
+  useCustomHtml?: boolean;
+  customHtml?: string;
+  customCss?: string;
 
   // Engagement & Ownership
   views?: number;

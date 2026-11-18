@@ -9,6 +9,10 @@ Allow: /hypervisor/
 Allow: /steamtools/
 Allow: /tools/
 Allow: /savegame/
+Allow: /rss.xml
+Allow: /sitemap.xml
+Allow: /llms.txt
+Allow: /ai-catalog.json
 Disallow: /api/
 Disallow: /admin
 Disallow: /profile
@@ -26,6 +30,8 @@ Allow: /hypervisor/
 Allow: /steamtools/
 Allow: /tools/
 Allow: /savegame/
+Allow: /rss.xml
+Allow: /sitemap.xml
 Disallow: /api/
 Disallow: /admin
 Disallow: /profile
@@ -39,10 +45,21 @@ Allow: /assets/
 
 User-agent: Bingbot
 Allow: /
+Allow: /blog
+Allow: /blog/
+Allow: /game/
+Allow: /ps5/
+Allow: /hypervisor/
+Allow: /steamtools/
+Allow: /tools/
+Allow: /savegame/
+Allow: /rss.xml
+Allow: /sitemap.xml
 Disallow: /api/
 Disallow: /admin
 Disallow: /profile
 Disallow: /settings
+Disallow: /disclaimer
 Disallow: /terminal
 
 Sitemap: https://secretarea.site/sitemap.xml
