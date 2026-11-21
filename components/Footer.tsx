@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
           <div className="flex flex-col items-center md:items-start text-center md:text-start">
             <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] mb-6">{t('Apps')}</h3>
             <div className="flex flex-col gap-3 w-full max-w-[200px]">
-              <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#00a2ed] dark:hover:border-[#00a2ed] rounded-xl text-slate-900 dark:text-white hover:text-[#00a2ed] dark:hover:text-[#00a2ed] hover:shadow-md transition-all w-full text-start group">
+              <a href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea.exe" className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#00a2ed] dark:hover:border-[#00a2ed] rounded-xl text-slate-900 dark:text-white hover:text-[#00a2ed] dark:hover:text-[#00a2ed] hover:shadow-md transition-all w-full text-start group">
                 <div className="text-slate-600 dark:text-slate-400 group-hover:text-[#00a2ed] transition-colors"><WindowsLogo /></div>
                 <div className="font-sans">
                   <div className="text-[10px] leading-tight font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">{t('Download for')}</div>
