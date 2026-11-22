@@ -952,16 +952,16 @@ const GuestDropdown = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full end-0 mt-2.5 w-72 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-[#111623] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700/70 p-3.5 z-50 text-slate-700 dark:text-[#94a3b8]"
+            className="absolute top-full end-0 mt-2.5 w-[min(18rem,calc(100vw-1.5rem))] sm:w-72 md:w-80 max-h-[calc(100dvh-5.5rem)] overflow-y-auto bg-white dark:bg-[#111623] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700/70 p-3 sm:p-3.5 z-50 text-slate-700 dark:text-[#94a3b8]"
           >
             {/* 1. Guest Mode Badge & Notice */}
-            <div className="p-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 mb-3">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 mb-2.5 sm:mb-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-bold text-xs">
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
                   <span className="whitespace-nowrap">{t('Guest mode')}</span>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-semibold uppercase tracking-wider">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-semibold uppercase tracking-wider shrink-0">
                   Visitor
                 </span>
               </div>
@@ -970,7 +970,7 @@ const GuestDropdown = ({
               </p>
             </div>
 
-            {/* 2. Login & Terminal Buttons inside drop menu */}
+            {/* 2. Login, Terminal & Desktop App Buttons inside drop menu */}
             <div className="space-y-2">
               {/* Login Button */}
               <button
@@ -979,14 +979,14 @@ const GuestDropdown = ({
                   setIsOpen(false);
                   setShowLoginModal(true);
                 }}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all active:scale-[0.98] cursor-pointer"
                 title={t('Login')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
                   <Icon name="LogIn" size={16} className="shrink-0" />
-                  <span>{t('Login')}</span>
+                  <span className="truncate">{t('Login')}</span>
                 </div>
-                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-md font-semibold tracking-wide uppercase">
+                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-md font-semibold tracking-wide uppercase shrink-0">
                   Google / Discord
                 </span>
               </button>
@@ -998,17 +998,37 @@ const GuestDropdown = ({
                   setIsOpen(false);
                   handleReturnToTerminal();
                 }}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs transition-colors border border-slate-200 dark:border-slate-700/60 shadow-xs active:scale-[0.98] cursor-pointer"
+                className="w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs transition-colors border border-slate-200 dark:border-slate-700/60 shadow-xs active:scale-[0.98] cursor-pointer"
                 title={t('Come back to terminal page')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
                   <Icon name="Terminal" size={16} className="text-emerald-500 shrink-0" />
-                  <span>{t('Terminal')}</span>
+                  <span className="truncate">{t('Terminal')}</span>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[120px]">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[96px] sm:max-w-[120px] md:max-w-[135px] shrink-0">
                   {t('Come back to terminal page')}
                 </span>
               </button>
+
+              {/* Desktop App Button */}
+              <a
+                href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea.exe"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 bg-slate-100 hover:bg-[#00a2ed]/10 dark:bg-slate-800/90 dark:hover:bg-[#00a2ed]/15 text-slate-700 dark:text-slate-200 hover:text-[#00a2ed] dark:hover:text-[#38bdf8] font-bold rounded-xl text-xs transition-all border border-slate-200 dark:border-slate-700/60 hover:border-[#00a2ed]/50 dark:hover:border-[#00a2ed]/50 shadow-xs active:scale-[0.98] cursor-pointer group"
+                title={`${t('Download for')} ${t('Desktop App')}`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Icon name="Windows" size={16} className="text-[#00a2ed] shrink-0 transition-transform group-hover:scale-110" />
+                  <span className="truncate">{t('Desktop App')}</span>
+                </div>
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-[#00a2ed]/15 text-[#00a2ed] dark:text-[#38bdf8] font-semibold uppercase tracking-wide shrink-0">
+                  <Icon name="Download" size={12} className="shrink-0" />
+                  <span className="hidden sm:inline">Windows</span>
+                  <span className="sm:hidden">.exe</span>
+                </span>
+              </a>
             </div>
           </motion.div>
         )}

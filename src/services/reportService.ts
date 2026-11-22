@@ -1,4 +1,5 @@
 import { db, auth } from '../firebase';
+import { isUserAdmin, getLocalProfile } from './userService';
 import { 
   collection, 
   doc, 
@@ -303,6 +304,8 @@ export async function submitReport(reportData: {
 
 /**
  * Real-time subscription to reports for the Admin Page and Navbar badge.
+ * Only attaches the Firestore `reports` collection listener when the signed-in user is an Admin
+ * (per firestore.rules `allow list: if isAdmin()`). Non-admins & guests receive cached/local events.
  */
 export function subscribeReports(onUpdate: (reports: ItemReport[]) => void): () => void {
   // Register in memory broadcast list
@@ -333,78 +336,110 @@ export function subscribeReports(onUpdate: (reports: ItemReport[]) => void): () 
     window.addEventListener('storage', handleReportAction);
   }
 
+  let unsubscribeSnapshot: (() => void) | null = null;
+  let unsubscribeAuth: (() => void) | null = null;
+
+  const detachSnapshot = () => {
+    if (unsubscribeSnapshot) {
+      try {
+        unsubscribeSnapshot();
+      } catch {}
+      unsubscribeSnapshot = null;
+    }
+  };
+
+  const attachIfAdmin = (user: any) => {
+    const profileRole = user?.uid ? getLocalProfile(user.uid)?.role : null;
+    const adminAllowed = Boolean(user && isUserAdmin(user.email, profileRole));
+
+    if (!adminAllowed) {
+      detachSnapshot();
+      return;
+    }
+
+    if (unsubscribeSnapshot) return;
+
+    try {
+      const colRef = collection(db, 'reports');
+      unsubscribeSnapshot = onSnapshot(
+        colRef,
+        (snapshot) => {
+          const deletedIds = getDeletedReportIds();
+          const reports: ItemReport[] = [];
+          snapshot.forEach((d) => {
+            if (!deletedIds.has(d.id)) {
+              const data = d.data() as ItemReport;
+              reports.push({ ...data, id: d.id });
+            }
+          });
+
+          // Merge with local storage in case of any offline/unsynced entries
+          const local = getCachedReports();
+          const mergedMap = new Map<string, ItemReport>();
+
+          // Remote first (ignoring tombstones)
+          reports.forEach((r) => {
+            if (!deletedIds.has(r.id)) {
+              mergedMap.set(r.id, r);
+            }
+          });
+          // Fill any local-only entries (ignoring tombstones)
+          local.forEach((r) => {
+            if (!deletedIds.has(r.id) && !mergedMap.has(r.id)) {
+              mergedMap.set(r.id, r);
+            }
+          });
+
+          const sorted = Array.from(mergedMap.values()).sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+
+          saveCachedReports(sorted, false);
+          onUpdate(sorted);
+        },
+        (error) => {
+          const code = (error as any)?.code;
+          if (code !== 'permission-denied') {
+            handleFirestoreError(error, OperationType.LIST, 'reports');
+          }
+          onUpdate(getCachedReports());
+        }
+      );
+    } catch (err) {
+      console.warn('Reports subscription fallback to local cache:', err);
+      onUpdate(getCachedReports());
+    }
+  };
+
   try {
-    const colRef = collection(db, 'reports');
-    const unsubscribeSnapshot = onSnapshot(
-      colRef,
-      (snapshot) => {
-        const deletedIds = getDeletedReportIds();
-        const reports: ItemReport[] = [];
-        snapshot.forEach((d) => {
-          if (!deletedIds.has(d.id)) {
-            const data = d.data() as ItemReport;
-            reports.push({ ...data, id: d.id });
-          }
-        });
-
-        // Merge with local storage in case of any offline/unsynced entries
-        const local = getCachedReports();
-        const mergedMap = new Map<string, ItemReport>();
-        
-        // Remote first (ignoring tombstones)
-        reports.forEach((r) => {
-          if (!deletedIds.has(r.id)) {
-            mergedMap.set(r.id, r);
-          }
-        });
-        // Fill any local-only entries (ignoring tombstones)
-        local.forEach((r) => {
-          if (!deletedIds.has(r.id) && !mergedMap.has(r.id)) {
-            mergedMap.set(r.id, r);
-          }
-        });
-
-        const sorted = Array.from(mergedMap.values()).sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-
-        saveCachedReports(sorted, false);
-        onUpdate(sorted);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, 'reports');
-        // Fallback to cached
-        onUpdate(getCachedReports());
-      }
-    );
-
-    return () => {
-      reportSubscribers.delete(onUpdate);
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('secretarea_reports_changed', handleCustomChange);
-        window.removeEventListener('secretarea_report_deleted', handleReportAction);
-        window.removeEventListener('secretarea_report_updated', handleCustomChange);
-        window.removeEventListener('secretarea_item_fixed', handleCustomChange);
-        window.removeEventListener('secretarea_report_submitted', handleReportAction);
-        window.removeEventListener('storage', handleReportAction);
-      }
-      unsubscribeSnapshot();
-    };
+    attachIfAdmin(auth?.currentUser);
+    if (auth && typeof auth.onAuthStateChanged === 'function') {
+      unsubscribeAuth = auth.onAuthStateChanged((user) => {
+        attachIfAdmin(user);
+      });
+    }
   } catch (err) {
-    console.warn('Reports subscription fallback to local cache:', err);
-    onUpdate(getCachedReports());
-    return () => {
-      reportSubscribers.delete(onUpdate);
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('secretarea_reports_changed', handleCustomChange);
-        window.removeEventListener('secretarea_report_deleted', handleReportAction);
-        window.removeEventListener('secretarea_report_updated', handleCustomChange);
-        window.removeEventListener('secretarea_item_fixed', handleCustomChange);
-        window.removeEventListener('secretarea_report_submitted', handleReportAction);
-        window.removeEventListener('storage', handleReportAction);
-      }
-    };
+    console.warn('Reports auth watcher fallback to local cache:', err);
   }
+
+  return () => {
+    reportSubscribers.delete(onUpdate);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('secretarea_reports_changed', handleCustomChange);
+      window.removeEventListener('secretarea_report_deleted', handleReportAction);
+      window.removeEventListener('secretarea_report_updated', handleCustomChange);
+      window.removeEventListener('secretarea_item_fixed', handleCustomChange);
+      window.removeEventListener('secretarea_report_submitted', handleReportAction);
+      window.removeEventListener('storage', handleReportAction);
+    }
+    detachSnapshot();
+    if (unsubscribeAuth) {
+      try {
+        unsubscribeAuth();
+      } catch {}
+      unsubscribeAuth = null;
+    }
+  };
 }
 
 /**

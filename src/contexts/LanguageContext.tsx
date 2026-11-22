@@ -382,6 +382,13 @@ export const translations: Translations = {
     'Original Size': { en: 'Original Size', fr: 'Taille originale', es: 'Tamaño original', ar: 'الحجم الأصلي' },
     'Languages': { en: 'Languages', fr: 'Langues', es: 'Idiomas', ar: 'اللغات' },
     'Denuvo DRM Detected': { en: 'Denuvo DRM Detected', fr: 'Denuvo DRM Détecté', es: 'Denuvo DRM Detectado', ar: 'تم اكتشاف حماية Denuvo' },
+    'This game uses Denuvo Anti-Tampering DRM. There is currently no known public bypass for Denuvo, meaning you likely will NOT be able to play this game. However, there\'s a slight chance it might be available in the': {
+      en: 'This game uses Denuvo Anti-Tampering DRM. There is currently no known public bypass for Denuvo, meaning you likely will NOT be able to play this game. However, there\'s a slight chance it might be available in the',
+      fr: 'Ce jeu utilise la protection DRM anti-falsification Denuvo. Il n\'existe actuellement aucun contournement public connu pour Denuvo, ce qui signifie que vous ne pourrez probablement PAS jouer à ce jeu. Cependant, il y a une légère chance qu\'il soit disponible dans le',
+      es: 'Este juego utiliza el sistema DRM anti-manipulación Denuvo. Actualmente no existe ningún bypass público conocido para Denuvo, lo que significa que probablemente NO podrás jugar a este juego. Sin embargo, hay una pequeña posibilidad de que esté disponible en',
+      ar: 'تستخدم هذه اللعبة حماية Denuvo Anti-Tampering DRM. لا يوجد حالياً أي تخطي عام معروف لحماية Denuvo، مما يعني أنك على الأرجح لن تتمكن من تشغيل هذه اللعبة. ومع ذلك، هناك احتمال بسيط أن تكون متوفرة في'
+    },
+    'with a bypass.': { en: 'with a bypass.', fr: 'avec un contournement.', es: 'con un bypass.', ar: 'مع تخطي للحماية.' },
     'Download at your own risk.': { en: 'Download at your own risk.', fr: 'Téléchargez à vos propres risques.', es: 'Descarga bajo tu propio riesgo.', ar: 'حمل على مسؤوليتك الخاصة.' },
     'In Game': { en: 'In Game', fr: 'En jeu', es: 'En el juego', ar: 'في اللعبة' },
     'Join Channel': { en: 'Join Channel', fr: 'Rejoindre le canal', es: 'Unirse al canal', ar: 'انضم للقناة' },
@@ -389,6 +396,13 @@ export const translations: Translations = {
     'Master File': { en: 'Master File', fr: 'Fichier maître', es: 'Archivo maestro', ar: 'الملف الرئيسي' },
     'Read': { en: 'Read', fr: 'Lire', es: 'Leer', ar: 'اقرأ' },
     'Third-Party Account Required': { en: 'Third-Party Account Required', fr: 'Compte tiers requis', es: 'Se requiere cuenta de terceros', ar: 'يتطلب حساب جهة خارجية' },
+    'Third-Party Account/Launcher Required': { en: 'Third-Party Account/Launcher Required', fr: 'Compte tiers / Lanceur requis', es: 'Cuenta de terceros / Lanzador requerido', ar: 'يتطلب حساب / مشغل جهة خارجية' },
+    'This game requires an external launcher or account verification (EA Account).': {
+      en: 'This game requires an external launcher or account verification (EA Account).',
+      fr: 'Ce jeu nécessite un lanceur externe ou une vérification de compte (Compte EA).',
+      es: 'Este juego requiere un lanzador externo o verificación de cuenta (Cuenta EA).',
+      ar: 'تتطلب هذه اللعبة مشغلاً خارجياً أو التحقق من الحساب (حساب EA).'
+    },
 
     'Decrypting Data Stream...': { en: 'Decrypting Data Stream...', fr: 'Décryptage du flux de données...', es: 'Descifrando el flujo de datos...', ar: 'جاري فك تشفير البيانات...' },
     'Request This Item': { en: 'Request This Item', fr: 'Demander cet article', es: 'Solicitar este artículo', ar: 'طلب هذا العنصر' },

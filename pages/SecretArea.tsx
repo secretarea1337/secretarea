@@ -5100,6 +5100,63 @@ export const ResourceDetailModal: React.FC<{
               </div>
           </div>
 
+          {/* Denuvo DRM & Third-Party Launcher Warnings */}
+          {(item.hasDenuvo || item.hasExternalLauncher) && (
+            <div className="space-y-3" dir={dir}>
+              {item.hasDenuvo && (() => {
+                const depotBoxTool = item.toolsNeeded?.find(
+                  (tool) => tool.name.toLowerCase().includes('depotbox') && tool.url
+                );
+                const depotBoxUrl = depotBoxTool?.url || 'https://depotbox.lol/';
+                return (
+                  <div className="w-full rounded-xl border border-rose-500/35 border-s-4 border-s-rose-500 bg-rose-50 dark:bg-[#241318] p-3.5 sm:p-4 flex items-start gap-3 sm:gap-3.5 shadow-sm">
+                    <div className="text-rose-500 shrink-0 mt-0.5">
+                      <Icon name="AlertTriangle" size={20} />
+                    </div>
+                    <div className="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 min-w-0">
+                      <span className="font-extrabold text-slate-900 dark:text-white">
+                        {t('Denuvo DRM Detected')}:
+                      </span>{' '}
+                      {t('This game uses Denuvo Anti-Tampering DRM. There is currently no known public bypass for Denuvo, meaning you likely will NOT be able to play this game. However, there\'s a slight chance it might be available in the')}{' '}
+                      <a
+                        href={depotBoxUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-sky-400 hover:underline font-semibold"
+                      >
+                        DepotBox Launcher
+                      </a>{' '}
+                      {t('with a bypass.')}{' '}
+                      {t('Download at your own risk.')}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {item.hasExternalLauncher && (
+                <div className="w-full rounded-xl border border-amber-500/40 border-s-4 border-s-amber-400 bg-amber-50 dark:bg-[#231d12] p-3.5 sm:p-4 flex items-start gap-3 sm:gap-3.5 shadow-sm">
+                  <div className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 mt-0.5">
+                    <Icon name="User" size={13} />
+                  </div>
+                  <div className="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 min-w-0">
+                    <span className="font-extrabold text-slate-900 dark:text-white">
+                      {t('Third-Party Account/Launcher Required')}:
+                    </span>{' '}
+                    {item.hasDenuvo ? (
+                      <>
+                        {t('ThirdPartyDisclaimer')} {t('Download at your own risk.')}
+                      </>
+                    ) : (
+                      <>
+                        {t('This game requires an external launcher or account verification (EA Account).')} {t('Download at your own risk.')}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* SecretArea message note if available */}
           {item.links?.fullNote && (
               <div className="w-full bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-xl p-4 flex gap-4">
@@ -8718,8 +8775,8 @@ const SecretArea: React.FC<SecretAreaProps> = ({ isTerminalRoute = false }) => {
             ratingPositive: getVal('ratingPositive') || '',
             ratingNegative: getVal('ratingNegative') || '',
             dateAdded: getVal('date') || getVal('timestamp') || getVal('dateAdded') || getVal('updated') || getVal('time') || getVal('created') || '',
-            hasDenuvo: String(getVal('denuvo')).toLowerCase() === 'true',
-            hasExternalLauncher: String(getVal('launcher')).toLowerCase() === 'true',
+            hasDenuvo: (() => { const v = String(getVal('denuvo') ?? '').trim().toLowerCase(); return v !== '' && v !== 'false' && v !== 'no' && v !== '0' && v !== 'off' && v !== 'null' && v !== 'undefined'; })(),
+            hasExternalLauncher: (() => { const v = String(getVal('launcher') ?? '').trim().toLowerCase(); return v !== '' && v !== 'false' && v !== 'no' && v !== '0' && v !== 'off' && v !== 'null' && v !== 'undefined'; })(),
             systemReqs: reqs,
             installSteps: steps,
             isPinned: String(isPinnedRaw).toLowerCase() === 'true' || String(isPinnedRaw).toLowerCase() === 'yes' || String(isPinnedRaw).toLowerCase() === 'on',

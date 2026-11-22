@@ -12,7 +12,27 @@ export default defineConfig(({ mode }) => {
         hmr: false,
         ws: false,
       },
-      plugins: [react()],
+      plugins: [
+        react(),
+        {
+          name: 'disable-hmr-websocket',
+          apply: 'serve',
+          enforce: 'post',
+          transform(code, id) {
+            if (id.includes('vite/dist/client/client.mjs')) {
+              return code
+                .replace(
+                  'async connect(handlers) {',
+                  'async connect(_handlers) { return;'
+                )
+                .replace(
+                  'transport.connect(createHMRHandler(handleMessage));',
+                  '/* HMR WebSocket disabled */'
+                );
+            }
+          },
+        },
+      ],
       define: {
         'process.env.DISCORD_CLIENT_ID': JSON.stringify(env.DISCORD_CLIENT_ID || env.VITE_DISCORD_CLIENT_ID || ''),
       },
