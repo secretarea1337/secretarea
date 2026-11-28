@@ -11,36 +11,6 @@ import { subscribeUserProfile, getLocalProfile, ensureUserProfile, isUserAdmin, 
 import { subscribeReports, getDeletedReportIds, getCachedReports } from '../src/services/reportService';
 import SpinWheelIcon from './SpinWheelIcon';
 
-const Flags = () => {
-  const { t } = useLanguage();
-  return (
-    <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 shrink-0">
-      <div 
-        className="relative w-5 h-3.5 sm:w-6 sm:h-4 rounded shadow-2xs cursor-default overflow-hidden group flex items-center justify-center shrink-0 border border-slate-200/40 dark:border-slate-700/40"
-        title={t("Made in Morocco")}
-      >
-        <img 
-          src="https://media3.giphy.com/media/v1.Y2lkPTZjMDliOTUyejV3bDZmYmVhczl6eWdtajNvb2Nocmk4NzVqYmE5aHBzd3Z6cndiOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Q6xuxUhCgCNpsbfhaP/source.gif" 
-          alt="Morocco Flag" 
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-      </div>
-      <div 
-        className="relative w-5 h-3.5 sm:w-6 sm:h-4 rounded shadow-2xs cursor-default overflow-hidden group flex items-center justify-center shrink-0 border border-slate-200/40 dark:border-slate-700/40"
-        title={t("Solidarity with Palestine")}
-      >
-        <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Flag_of_Palestine.gif" 
-          alt="Palestine Flag" 
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-      </div>
-    </div>
-  );
-};
-
 const DiscoverGameButton = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -952,7 +922,7 @@ const GuestDropdown = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full end-0 mt-2.5 w-[min(18rem,calc(100vw-1.5rem))] sm:w-72 md:w-80 max-h-[calc(100dvh-5.5rem)] overflow-y-auto bg-white dark:bg-[#111623] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700/70 p-3 sm:p-3.5 z-50 text-slate-700 dark:text-[#94a3b8]"
+            className="absolute top-full end-0 mt-2.5 w-[min(19.5rem,calc(100vw-1.5rem))] sm:w-80 md:w-[340px] max-h-[calc(100dvh-5.5rem)] overflow-y-auto bg-white dark:bg-[#111623] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700/70 p-3 sm:p-3.5 z-50 text-slate-700 dark:text-[#94a3b8]"
           >
             {/* 1. Guest Mode Badge & Notice */}
             <div className="p-2.5 sm:p-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 mb-2.5 sm:mb-3">
@@ -1010,25 +980,88 @@ const GuestDropdown = ({
                 </span>
               </button>
 
-              {/* Desktop App Button */}
-              <a
-                href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea.exe"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setIsOpen(false)}
-                className="w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 bg-slate-100 hover:bg-[#00a2ed]/10 dark:bg-slate-800/90 dark:hover:bg-[#00a2ed]/15 text-slate-700 dark:text-slate-200 hover:text-[#00a2ed] dark:hover:text-[#38bdf8] font-bold rounded-xl text-xs transition-all border border-slate-200 dark:border-slate-700/60 hover:border-[#00a2ed]/50 dark:hover:border-[#00a2ed]/50 shadow-xs active:scale-[0.98] cursor-pointer group"
-                title={`${t('Download for')} ${t('Desktop App')}`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Icon name="Windows" size={16} className="text-[#00a2ed] shrink-0 transition-transform group-hover:scale-110" />
-                  <span className="truncate">{t('Desktop App')}</span>
+              {/* Desktop App Multi-Platform Group */}
+              <div className="pt-1.5 border-t border-slate-200/80 dark:border-slate-800">
+                <div className="flex items-center justify-between px-1 mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <Icon name="Monitor" size={12} className="text-[#00a2ed] shrink-0" />
+                    <span>{t('Desktop App')}</span>
+                  </span>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-[#00a2ed]/15 text-[#00a2ed] dark:text-[#38bdf8] font-semibold uppercase tracking-wide shrink-0">
-                  <Icon name="Download" size={12} className="shrink-0" />
-                  <span className="hidden sm:inline">Windows</span>
-                  <span className="sm:hidden">.exe</span>
-                </span>
-              </a>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                  {/* Windows (.exe) */}
+                  <a
+                    href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea.exe"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-between gap-1.5 px-2.5 py-2 bg-slate-100 hover:bg-[#00a2ed]/10 dark:bg-slate-800/90 dark:hover:bg-[#00a2ed]/15 text-slate-700 dark:text-slate-200 hover:text-[#00a2ed] dark:hover:text-[#38bdf8] font-bold rounded-xl text-[11px] transition-all border border-slate-200 dark:border-slate-700/60 hover:border-[#00a2ed]/50 active:scale-[0.98] cursor-pointer group min-w-0"
+                    title={`${t('Download for')} ${t('Windows')} (.exe)`}
+                  >
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <Icon name="Windows" size={14} className="text-[#00a2ed] shrink-0" />
+                      <span className="truncate">{t('Windows')}</span>
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00a2ed]/15 text-[#00a2ed] dark:text-[#38bdf8] font-bold shrink-0">
+                      .exe
+                    </span>
+                  </a>
+
+                  {/* Linux (.deb) */}
+                  <a
+                    href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea-linux-amd64.deb"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-between gap-1.5 px-2.5 py-2 bg-slate-100 hover:bg-amber-500/10 dark:bg-slate-800/90 dark:hover:bg-amber-500/15 text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 font-bold rounded-xl text-[11px] transition-all border border-slate-200 dark:border-slate-700/60 hover:border-amber-500/50 active:scale-[0.98] cursor-pointer group min-w-0"
+                    title={`${t('Download for')} ${t('Linux')} (.deb)`}
+                  >
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <Icon name="Linux" size={14} className="text-amber-500 shrink-0" />
+                      <span className="truncate">{t('Linux')}</span>
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold shrink-0">
+                      .deb
+                    </span>
+                  </a>
+
+                  {/* Linux (.AppImage) */}
+                  <a
+                    href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea-linux-x86_64.AppImage"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-between gap-1.5 px-2.5 py-2 bg-slate-100 hover:bg-emerald-500/10 dark:bg-slate-800/90 dark:hover:bg-emerald-500/15 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-bold rounded-xl text-[11px] transition-all border border-slate-200 dark:border-slate-700/60 hover:border-emerald-500/50 active:scale-[0.98] cursor-pointer group min-w-0"
+                    title={`${t('Download for')} ${t('Linux')} (.AppImage)`}
+                  >
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <Icon name="Linux" size={14} className="text-emerald-500 shrink-0" />
+                      <span className="truncate">{t('Linux')}</span>
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold shrink-0">
+                      AppImage
+                    </span>
+                  </a>
+
+                  {/* macOS (Coming Soon) */}
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    className="flex items-center justify-between gap-1.5 px-2.5 py-2 bg-slate-100/70 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 font-bold rounded-xl text-[11px] border border-slate-200/70 dark:border-slate-700/40 cursor-not-allowed min-w-0"
+                    title={`${t('macOS')} — ${t('Coming Soon')}`}
+                  >
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <Icon name="Apple" size={14} className="text-purple-400/80 shrink-0" />
+                      <span className="truncate text-slate-600 dark:text-slate-300">{t('macOS')}</span>
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold shrink-0 truncate max-w-[68px]">
+                      {t('Coming Soon')}
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -1177,7 +1210,6 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
             <AdminReportsHeaderButton profileData={profileData} user={currentUser} />
             <ScrollToLibraryButton />
-            <Flags />
             <DiscoverGameButton />
             <LanguageSwitcher />
             <ThemeToggle />

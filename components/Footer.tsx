@@ -13,12 +13,6 @@ const WindowsLogo = () => (
   </svg>
 );
 
-const AndroidLogo = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M15 4l1.4-1.9c.2-.3.1-.7-.2-.9-.3-.2-.7-.1-.9.2L13.8 3.5c-1.3-.4-2.8-.4-4 0L8.2 1.4C8 1.1 7.6 1 7.3 1.2c-.3.2-.4.6-.2.9L8.5 4C4.3 6 1.4 10.1 1 14.8h22C22.6 10.1 19.7 6 15 4zm-7.5 7.5c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm8.5 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/>
-  </svg>
-);
-
 const Footer: React.FC = () => {
   const { dir, t } = useLanguage();
   const [showDonateModal, setShowDonateModal] = useState(false);
@@ -78,21 +72,78 @@ const Footer: React.FC = () => {
           {/* Apps */}
           <div className="flex flex-col items-center md:items-start text-center md:text-start">
             <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] mb-6">{t('Apps')}</h3>
-            <div className="flex flex-col gap-3 w-full max-w-[200px]">
-              <a href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea.exe" className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#00a2ed] dark:hover:border-[#00a2ed] rounded-xl text-slate-900 dark:text-white hover:text-[#00a2ed] dark:hover:text-[#00a2ed] hover:shadow-md transition-all w-full text-start group">
-                <div className="text-slate-600 dark:text-slate-400 group-hover:text-[#00a2ed] transition-colors"><WindowsLogo /></div>
-                <div className="font-sans">
-                  <div className="text-[10px] leading-tight font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">{t('Download for')}</div>
-                  <div className="text-sm font-black leading-tight text-slate-900 dark:text-white">{t('Desktop App')}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-2.5 w-full max-w-[340px] md:max-w-[250px]">
+              <a
+                href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea.exe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#00a2ed] dark:hover:border-[#00a2ed] rounded-xl text-slate-900 dark:text-white hover:text-[#00a2ed] dark:hover:text-[#00a2ed] hover:shadow-md transition-all w-full text-start group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="text-slate-600 dark:text-slate-400 group-hover:text-[#00a2ed] transition-colors shrink-0"><WindowsLogo /></div>
+                  <div className="font-sans min-w-0">
+                    <div className="text-[10px] leading-tight font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">{t('Download for')}</div>
+                    <div className="text-xs sm:text-sm font-black leading-tight text-slate-900 dark:text-white truncate">{t('Windows')}</div>
+                  </div>
                 </div>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00a2ed]/15 text-[#00a2ed] dark:text-sky-300 font-bold shrink-0">.exe</span>
               </a>
-              <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#3DDC84] dark:hover:border-[#3DDC84] rounded-xl text-slate-900 dark:text-white hover:text-[#3DDC84] dark:hover:text-[#3DDC84] hover:shadow-md transition-all w-full text-start group">
-                <div className="text-slate-600 dark:text-slate-400 group-hover:text-[#3DDC84] transition-colors"><AndroidLogo /></div>
-                <div className="font-sans">
-                  <div className="text-[10px] leading-tight font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">{t('Download for')}</div>
-                  <div className="text-sm font-black leading-tight text-slate-900 dark:text-white">{t('Android App')}</div>
+
+              <a
+                href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea-linux-amd64.deb"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-400 rounded-xl text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 hover:shadow-md transition-all w-full text-start group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="text-slate-600 dark:text-slate-400 group-hover:text-amber-500 transition-colors shrink-0">
+                    <Icon name="Linux" size={22} />
+                  </div>
+                  <div className="font-sans min-w-0">
+                    <div className="text-[10px] leading-tight font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">{t('Download for')}</div>
+                    <div className="text-xs sm:text-sm font-black leading-tight text-slate-900 dark:text-white truncate">{t('Linux')}</div>
+                  </div>
                 </div>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold shrink-0">.deb</span>
               </a>
+
+              <a
+                href="https://github.com/secretarea1337/secretarea-desktop/releases/latest/download/SecretArea-linux-x86_64.AppImage"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-400 rounded-xl text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-md transition-all w-full text-start group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="text-slate-600 dark:text-slate-400 group-hover:text-emerald-500 transition-colors shrink-0">
+                    <Icon name="Linux" size={22} />
+                  </div>
+                  <div className="font-sans min-w-0">
+                    <div className="text-[10px] leading-tight font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">{t('Download for')}</div>
+                    <div className="text-xs sm:text-sm font-black leading-tight text-slate-900 dark:text-white truncate">{t('Linux')}</div>
+                  </div>
+                </div>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold shrink-0">.AppImage</span>
+              </a>
+
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800/80 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed w-full text-start opacity-85"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="text-purple-500/80 dark:text-purple-400/80 shrink-0">
+                    <Icon name="Apple" size={22} />
+                  </div>
+                  <div className="font-sans min-w-0">
+                    <div className="text-[10px] leading-tight font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">{t('Desktop App')}</div>
+                    <div className="text-xs sm:text-sm font-black leading-tight text-slate-700 dark:text-slate-300 truncate">{t('macOS')}</div>
+                  </div>
+                </div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 font-extrabold uppercase shrink-0">
+                  {t('Coming Soon')}
+                </span>
+              </button>
             </div>
           </div>
 

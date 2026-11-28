@@ -441,6 +441,28 @@ export const translations: Translations = {
     'Download for': { en: 'Download for', fr: 'Télécharger pour', es: 'Descargar para', ar: 'تحميل لـ' },
     'Desktop App': { en: 'Desktop App', fr: 'Application de bureau', es: 'Aplicación de escritorio', ar: 'تطبيق سطح المكتب' },
     'Android App': { en: 'Android App', fr: 'Application Android', es: 'Aplicación de Android', ar: 'تطبيق أندرويد' },
+    'Meet SecretArea Desktop': {
+      en: 'Meet SecretArea Desktop',
+      fr: 'Découvrez SecretArea Desktop',
+      es: 'Conoce SecretArea Desktop',
+      ar: 'تعرّف على تطبيق SecretArea Desktop'
+    },
+    'Your Gaming World. Beyond the Browser.': {
+      en: 'Your Gaming World. Beyond the Browser.',
+      fr: 'Votre univers gaming. Au-delà du navigateur.',
+      es: 'Tu mundo gaming. Más allá del navegador.',
+      ar: 'عالم الألعاب الخاص بك. أبعد من المتصفح.'
+    },
+    'Discover the next level of SecretArea with a dedicated desktop experience. Enjoy your gaming hub with powerful desktop tools, downloads, hardware monitoring, and more.': {
+      en: 'Discover the next level of SecretArea with a dedicated desktop experience. Enjoy your gaming hub with powerful desktop tools, downloads, hardware monitoring, and more.',
+      fr: 'Découvrez le niveau supérieur de SecretArea avec une expérience de bureau dédiée. Profitez de votre hub gaming avec des outils puissants, des téléchargements, la surveillance matérielle et bien plus encore.',
+      es: 'Descubre el siguiente nivel de SecretArea con una experiencia de escritorio dedicada. Disfruta de tu centro de juegos con herramientas potentes, descargas, monitoreo de hardware y mucho más.',
+      ar: 'اكتشف المستوى التالي من SecretArea مع تجربة سطح مكتب مخصصة. استمتع بمركز الألعاب الخاص بك مع أدوات سطح مكتب قوية، وتنزيلات، ومراقبة العتاد، والمزيد.'
+    },
+    'Windows': { en: 'Windows', fr: 'Windows', es: 'Windows', ar: 'ويندوز' },
+    'Linux': { en: 'Linux', fr: 'Linux', es: 'Linux', ar: 'لينكس' },
+    'macOS': { en: 'macOS', fr: 'macOS', es: 'macOS', ar: 'ماك (macOS)' },
+    'Coming Soon': { en: 'Coming Soon', fr: 'Bientôt disponible', es: 'Próximamente', ar: 'قريباً' },
     'All rights reserved.': { en: 'All rights reserved.', fr: 'Tous droits réservés.', es: 'Todos los derechos reservados.', ar: 'جميع الحقوق محفوظة.' },
     'Built by :': { en: 'Built by :', fr: 'Construit par :', es: 'Construido por :', ar: 'تم التطوير بواسطة :' },
     'SecretArea Ecosystem': { en: 'SecretArea Ecosystem', fr: 'Écosystème SecretArea', es: 'Ecosistema SecretArea', ar: 'نظام SecretArea' },

@@ -35,6 +35,7 @@ import UpcomingTrailersSection from '../components/UpcomingTrailersSection';
 import TwoPlayersSection from '../components/TwoPlayersSection';
 import MostPopularRepacksSection from '../components/MostPopularRepacksSection';
 import TopStudiosSection from '../components/TopStudiosSection';
+import DesktopAppSection from '../components/DesktopAppSection';
 
 import { CommentsSection } from '../components/CommentsSection';
 import { BestGameSeriesSection } from '../components/BestGameSeriesSection';
@@ -5231,6 +5232,10 @@ export const ResourceDetailModal: React.FC<{
 
                   </>
                   )}
+                  {/* SecretArea Desktop App Section */}
+                  <div className="py-6 sm:py-10 border-b border-slate-200 dark:border-slate-800">
+                    <DesktopAppSection variant="detail" />
+                  </div>
                   {/* Installation Steps */}
                   {item.installSteps && item.installSteps.length > 0 && (
                   <div className="py-6 sm:py-12 border-b border-slate-200 dark:border-slate-800">
@@ -10920,6 +10925,7 @@ const paginatedData = useMemo(() => {
                     onSeeAll={() => setShowAllProfiles(true)}
                     categoryType="games"
                 />
+                <DesktopAppSection variant="home" />
                 {/* TWO PLAYERS. ENDLESS FUN. SECTION - MOVED BETWEEN TOP STUDIOS AND OPEN WORLD GAMES */}
                 <TwoPlayersSection 
                     allGames={Object.values(allResources).flat()}
@@ -10937,6 +10943,7 @@ const paginatedData = useMemo(() => {
                     onSeeAll={() => setShowAllProfiles(true)}
                     categoryType="tools"
                 />
+                <DesktopAppSection variant="home" />
             </>
         )}
 
